@@ -1,0 +1,49 @@
+body
+{
+    background-color: #d9d9d9;
+    display: flex;
+    flex-direction: column;
+    /*justify-content: space-evenly;*/
+    align-items: center;
+    gap: 10px;
+}
+
+.header
+{
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #f5f5f5;
+    padding: 0.5em;
+    border-radius: 5px;
+    border: 1px solid black;
+    margin-top: 10%;
+    width: 320px;
+    height: 150px;
+    text-align: center;
+    text-wrap: wrap;
+    font-size: 25px;
+}
+
+.login
+{
+    background-color: white;
+    border-radius: 5px;
+    flex-grow: 5;
+    padding: 2em 2em 0 2em;
+}
+       
+input
+{
+    display: block;
+    padding: 5px;
+    margin: 3px;
+    border-radius: 5px;
+    width: 100%;
+}
+       
+#submit
+{
+    color: white;
+    background-color: black;
+    margin-top: 10px;
+}
