@@ -30,6 +30,7 @@ body
     border-radius: 5px;
     flex-grow: 5;
     padding: 2em 2em 0 2em;
+    width: 20vw;
 }
        
 input
