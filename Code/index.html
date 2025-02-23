@@ -10,12 +10,11 @@
          <link rel="stylesheet" href="style.css">
        </head>
        <body>
-         <script src="script.js"></script>
          <div class="header">
              <h1> HCAR Staff Portal </h1>
          </div>
          <div class="login">
-           <form action="" method="post">
+           <form action="" method="post" id="login-form">
              <label for="user"> Username: </label>
              <input type="text" id="user" placeholder="abc123"/>
      
@@ -23,7 +22,9 @@
              <input type="password" id="pass" placeholder="Enter here"/>
             
              <input type="submit" id="submit" name="sign-in" value="Sign In"/>
+             <p style="display: none"></p>
            </form>
          </div>
+         <script src="script.js"></script>
        </body>
      </html>
