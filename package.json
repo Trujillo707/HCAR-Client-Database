@@ -1,0 +1,22 @@
+{
+  "name": "hcar-client-database",
+  "version": "1.0.0",
+  "description": "Webserver Code for HCAR Client Database",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Trujillo707/HCAR-Client-Database.git"
+  },
+  "author": "Xplorers",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Trujillo707/HCAR-Client-Database/issues"
+  },
+  "homepage": "https://github.com/Trujillo707/HCAR-Client-Database#readme",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

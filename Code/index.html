@@ -1,13 +1,13 @@
 <!-- Justin Crittenden
      HCAR Sign-in Page -->
-     <!DOCTYPE html>
+<!DOCTYPE html>
      <html lang="en">
        <head>
          <meta charset="UTF-8">
          <meta name="viewport" content="width=device-width, initial-scale=1.0">
          <meta http-equiv="X-UA-Compatible" content="ie=edge">
          <title> HCAR Staff Portal </title>
-         <link rel="stylesheet" href="style.css">
+         <link rel="stylesheet" href="public/style.css">
          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" >
        </head>
        <body>
@@ -17,13 +17,13 @@
           <form action="" method="post" id="login-form">
             <div class="user-entry">
               <label for="user"> Username: </label>
-              <input type="text" id="user" placeholder="abc123"/>
+              <input type="text" id="user" name="user" placeholder="abc123"/>
             </div>
             <div class="pass-entry">
               <label for="pass"> Password: </label>
-              <input type="password" id="pass" placeholder="Enter here"/>
+              <input type="password" id="pass" name="pass" placeholder="Enter here"/>
             </div>
-          
+
             <input type="submit" id="submit" name="sign-in" value="Sign In"/>
           </form>
          <script src="script.js"></script>
