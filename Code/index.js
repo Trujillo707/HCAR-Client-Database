@@ -10,12 +10,16 @@ app.set('views', __dirname + "/views");
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname,"public/index.html"))
-})
+});
 
 app.post('/', (req, res) =>{
     res.render("test",{})
-})
+});
 
+// THIS SHOULD NOT BE A GET PROBABLY MAYBE UNLESS???
+app.get('/result', (req, res) => {
+    res.render("results");
+});
 
 /* Port Number should be an environment variable fyi */
 app.listen(port, () => {

@@ -1,0 +1,151 @@
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <title>Search Results</title>
+    <style>
+        body{
+            font-family: "Inter", sans-serif;
+            background-color: #d3d3d3;
+            margin: 0;
+        }
+        header {
+            background-color: #fff;
+            display:flex;
+            align-items: center;
+            padding: 0 5px;
+        }
+        @media (max-width: 600px){
+            header{
+                flex-direction: column;
+            }
+        }
+
+        header * {
+            padding: 0 5px;
+        }
+
+        header p{
+            font-weight: bold;
+            font-size: 1.6em;
+            padding-right: 10px;
+        }
+
+        header a {
+            padding: 10px 15px;
+            border-radius: 15px;
+            color: black;
+        }
+
+        header a:hover {
+            background-color: #d3d3d3;
+        }
+
+        #resultsBox {
+            background-color: #fff;
+            height: 80%;
+            margin: 20px 20px;
+            border-radius: 5px;
+        }
+        #resultsBox table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        tr {
+            margin: 10px 0;
+
+        }
+        td,th {
+            border: 1px solid black;
+        }
+
+        td {
+            padding-left: 5px;
+        }
+
+        footer{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        footer a {
+            padding: 10px 30px;
+            background-color: black;
+            color: #fff;
+            border-radius: 5px;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .dimHover {
+            background-color: #323232;
+        }
+        .dimHover:hover {
+            background-color:black;
+        }
+        #pageChanger {
+            border: 1px solid black;
+            border-radius: 6px;
+            display: flex;
+        }
+
+        #pageChanger button {
+            border: none;
+            cursor: pointer;
+            background-color: #d3d3d3;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+
+        #pageChanger button:hover {
+            background-color: #989898;
+        }
+    </style>
+
+</head>
+<body>
+<header>
+    <p>HCAR Staff Portal</p>
+    <a href="">Home</a>
+    <a href="">Search</a>
+    <a href="">Reports</a>
+</header>
+
+<div id="resultsBox">
+    <table>
+        <tr>
+            <th scope="col">Photo</th>
+            <th scope="col">First Name</th>
+            <th scope="col">M.I.</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">Foo</th>
+            <th scope="col">Bar</th>
+        </tr>
+        <tr>
+            <td >:)</td>
+            <td >Bob</td>
+            <td > D</td>
+            <td > Saget</td>
+            <td >Foo</td>
+            <td >Bar</td>
+        </tr>
+    </table>
+</div>
+<footer>
+    <a href="">Go Back</a>
+
+    <div id="pageChanger">
+        <button type="button" disabled="disabled">← Previous</button>
+        <button type="button">Next →</button>
+    </div>
+    <!-- Probably going to need JavaScript to make this button work nicely -->
+    <a class="dimHover" href="">Select</a>
+
+</footer>
+</body>
+
+</html>
