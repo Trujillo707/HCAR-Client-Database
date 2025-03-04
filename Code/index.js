@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const path = require('path');
+const {reportTypes} = require("./reportsLogic");
 const port = 3000
 
 app.use(express.static(__dirname + '/public'));
@@ -13,13 +14,18 @@ app.get('/', (req, res) => {
 });
 
 app.post('/', (req, res) =>{
-    res.render("test",{})
+
 });
 
 // THIS SHOULD NOT BE A GET PROBABLY MAYBE UNLESS???
 app.get('/result', (req, res) => {
+    // TODO: put logic here obviously
     res.render("results");
 });
+
+app.get("/reports", (req, res) =>{
+    res.render("reports", {availableReportsMap: reportTypes});
+})
 
 /* Port Number should be an environment variable fyi */
 app.listen(port, () => {

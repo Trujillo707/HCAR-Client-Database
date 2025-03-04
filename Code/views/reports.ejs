@@ -1,0 +1,32 @@
+<!--suppress HtmlRequiredAltAttribute -->
+<html lang="en">
+    <head>
+        <title>Reports</title>
+        <%-include("fontLinks")-%>
+        <link href="css/orlando.css" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+        <%-include("header")-%>
+        <div id="reportForm">
+            <form>
+                <div>
+                    <label for="reportType">Select a Document:</label>
+                    <br/>
+                    <select id="reportType" name="reportType">
+                        <!-- If given a Map of reports, make them as options-->
+                        <% if (locals.availableReportsMap){
+                        availableReportsMap.forEach(function (longName, formName) {%>
+                        <option value="<%=formName%>"><%=longName%></option>
+                        <%})} %>
+                    </select>
+                </div>
+                <button class="lightHover" type="button">
+                    <img src="icons/pen-to-square-solid.svg"><span>Edit</span>
+                </button>
+                <button class="lightHover">
+                    <img src="icons/arrow-up-from-bracket-solid.svg"><span>Export to PDF</span>
+                </button>
+            </form>
+        </div>
+    </body>
+</html>
