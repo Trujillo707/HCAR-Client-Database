@@ -16,10 +16,20 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname,"public/index.html"))
 });
 
-app.post('/', (req, res) => {
+app.post('/tohome', (req, res) => {
     // After verification of credentials
     res.render("home");
 });
+
+// Clicking home from home will re-render the page
+app.get('/tohome', (req, res) => {
+    
+    res.render("home");
+});
+
+app.get("/search", (req, res) =>{
+    res.render("search");
+})
 
 // THIS SHOULD NOT BE A GET PROBABLY MAYBE UNLESS???
 app.get('/result', (req, res) => {

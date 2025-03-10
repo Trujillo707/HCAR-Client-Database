@@ -1,5 +1,5 @@
 /* Justin Crittenden
-   Last Modified: February 22, 2025
+   Last Modified: March 10, 2025
 */
 
 *
@@ -7,8 +7,8 @@
     box-sizing: border-box;
 }
 
-
-body
+/* Style for login page */
+.login-page
 {
     background-color: #d9d9d9;
     display: flex;
@@ -54,7 +54,7 @@ body
     gap: 1em;
 }
        
-input
+#user, #pass
 {
     display: block;
     padding: 5px;
@@ -71,9 +71,110 @@ input
     padding: 10px;
 }
 
-/* Style for search.ejs */
-#searchContainer
+/* Style for Home page and header */
+#hcar-header
+{
+    font-size: 20px;
+}
+.hcar-body
+{
+    background-color: #d9d9d9;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+.home-header
 {
     display: flex;
-    
+    gap: 24px;
+    background-color: white;
+    padding: 32px;
+    height: 96px;
+}
+
+.header-link
+{
+    text-decoration: none;
+    padding: 8px;
+    border-radius: 8px;
+    color: grey;
+}
+
+.header-link:active
+{
+    /* How do I make it so there's a background behind
+       the selected tab? */
+}
+
+.header-link:visited
+{
+    color: grey;
+}
+
+.header-link.active
+{
+    background-color: #f0f0f0;
+    border-radius: 8px;
+}
+
+.header-link:hover
+{
+    color: orange;
+}
+
+.buttons-container
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 5%;
+}
+
+.home-button
+{
+    background-color: black;
+    color: white;
+    padding: 12px;
+    width: 281.25px;
+    height: 150px;
+    border-radius: 8px;
+    font-size: 2em;
+    cursor: pointer;
+}
+
+/* Style for search.ejs */
+#search-container
+{
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+    height: 50vh;
+    margin: 20px auto 0 auto;
+    width: 50vw;
+    background-color: #b3b3b3;
+    padding: 10px;
+    align-items: center;
+    justify-items: center;
+}
+
+#firstNameFilter
+{
+    grid-area: 1 / 1 / 1 / 2;
+}
+
+#lastNameFilter
+{
+    grid-area: 1 / 2 / 1 / 3;
+}
+
+#phoneFilter
+{   
+    grid-area: 2 / 1 / 2 / 2; 
+}
+
+#birthDateFilter
+{
+    grid-area: 2 / 2 / 2 / 3;
 }
