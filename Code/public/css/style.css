@@ -70,3 +70,10 @@ input
     margin-top: 30px;
     padding: 10px;
 }
+
+/* Style for search.ejs */
+#searchContainer
+{
+    display: flex;
+    
+}
