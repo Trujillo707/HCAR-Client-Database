@@ -13,16 +13,16 @@ app.set('view engine', 'ejs');
 app.set('views', __dirname + "/views");
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname,"public/index.html"))
+    res.sendFile(path.join(__dirname,"public/html/index.html"))
 });
 
-app.post('/tohome', (req, res) => {
+app.post('/home', (req, res) => {
     // After verification of credentials
     res.render("home");
 });
 
 // Clicking home from home will re-render the page
-app.get('/tohome', (req, res) => {
+app.get('/home', (req, res) => {
     
     res.render("home");
 });
@@ -39,7 +39,12 @@ app.get('/result', (req, res) => {
 
 app.get("/reports", (req, res) =>{
     res.render("reports", {availableReportsMap: reportTypes});
-})
+});
+
+// TODO: MAKE THIS USE POST INSTEAD DUMMY
+app.get('/client', (req, res) =>{
+   res.render("clientDetails");
+});
 
 /* Port Number should be an environment variable fyi */
 app.listen(port, () => {
