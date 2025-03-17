@@ -1,3 +1,16 @@
+DROP TABLE IF EXISTS Client;
+DROP TABLE IF EXISTS File;
+DROP TABLE IF EXISTS Staff;
+DROP TABLE IF EXISTS Account;
+DROP TABLE IF EXISTS Note;
+DROP TABLE IF EXISTS Program;
+DROP TABLE IF EXISTS Medication;
+DROP TABLE IF EXISTS ContactInfo;
+DROP TABLE IF EXISTS Insurance;
+DROP TABLE IF EXISTS ProgramClient;
+DROP TABLE IF EXISTS StaffClient;
+DROP TABLE IF EXISTS NoteClient;
+
 CREATE TABLE Client(
     CLIENTID INT AUTO_INCREMENT PRIMARY KEY, 
     fName VARCHAR(64), 
@@ -28,11 +41,11 @@ CREATE TABLE Client(
     primaryCareProvider INT,
     primaryPhysician INT,
     profilePicture INT,
-    foreign key (primaryInsurance) references Insurance(insuranceID),
-    foreign key (secondaryInsurance) references Insurance(insuranceID),
-    foreign key (primaryCareProvider) references ContactInfo(contactID),
-    foreign key (primaryPhysician) references ContactInfo(contactID),
-    foreign key (profilePicture) references File(fileID)
+    FOREIGN KEY (primaryInsurance) REFERENCES Insurance(insuranceID),
+    FOREIGN KEY (secondaryInsurance) REFERENCES Insurance(insuranceID),
+    FOREIGN KEY (primaryCareProvider) REFERENCES ContactInfo(contactID),
+    FOREIGN KEY (primaryPhysician) REFERENCES ContactInfo(contactID),
+    FOREIGN KEY (profilePicture) REFERENCES File(fileID)
 );
 
 CREATE TABLE File(
@@ -40,9 +53,8 @@ CREATE TABLE File(
     filename VARCHAR(255) NOT NULL, 
     uploadDate DATETIME NOT NULL, 
     ClientID INT,
-    foreign key (ClientID) references Client(CLIENTID)
+    FOREIGN KEY (ClientID) REFERENCES Client(CLIENTID)
 );
-
 
 CREATE TABLE Staff(
     staffID INT AUTO_INCREMENT PRIMARY KEY, 
@@ -61,7 +73,7 @@ CREATE TABLE Account(
     admin BOOL,
     disabled BOOL,
     staffID INT, 
-    foreign key (staffID) references Staff(staffID)
+    FOREIGN KEY (staffID) REFERENCES Staff(staffID)
 );
 
 CREATE TABLE Note(
@@ -69,7 +81,7 @@ CREATE TABLE Note(
     staffID INT, 
     dateCreated DATETIME, 
     content VARCHAR(2048),
-    foreign key (staffID) references Staff(staffID)
+    FOREIGN KEY (staffID) REFERENCES Staff(staffID)
 );
 
 CREATE TABLE Program(
@@ -89,8 +101,8 @@ CREATE TABLE Medication(
     frequency VARCHAR(64),
     fileID INT,
     clientID INT,
-    foreign key (fileID) references File(fileID),
-    foreign key (clientID) references Client(clientID)
+    FOREIGN KEY (fileID) REFERENCES File(fileID),
+    FOREIGN KEY (clientID) REFERENCES Client(clientID)
 );
 
 CREATE TABLE ContactInfo(
@@ -108,20 +120,20 @@ CREATE TABLE Insurance(
 CREATE TABLE ProgramClient(
     clientID INT, 
     programID INT,
-    foreign key (clientID) references Client(clientID),
-    foreign key (programID) references Program(programID)
+    FOREIGN KEY (clientID) REFERENCES Client(clientID),
+    FOREIGN KEY (programID) REFERENCES Program(programID)
 );
 
 CREATE TABLE StaffClient(
     accountID INT, 
     clientID INT,
-    foreign key (accountID) references Account(accountID),
-    foreign key (clientID) references Client(clientID)
+    FOREIGN KEY (accountID) REFERENCES Account(accountID),
+    FOREIGN KEY (clientID) REFERENCES Client(clientID)
 );
 
 CREATE TABLE NoteClient(
     noteID INT,
     clientID INT,
-    foreign key (noteID) references Note(noteID),
-    foreign key (clientID) references Client(clientID)
+    FOREIGN KEY (noteID) REFERENCES Note(noteID),
+    FOREIGN KEY (clientID) REFERENCES Client(clientID)
 );
