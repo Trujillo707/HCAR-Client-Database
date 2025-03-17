@@ -1,9 +1,14 @@
-const express = require('express')
+//const express = require('express')
+import express from "express"
 const app = express()
-const path = require('path');
-const {reportTypes} = require("./reportsLogic");
-const {ClientBuilder} = require("./ClientBuilder.js");
+import {reportTypes} from "./reportsLogic.js";
+import {ClientBuilder} from "./ClientBuilder.js";
 const port = process.env.PORT || 3000;
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(express.static(__dirname + '/public'));
 
