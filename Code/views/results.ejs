@@ -2,6 +2,7 @@
 <head>
     <%- include("fontLinks") -%>
     <title>Search Results</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
     <link href="css/orlando.css" rel="stylesheet" type="text/css">
 </head>
 <body>
@@ -11,104 +12,57 @@
 <div id="resultsBox">
     <table>
         <thead>
-            <tr>
-                <th scope="col">Photo</th>
-                <th scope="col">First Name</th>
-                <th scope="col">Last Name</th>
-                <th scope="col">Pronouns</th>
-                <th scope="col">Gender</th>
-                <th scope="col">Phone</th>
-                <th scope="col">Email</th>
-                <th scope="col">Date of Birth</th>
-                <th scope="col">Programs</th>
-                <th scope="col">PoS Status</th>
-            </tr>
+        <tr>
+            <th scope="col">Photo</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">Pronouns</th>
+            <th scope="col">Gender</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Email</th>
+            <th scope="col">Date of Birth</th>
+            <th scope="col">Programs</th>
+            <th scope="col">PoS Status</th>
+        </tr>
         </thead>
-        <tr>
-            <td ><img width="256" alt="Bob Saget 1987"
-                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Bob_Saget_1987.jpg/256px-Bob_Saget_1987.jpg?20220610073736">
-            </td>
-            <td >Bob</td>
-            <td >Saget</td>
-            <td >He/Him</td>
-            <td >Male</td>
-            <td>777-777-7777</td>
-            <td>foo@gmail.com</td>
-            <td>1956-05-17</td>
-            <td>Bay Center</td>
-            <td>Good</td>
-        </tr>
-        <tr>
-            <td ><img width="256" alt="Bob Saget 1987"
-                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Bob_Saget_1987.jpg/256px-Bob_Saget_1987.jpg?20220610073736">
-            </td>
-            <td >Bob</td>
-            <td >Saget</td>
-            <td >He/Him</td>
-            <td >Male</td>
-            <td>777-777-7777</td>
-            <td>foo@gmail.com</td>
-            <td>1956-05-17</td>
-            <td>Bay Center</td>
-            <td>Good</td>
-        </tr>
-        <tr>
-            <td ><img width="256" alt="Bob Saget 1987"
-                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Bob_Saget_1987.jpg/256px-Bob_Saget_1987.jpg?20220610073736">
-            </td>
-            <td >Bob</td>
-            <td >Saget</td>
-            <td >He/Him</td>
-            <td >Male</td>
-            <td>777-777-7777</td>
-            <td>foo@gmail.com</td>
-            <td>1956-05-17</td>
-            <td>Bay Center</td>
-            <td>Good</td>
-        </tr>
-        <tr>
-            <td ><img width="256" alt="Bob Saget 1987"
-                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Bob_Saget_1987.jpg/256px-Bob_Saget_1987.jpg?20220610073736">
-            </td>
-            <td >Bob</td>
-            <td >Saget</td>
-            <td >He/Him</td>
-            <td >Male</td>
-            <td>777-777-7777</td>
-            <td>foo@gmail.com</td>
-            <td>1956-05-17</td>
-            <td>Bay Center</td>
-            <td>Good</td>
-        </tr>
-        <tr>
-            <td ><img width="256" alt="Bob Saget 1987"
-                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Bob_Saget_1987.jpg/256px-Bob_Saget_1987.jpg?20220610073736">
-            </td>
-            <td >Bob</td>
-            <td >Saget</td>
-            <td >He/Him</td>
-            <td >Male</td>
-            <td>777-777-7777</td>
-            <td>foo@gmail.com</td>
-            <td>1956-05-17</td>
-            <td>Bay Center</td>
-            <td>Good</td>
-        </tr>
-        <tr>
-            <td ><img width="256" alt="Bob Saget 1987"
-                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Bob_Saget_1987.jpg/256px-Bob_Saget_1987.jpg?20220610073736">
-            </td>
-            <td >Bob</td>
-            <td >Saget</td>
-            <td >He/Him</td>
-            <td >Male</td>
-            <td>777-777-7777</td>
-            <td>foo@gmail.com</td>
-            <td>1956-05-17</td>
-            <td>Bay Center</td>
-            <td>Good</td>
-        </tr>
+        <!-- If there are Clients to display, show them! -->
+        <% if (locals.clientList && Array.isArray(clientList) && clientList.length > 0){
+        %>
+            <tbody>
+            <% clientList.forEach((current) => {
+                %>
+                <tr>
+                    <td><img width="256" alt="Picture of <%-current.getFirstName()%>"
+                             src="<%- current.getPictureURL() %>">
+                    </td>
+                    <td><%-current.getFirstName()%></td>
+                    <td><%-current.getLastName()%></td>
+                    <td><%-current.getPronouns()%></td>
+                    <td><%-current.getSex()%></td>
+                    <td><%-current.getPhoneNumber()%></td>
+                    <td><%-current.getEmail()%></td>
+                    <td><% if(current.getDOB() instanceof Date){
+                            %><%-current.getDOB().toLocaleDateString("en-US")%>
+                        <%}else{
+                            %><%-current.getDOB()%>
+                        <%}%></td>
+                    <td><% current.getPrograms().forEach((currProgram) => {
+                        %><%-currProgram %><br/>
+                        <%})%></td>
+                    <!--TODO: make this work! -->
+                    <td>Good</td>
+                </tr>
+            <%})%>
+
+            </tbody>
     </table>
+        <% }
+        else {
+        %>
+            </table>
+            <p>No search results found!</p>
+        <%} %>
+
 </div>
 <footer>
     <a href="">Go Back</a>
