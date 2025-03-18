@@ -99,3 +99,6 @@ testClientArray.push(new ClientBuilder()
     .build());
 
 export {testClientArray}
+
+
+console.log(Array.isArray(foo))
