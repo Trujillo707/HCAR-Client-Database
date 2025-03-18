@@ -63,13 +63,14 @@ CREATE TABLE Staff(
     address VARCHAR(64),
     city VARCHAR(64), 
     state CHAR(2),
+    zip VARCHAR(9),
     phoneNumber VARCHAR(12) NOT NULL
 );
 
 CREATE TABLE Account(
     accountID INT AUTO_INCREMENT PRIMARY KEY, 
     username VARCHAR(32) UNIQUE, 
-    password VARCHAR(32), 
+    hash VARCHAR(128), 
     admin BOOL,
     disabled BOOL,
     staffID INT, 
