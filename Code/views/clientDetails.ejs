@@ -31,7 +31,7 @@
 
         <form method="post" action="/api/updateClient" id="clientUpdate">
             <div id="clientID" class="tabcontent">
-                <input type="text" name="" id="" value="<%= locals.theClient.%>"/>
+                <input type="text" name="firstName" id="firstName" value="<%= locals.theClient.getFirstName()%>"/>
             </div>
 
             <div id="medInfo" class="tabcontent">
@@ -52,7 +52,6 @@
 
             <script src="js/tab.js"></script>
     </div>
-    //
 </div>
 
 </body>

@@ -38,7 +38,7 @@ app.get("/search", (req, res) => {
 })
 
 // TODO: MAKE THIS POST OBVIOUSLY
-app.get('/results', (req, res) => {
+app.post('/results', (req, res) => {
     res.render("results", {clientList: testClientArray});
 });
 
@@ -46,7 +46,7 @@ app.get("/reports", (req, res) => {
     res.render("reports", {availableReportsMap: reportTypes});
 });
 
-// TODO: MAKE THIS GET ONCE HTML TESTING IS DONE
+// TODO: MAKE THIS POST OBVIOUSLY 
 app.get('/client', (req, res) => {
     let rawData = req.body.clientID;
     res.render("clientDetails", {theClient: testClientArray[0]});
