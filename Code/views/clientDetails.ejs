@@ -8,27 +8,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-    <%-include("header")-%>
-    <div class="bodyContent">
-        <p>Showing information for
-            <% if(locals.theClient){
-            %><%= locals.theClient.getFirstName() + " " + locals.theClient.getLastName() %><%
-            }
-            else{
-            %> Unknown Client <%
-            } %></p>
-        <div id="tabContainer">
-            <div class="tab">
-                <button class="tablinks" data-tabName="clientID" id="defaultOpen" >Client ID</button>
-                <button class="tablinks" data-tabName="medInfo"> Medical Information</button>
-                <button class="tablinks" data-tabName="personalInfo"> Personal Information</button>
-                <button class="tablinks" data-tabName="supportTeam"> Support Team</button>
-                <button class="tablinks" data-tabName="caseNotes"> Case Notes</button>
-            </div>
+<%- include("header") -%>
+<div class="bodyContent">
+    <p>Showing information for
+        <% if(locals.theClient){
+        %><%= locals.theClient.getFirstName() + " " + locals.theClient.getLastName() %>
+        <%
+        }
+        else{
+        %> Unknown Client
+        <%
+        } %>
+    </p>
+    <div id="tabContainer">
+        <div class="tab">
+            <button class="tablinks" data-tabName="clientID" id="defaultOpen">Client ID</button>
+            <button class="tablinks" data-tabName="medInfo"> Medical Information</button>
+            <button class="tablinks" data-tabName="personalInfo"> Personal Information</button>
+            <button class="tablinks" data-tabName="supportTeam"> Support Team</button>
+            <button class="tablinks" data-tabName="caseNotes"> Case Notes</button>
+        </div>
 
+        <form method="post" action="/api/updateClient" id="clientUpdate">
             <div id="clientID" class="tabcontent">
-                1
-
+                <input type="text" name="firstName" id="firstName" value="<%= locals.theClient.getFirstName()%>"/>
             </div>
 
             <div id="medInfo" class="tabcontent">
@@ -42,14 +45,13 @@
             <div id="supportTeam" class="tabcontent">
                 4
             </div>
-
-            <div id="caseNotes" class="tabcontent">
+        </form>
+        <div id="caseNotes" class="tabcontent">
                 5
-            </div>
+        </div>
 
             <script src="js/tab.js"></script>
-        </div>
     </div>
-
+</div>
 
 </body>
