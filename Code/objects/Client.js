@@ -19,7 +19,13 @@ class Client {
     #sex = "";
     #maritalStatus = "";
     #preferredHospital = "";
+    /**
+     * @type {Insurance}
+     */
     #primaryInsurance = null;
+    /**
+     * @type {Insurance}
+     */
     #secondaryInsurance = null;
     #pcp = null;
     #primaryPhysician = null;
@@ -35,6 +41,9 @@ class Client {
     #pictureURL = "";
     #programs = [];
 
+    /**
+     * @param {ClientBuilder} builder
+     */
     constructor( builder ) {
         this.#firstName = builder.firstName;
         this.#middleName = builder.middleName;
@@ -108,10 +117,18 @@ class Client {
         return this.#preferredHospital;
     }
 
+    /**
+     *
+     * @returns {Insurance}
+     */
     getPrimaryInsurance() {
         return this.#primaryInsurance;
     }
 
+    /**
+     *
+     * @returns {Insurance}
+     */
     getSecondaryInsurance() {
         return this.#secondaryInsurance;
     }
@@ -164,6 +181,9 @@ class Client {
         return this.#pictureURL;
     }
 
+    /**
+     * @returns {Program[]}
+     */
     getPrograms(){
         return this.#programs;
     }

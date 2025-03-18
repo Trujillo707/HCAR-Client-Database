@@ -19,7 +19,13 @@ class ClientBuilder {
     sex = "";
     maritalStatus = "";
     preferredHospital = "";
+    /**
+     * @type {Insurance}
+     */
     primaryInsurance = null;
+    /**
+     * @type {Insurance}
+     */
     secondaryInsurance = null;
     pcp = null;
     primaryPhysician = null;

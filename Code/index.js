@@ -1,8 +1,7 @@
-//const express = require('express')
 import express from "express"
 const app = express()
 import {reportTypes} from "./reportsLogic.js";
-import {ClientBuilder} from "./ClientBuilder.js";
+import {ClientBuilder} from "./objects/ClientBuilder.js";
 const port = process.env.PORT || 3000;
 import { fileURLToPath } from 'url';
 import path from 'path';
