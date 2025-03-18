@@ -1,3 +1,9 @@
+/**
+ * @author Orlando Trujillo-Ortiz
+ * @version 2025-03-17
+ * @desc
+ * This class holds information for any individuals considered "SupportStaff" for an HCAR Client.
+ */
 class SupportStaff {
     #name = "";
     #title = "";

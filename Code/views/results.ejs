@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <%- include("fontLinks") -%>
@@ -26,43 +27,42 @@
         </tr>
         </thead>
         <!-- If there are Clients to display, show them! -->
-        <% if (locals.clientList && Array.isArray(clientList) && clientList.length > 0){
-        %>
-            <tbody>
-            <% clientList.forEach((current) => {
-                %>
+    <% if (locals.clientList && Array.isArray(clientList) && clientList.length > 0){ %>
+        <tbody>
+            <% clientList.forEach((current) => { %>
                 <tr>
-                    <td><img width="256" alt="Picture of <%-current.getFirstName()%>"
-                             src="<%- current.getPictureURL() %>">
+                    <td><img width="256" alt="Picture of <%= current.getFirstName() %>"
+                             src="<%= current.getPictureURL() %>">
                     </td>
-                    <td><%-current.getFirstName()%></td>
-                    <td><%-current.getLastName()%></td>
-                    <td><%-current.getPronouns()%></td>
-                    <td><%-current.getSex()%></td>
-                    <td><%-current.getPhoneNumber()%></td>
-                    <td><%-current.getEmail()%></td>
-                    <td><% if(current.getDOB() instanceof Date){
-                            %><%-current.getDOB().toLocaleDateString("en-US")%>
-                        <%}else{
-                            %><%-current.getDOB()%>
-                        <%}%></td>
-                    <td><% current.getPrograms().forEach((currProgram) => {
-                        %><%-currProgram %><br/>
-                        <%})%></td>
+                    <td><%= current.getFirstName() %></td>
+                    <td><%= current.getLastName() %></td>
+                    <td><%= current.getPronouns() %></td>
+                    <td><%= current.getSex() %></td>
+                    <td><%= current.getPhoneNumber() %></td>
+                    <td><%= current.getEmail() %></td>
+                    <td>
+                        <% if(current.getDOB() instanceof Date){ %>
+                            <%= current.getDOB().toLocaleDateString("en-US") %>
+                        <%}else { %>
+                            <%= current.getDOB() %>
+                        <%} %>
+                    </td>
+                    <td>
+                        <% current.getPrograms().forEach((currProgram) => { %>
+                            <%=currProgram.getName()%><br/>
+                        <% }) %>
+                    </td>
                     <!--TODO: make this work! -->
                     <td>Good</td>
                 </tr>
-            <%})%>
-
-            </tbody>
+            <% }) %>
+        </tbody>
     </table>
-        <% }
-        else {
-        %>
-            </table>
-            <p>No search results found!</p>
-        <%} %>
-
+    <% }
+    else { %>
+        </table>
+        <p>No search results found!</p>
+    <% } %>
 </div>
 <footer>
     <a href="">Go Back</a>

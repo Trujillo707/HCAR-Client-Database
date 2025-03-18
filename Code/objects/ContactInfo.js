@@ -1,4 +1,7 @@
-/** Simple class to hold basic contact information */
+/** Simple class to hold basic contact information
+ * @author Orlando Trujillo-Ortiz
+ * @version 2025-03-17
+ */
 class ContactInfo {
     #name = "";
     #phoneNumber = "";
