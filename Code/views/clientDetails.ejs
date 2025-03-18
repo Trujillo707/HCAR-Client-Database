@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>Client Details</title>
-    <%-include("fontLinks")-%>
+    <%- include("fontLinks") -%>
     <link href="../css/style.css" rel="stylesheet" type="text/css">
     <link href="../css/orlando.css" rel="stylesheet" type="text/css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,8 +11,8 @@
     <%-include("header")-%>
     <div class="bodyContent">
         <p>Showing information for
-            <% if(locals.client){
-            %><%= client.getClientName() %><%
+            <% if(locals.theClient){
+            %><%= locals.theClient.getFirstName() + " " + locals.theClient.getLastName() %><%
             }
             else{
             %> Unknown Client <%

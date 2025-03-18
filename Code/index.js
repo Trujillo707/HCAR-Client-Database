@@ -1,9 +1,14 @@
-const express = require('express')
+import express from "express"
 const app = express()
-const path = require('path');
-const {reportTypes} = require("./reportsLogic");
-const {ClientBuilder} = require("./ClientBuilder.js");
+import {reportTypes} from "./reportsLogic.js";
+import {ClientBuilder} from "./objects/ClientBuilder.js";
 const port = process.env.PORT || 3000;
+import { fileURLToPath } from 'url';
+import path from 'path';
+import {testClientArray} from "./testData.js"
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(express.static(__dirname + '/public'));
 
@@ -33,113 +38,18 @@ app.get("/search", (req, res) => {
 })
 
 // TODO: MAKE THIS POST OBVIOUSLY
-app.get('/result', (req, res) => {
-    let foo = [];
-    foo.push(new ClientBuilder()
-        .setFirstName("Alice")
-        .setLastName("Auger")
-        .setPronouns("She/Her")
-        .setDOB(new Date("2000-06-06"))
-        .setSex("Female")
-        .setPhoneNumber("707-777-7777")
-        .setEmail("alice@foobar.com")
-        .setPrograms(["Bay Center", "Clinical Services"])
-        .build());
-    foo.push(new ClientBuilder()
-        .setFirstName("Bob")
-        .setLastName("Auger")
-        .setPronouns("She/Her")
-        .setDOB(new Date("2000-06-06"))
-        .setSex("Female")
-        .setPhoneNumber("707-777-7777")
-        .setEmail("alice@foobar.com")
-        .setPrograms(["Bay Center", "Clinical Services"])
-        .build());
-    foo.push(new ClientBuilder()
-        .setFirstName("Cam")
-        .setLastName("Auger")
-        .setPronouns("She/Her")
-        .setDOB(new Date("2000-06-06"))
-        .setSex("Female")
-        .setPhoneNumber("707-777-7777")
-        .setEmail("alice@foobar.com")
-        .build());
-    foo.push(new ClientBuilder()
-        .setFirstName("Danny")
-        .setLastName("Auger")
-        .setPronouns("She/Her")
-        .setSex("Female")
-        .setPhoneNumber("707-777-7777")
-        .setEmail("alice@foobar.com")
-        .setPrograms(["Bay Center", "Clinical Services"])
-        .build());
-    foo.push(new ClientBuilder()
-        .setFirstName("Edward")
-        .setLastName("Auger")
-        .setPronouns("She/Her")
-        .setDOB(new Date("2000-06-06"))
-        .setSex("Female")
-        .setEmail("alice@foobar.com")
-        .setPrograms(["Bay Center", "Clinical Services"])
-        .build());
-    foo.push(new ClientBuilder()
-        .setFirstName("Fred")
-        .setLastName("Auger")
-        .setPronouns("She/Her")
-        .setDOB(new Date("2000-06-06"))
-        .setPhoneNumber("707-777-7777")
-        .setEmail("alice@foobar.com")
-        .setPrograms(["Bay Center", "Clinical Services"])
-        .build());
-    foo.push(new ClientBuilder()
-        .setLastName("Auger")
-        .setPronouns("She/Her")
-        .setDOB(new Date("2000-06-06"))
-        .setSex("Female")
-        .setPhoneNumber("707-777-7777")
-        .setEmail("alice@foobar.com")
-        .setPrograms(["Bay Center", "Clinical Services"])
-        .build());
-    foo.push(new ClientBuilder()
-        .setFirstName("Harry")
-        .setPronouns("She/Her")
-        .setDOB(new Date("2000-06-06"))
-        .setSex("Female")
-        .setPhoneNumber("707-777-7777")
-        .setEmail("alice@foobar.com")
-        .setPrograms(["Bay Center", "Clinical Services"])
-        .build());
-    foo.push(new ClientBuilder()
-        .setFirstName("Isaac")
-        .setLastName("Auger")
-        .setDOB(new Date("2000-06-06"))
-        .setSex("Female")
-        .setPhoneNumber("707-777-7777")
-        .setEmail("alice@foobar.com")
-        .setPrograms(["Bay Center", "Clinical Services"])
-        .build());
-    foo.push(new ClientBuilder()
-        .setFirstName("James")
-        .setLastName("Auger")
-        .setPronouns("She/Her")
-        .setDOB(new Date("2000-06-06"))
-        .setSex("Female")
-        .setPhoneNumber("707-777-7777")
-        .setPrograms(["Bay Center", "Clinical Services"])
-        .build());
-
-    let bar = []
-
-    res.render("results", {clientList: foo});
+app.get('/results', (req, res) => {
+    res.render("results", {clientList: testClientArray});
 });
 
 app.get("/reports", (req, res) => {
     res.render("reports", {availableReportsMap: reportTypes});
 });
 
-app.post('/client', (req, res) => {
+// TODO: MAKE THIS GET ONCE HTML TESTING IS DONE
+app.get('/client', (req, res) => {
     let rawData = req.body.clientID;
-    res.render("clientDetails", {client: getClientDetails()});
+    res.render("clientDetails", {theClient: testClientArray[0]});
 });
 
 /* Port Number should be an environment variable fyi */

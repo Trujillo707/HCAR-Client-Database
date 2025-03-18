@@ -5,24 +5,31 @@
  * Class for Client data. Immutable for the most part.
  * Users can technically mutate the arrays, but that is an acceptable risk.
  */
-class Client {
+export class Client {
     // Keep these private to prevent any changes!
     #firstName = "";
     #middleName = "";
     #lastName = "";
     #pronouns = "";
     #phoneNumber = "";
-    #address = "";
+    /** @type {Address} */
+    #address = null;
     #email = "";
+    /** @type {Date}*/
     #DOB = null;
     // TODO: Consider adding gender as field
     #sex = "";
     #maritalStatus = "";
     #preferredHospital = "";
+    /** @type {Insurance} */
     #primaryInsurance = null;
+    /** @type {Insurance} */
     #secondaryInsurance = null;
+    /** @type {ContactInfo} */
     #pcp = null;
+    /** @type {ContactInfo} */
     #primaryPhysician = null;
+    /** @type {Medication[]} */
     #medicationList = [];
     #likes = "";
     #dislikes = "";
@@ -30,11 +37,19 @@ class Client {
     #hobbies = "";
     #achievements = "";
     #miscNotes = "";
+    /** @type {SupportStaff[]} */
     #supportTeam = [];
+    /** @type {CaseNote[]} */
     #caseNoteList = [];
     #pictureURL = "";
+    /** @type {Program[]} */
     #programs = [];
 
+    /**
+     * Client instances are to be created via a ClientBuilder object only.
+     * These Client objects are intended to be treated as immutable.
+     * @param {ClientBuilder} builder
+     */
     constructor( builder ) {
         this.#firstName = builder.firstName;
         this.#middleName = builder.middleName;
@@ -64,109 +79,133 @@ class Client {
         this.#programs = builder.programs;
     }
 
+    /** @returns {string} */
     getFirstName() {
         return this.#firstName;
     }
 
+    /** @returns {string} */
     getMiddleName() {
         return this.#middleName;
     }
 
+    /** @returns {string} */
     getLastName() {
         return this.#lastName;
     }
 
+    /** @returns {string} */
     getPronouns(){
         return this.#pronouns;
     }
 
+    /** @returns {string} */
     getPhoneNumber() {
         return this.#phoneNumber;
     }
 
+    /** @returns {Address} */
     getAddress() {
         return this.#address;
     }
 
+    /** @returns {string} */
     getEmail() {
         return this.#email;
     }
 
+    /** @returns {Date} */
     getDOB() {
         return this.#DOB;
     }
 
+    /** @returns {string} */
     getSex() {
         return this.#sex;
     }
 
+    /** @returns {string} */
     getMaritalStatus() {
         return this.#maritalStatus;
     }
 
+    /** @returns {string} */
     getPreferredHospital() {
         return this.#preferredHospital;
     }
 
+    /** @returns {Insurance} */
     getPrimaryInsurance() {
         return this.#primaryInsurance;
     }
 
+    /** @returns {Insurance} */
     getSecondaryInsurance() {
         return this.#secondaryInsurance;
     }
 
+    /** @returns {ContactInfo} */
     getPcp() {
         return this.#pcp;
     }
 
+    /** @returns {ContactInfo} */
     getPrimaryPhysician() {
         return this.#primaryPhysician;
     }
 
+    /** @returns {Medication[]} */
     getMedicationList() {
         return this.#medicationList;
     }
 
+    /** @returns {string} */
     getLikes() {
         return this.#likes;
     }
 
+    /** @returns {string} */
     getDislikes() {
         return this.#dislikes;
     }
 
+    /** @returns {string} */
     getGoals() {
         return this.#goals;
     }
 
+    /** @returns {string} */
     getHobbies() {
         return this.#hobbies;
     }
 
+    /** @returns {string} */
     getAchievements() {
         return this.#achievements;
     }
 
+    /** @returns {string} */
     getMiscNotes() {
         return this.#miscNotes;
     }
 
+    /** @returns {SupportStaff[]} */
     getSupportTeam() {
         return this.#supportTeam;
     }
 
+    /** @returns {CaseNote[]} */
     getCaseNoteList() {
         return this.#caseNoteList;
     }
 
+    /** @returns {string} */
     getPictureURL() {
         return this.#pictureURL;
     }
 
+    /** @returns {Program[]} */
     getPrograms(){
         return this.#programs;
     }
 }
-
-export { Client };
