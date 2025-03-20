@@ -38,6 +38,10 @@ app.get("/search", (req, res) => {
 })
 
 // TODO: MAKE THIS POST OBVIOUSLY
+app.get('/results', (req, res) => {
+    res.render("results", {clientList: testClientArray});
+});
+
 app.post('/results', (req, res) => {
     res.render("results", {clientList: testClientArray});
 });
