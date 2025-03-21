@@ -23,6 +23,7 @@ app.use(
       maxAge: 86400000, //One day(miliseconds)
       secure: false, //Set to true in prod(Requires HTTPS for cookies to be set)
       httpOnly: true, //Disallows browser js from accessing cookie
+      sameSite: 'strict', //CSRF Protection
     },
   })
 );
