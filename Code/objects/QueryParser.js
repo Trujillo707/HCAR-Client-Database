@@ -1,11 +1,18 @@
+import mysql from 'mysql2/promise';
+// TODO: If using CloudSQL, they suggest using their connect for better security, I suppose
+import {Connector} from '@google-cloud/cloud-sql-connector';
+
 /**
  * @author Orlando Trujillo-Ortiz et al.
- * @version 2025-03-21
+ * @version 2025-03-23
  * @desc This class holds a mySQL2 database connection and executes queries.
  * It is implemented using the Singleton creation pattern, so although it
  * seems like programmers are making new instances, they are actually just
  * getting the same one. Unfortunately, JavaScript does not allow private
  * constructors so please keep this in mind!
+ *
+ * WARNING: If you encounter behavior that mutates the state of QueryParser,
+ * please report it immediately for an ASAP bugfix;
  *
  * @example Getting an instance of the singleton and using it
  * let foo = new QueryParser();
@@ -25,15 +32,38 @@ export default class QueryParser{
      */
     constructor() {
         if (!QueryParser.#instance){
-            this.#connect();
+            try{
+                this.#connect();
+            }
+            catch (error){
+                // TODO: Consider making this error propagate elsewhere?
+                console.log(error);
+            }
             QueryParser.#instance = this;
         }
 
         return QueryParser.#instance;
     }
 
-    #connect() {
-        this.#db = "TODO"        //TODO: db logic here
+    /**
+     * Initializes a database connection pool. Currently, it assumes a Google CloudSQL
+     * database using their Node.js connector to ensure TLS 1.3 and whatnot. This function
+     * is asynchronous. See resources here: https://github.com/GoogleCloudPlatform/cloud-sql-nodejs-connector#usage
+     * @returns {Promise<void>} Unknown if this will be used
+     */
+    async #connect() {
+        const connector = new Connector();
+        const clientOpts = await connector.getOptions({
+            instanceConnectionName: process.env.DB_INSTANCE,
+            ipType: 'PUBLIC',
+        });
+        const pool = await mysql.createPool({
+            ...clientOpts,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_NAME,
+        });
+        this.#db = await pool.getConnection();
     }
 
 }
