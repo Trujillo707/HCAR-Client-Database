@@ -23,7 +23,8 @@ export default class QueryParser{
      * @type {QueryParser}
      */
     static #instance;
-    #db;
+    #pool;
+    #connector;
 
     /**
      * This is the "Constructor" for QueryParser. Save the returned instance and
@@ -33,7 +34,7 @@ export default class QueryParser{
     constructor() {
         if (!QueryParser.#instance){
             try{
-                this.#connect();
+                this.connect();
             }
             catch (error){
                 // TODO: Consider making this error propagate elsewhere?
@@ -51,19 +52,44 @@ export default class QueryParser{
      * is asynchronous. See resources here: https://github.com/GoogleCloudPlatform/cloud-sql-nodejs-connector#usage
      * @returns {Promise<void>} Unknown if this will be used
      */
-    async #connect() {
-        const connector = new Connector();
-        const clientOpts = await connector.getOptions({
-            instanceConnectionName: process.env.DB_INSTANCE,
-            ipType: 'PUBLIC',
-        });
-        const pool = await mysql.createPool({
-            ...clientOpts,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASS,
-            database: process.env.DB_NAME,
-        });
-        this.#db = await pool.getConnection();
+    async connect() {
+        if (!this.#pool){
+            this.#connector = new Connector();
+            const clientOpts = await this.#connector.getOptions({
+                instanceConnectionName: process.env.DB_INSTANCE,
+                ipType: 'PUBLIC',
+            });
+            this.#pool = await mysql.createPool({
+                ...clientOpts,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASS,
+                database: process.env.DB_NAME,
+            });
+        }
     }
 
+    /**
+     * Access the current connection pool. This should be used with caution.
+     * @returns {Pool}
+     */
+    getPool(){
+        return this.#pool;
+    }
+
+    /**
+     * Access the Google CloudSQL Connector object. This should be used with extreme caution.
+     * @returns {Connector}
+     */
+    getGoogleConnector(){
+        return this.#connector;
+    }
+
+    /**
+     * Checks if an instance of QueryParser was ever created. This is only
+     * really useful for cleanup activities.
+     * @returns {boolean}
+     */
+    static hasInstance(){
+        return QueryParser.#instance !== undefined;
+    }
 }

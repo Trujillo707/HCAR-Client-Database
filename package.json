@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/Trujillo707/HCAR-Client-Database#readme",
   "dependencies": {
+    "@google-cloud/cloud-sql-connector": "^1.7.0",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "mysql2": "^3.14.0"
