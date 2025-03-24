@@ -50,7 +50,7 @@ export default class QueryParser{
      * Initializes a database connection pool. Currently, it assumes a Google CloudSQL
      * database using their Node.js connector to ensure TLS 1.3 and whatnot. This function
      * is asynchronous. See resources here: https://github.com/GoogleCloudPlatform/cloud-sql-nodejs-connector#usage
-     * @returns {Promise<void>} Unknown if this will be used
+     * @returns {Promise<void>} Unknown if this return will be used
      */
     async connect() {
         if (!this.#pool){
