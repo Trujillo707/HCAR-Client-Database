@@ -11,11 +11,14 @@ import {Connector} from '@google-cloud/cloud-sql-connector';
  * getting the same one. Unfortunately, JavaScript does not allow private
  * constructors so please keep this in mind!
  *
- * WARNING: If you encounter behavior that mutates the state of QueryParser,
+ * **WARNING:** You **must** assume the database connection has not been established and call connect()
+ *
+ * **IMPORTANT:** If you encounter behavior that mutates the state of QueryParser,
  * please report it immediately for an ASAP bugfix;
  *
  * @example Getting an instance of the singleton and using it
  * let foo = new QueryParser();
+ * foo.connect();
  * let results = foo.getAllClients(staffID);
  */
 export default class QueryParser{
@@ -29,44 +32,19 @@ export default class QueryParser{
     /**
      * This is the "Constructor" for QueryParser. Save the returned instance and
      * use it as if it were a regular class instance!
+     * @param {QueryParserBuilder} builder A QueryParserBuilder object, ideally you should never do this manually
      * @returns {QueryParser} The Singleton instance of QueryParser
      */
-    constructor() {
+    constructor(builder) {
         if (!QueryParser.#instance){
-            try{
-                this.connect();
-            }
-            catch (error){
-                // TODO: Consider making this error propagate elsewhere?
-                console.log(error);
-            }
+            this.#pool = builder.pool;
+            this.#connector = builder.connector;
             QueryParser.#instance = this;
         }
 
         return QueryParser.#instance;
     }
 
-    /**
-     * Initializes a database connection pool. Currently, it assumes a Google CloudSQL
-     * database using their Node.js connector to ensure TLS 1.3 and whatnot. This function
-     * is asynchronous. See resources here: https://github.com/GoogleCloudPlatform/cloud-sql-nodejs-connector#usage
-     * @returns {Promise<void>} Unknown if this return will be used
-     */
-    async connect() {
-        if (!this.#pool){
-            this.#connector = new Connector();
-            const clientOpts = await this.#connector.getOptions({
-                instanceConnectionName: process.env.DB_INSTANCE,
-                ipType: 'PUBLIC',
-            });
-            this.#pool = await mysql.createPool({
-                ...clientOpts,
-                user: process.env.DB_USER,
-                password: process.env.DB_PASS,
-                database: process.env.DB_NAME,
-            });
-        }
-    }
 
     /**
      * Access the current connection pool. This should be used with caution.
