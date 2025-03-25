@@ -1,5 +1,5 @@
 import mysql from 'mysql2/promise';
-// TODO: If using CloudSQL, they suggest using their connect for better security, I suppose
+// If using CloudSQL, they suggest using their connect for better security, I suppose
 import {Connector} from '@google-cloud/cloud-sql-connector';
 
 /**
