@@ -194,6 +194,7 @@
     width: 150px;
     height: 53px;
     font-size: 20px;
+    cursor: pointer;
 }
 
 /* START: Stuff for the clientDetails.ejs */
