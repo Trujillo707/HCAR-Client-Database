@@ -7,9 +7,10 @@
     <body class="hcar-body">
         <%-include("header")-%>
         <div class="buttons-container">
-            <button class="home-button" onclick="window.location.href='/results'">Quick View All</button>
-            <button class="home-button" onclick="window.location.href='/search'">Search Client</button>
-            <button class="home-button" onclick="window.location.href='/reports'">Reports</button>
+            <button class="home-button" id="quickViewButton">Quick View All</button>
+            <button class="home-button" id="searchButton">Search Client</button>
+            <button class="home-button" id="reportsButton">Reports</button>
         </div>
+        <script src="../js/homeScript.js"></script>
     </body>
 </html>
