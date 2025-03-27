@@ -1,8 +1,8 @@
 /** Simple class to hold basic contact information
  * @author Orlando Trujillo-Ortiz
- * @version 2025-03-17
+ * @version 2025-03-26
  */
-class ContactInfo {
+export default class ContactInfo {
     #name = "";
     #phoneNumber = "";
     #address = "";

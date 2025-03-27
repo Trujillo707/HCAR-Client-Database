@@ -4,6 +4,8 @@
  * @desc
  * This class holds data for Insurance objects.
  * Only holds an insurance Name and PolicyNumber
+ * @author Orlando Trujillo-Ortiz
+ * @version 2025-03-26
  */
 export default class Insurance{
     #name = "";

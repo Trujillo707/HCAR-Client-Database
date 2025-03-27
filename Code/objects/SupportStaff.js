@@ -4,7 +4,7 @@
  * @desc
  * This class holds information for any individuals considered "SupportStaff" for an HCAR Client.
  */
-class SupportStaff {
+export class SupportStaff {
     #name = "";
     #title = "";
     #idNumber = 0;

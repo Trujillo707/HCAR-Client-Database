@@ -179,6 +179,24 @@
     grid-area: 2 / 2 / 2 / 3;
 }
 
+#searchSubmitContainer
+{
+    margin: 20px auto 0 auto;
+    text-align: center;
+}
+
+#searchSubmit
+{
+    background-color: black;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    width: 150px;
+    height: 53px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
 /* START: Stuff for the clientDetails.ejs */
 /* Style the tab */
 .tab {
