@@ -1,4 +1,4 @@
-class Address {
+export default class Address {
     #streetAddress = "";
     #city = "";
     #state = "";

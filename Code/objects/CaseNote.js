@@ -1,10 +1,10 @@
 /**
  * @author Orlando Trujillo-Ortiz
- * @version 2025-03-17
+ * @version 2025-03-26
  * @desc
  * This class holds information for a single Case Note associated with a particular client.
  */
-class CaseNote {
+export default class CaseNote {
     #subject = "";
     /** @type {Date} */
     #date = null;

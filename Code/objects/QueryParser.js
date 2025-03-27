@@ -11,13 +11,13 @@ import {Connector} from '@google-cloud/cloud-sql-connector';
  * getting the same one. Unfortunately, JavaScript does not allow private
  * constructors so please keep this in mind!
  *
- * **WARNING:** You **must** assume the database connection has not been established and call connect()
+ * **WARNING:** You **must** utilize the QueryParserBuilder to get an instance!
  *
  * **IMPORTANT:** If you encounter behavior that mutates the state of QueryParser,
  * please report it immediately for an ASAP bugfix;
  *
  * @example Getting an instance of the singleton and using it
- * let foo = new QueryParser();
+ * let foo = new QueryParserBuilder().build();
  * foo.connect();
  * let results = foo.getAllClients(staffID);
  */
@@ -68,6 +68,22 @@ export default class QueryParser{
      * @returns {boolean}
      */
     static hasInstance(){
-        return QueryParser.#instance !== undefined;
+        return QueryParser.#instance !== undefined && QueryParser.#instance !== null;
+    }
+
+    /**
+     * This will destruct the
+     * @returns {Promise<void>} This function is asynchronous and should handle the promise
+     */
+    async destructor(){
+        if (this.#pool){
+            await this.#pool.end();
+            this.#pool = null;
+        }
+        if(this.#connector){
+            this.#connector.close();
+            this.#connector = null;
+        }
+        QueryParser.#instance = null;
     }
 }

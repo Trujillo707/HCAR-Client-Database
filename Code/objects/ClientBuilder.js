@@ -1,8 +1,10 @@
 import {Client} from "./Client.js"
+import Programs from "./Programs.js";
+import Address from "./Address.js";
 
 /**
  * @author Orlando Trujillo-Ortiz
- * @version 2025-03-17
+ * @version 2025-03-26
  * @desc Class ClientBuilder is responsible for creating Client objects and ensuring the inputted data is valid.
  *       Default values for Client class are enforced here. Unprovided values are given a safe default empty data.
  *       Observe that there is no constructor specified, so default one is used!

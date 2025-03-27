@@ -4,7 +4,7 @@
  * @author Orlando Trujillo-Ortiz
  * @version 2025-03-17
  */
-export class Program {
+export default class Programs {
     #name = "";
 
     /**
