@@ -1,5 +1,6 @@
 import {ClientBuilder} from "./objects/ClientBuilder.js";
 import {Program} from "./objects/Program.js";
+import Insurance from "./objects/Insurance.js";
 
 /**
  * @type {Client[]}
@@ -14,6 +15,8 @@ testClientArray.push(new ClientBuilder()
     .setPhoneNumber("707-777-7777")
     .setEmail("alice@foobar.com")
     .setPrograms([new Program("Bay Center"), new Program("Clinical Services")])
+    .setMaritalStatus("divorced")
+    .setPrimaryInsurance(new Insurance("Anthem Blue Cross", "123456789"))
     .build());
 testClientArray.push(new ClientBuilder()
     .setFirstName("Bob")

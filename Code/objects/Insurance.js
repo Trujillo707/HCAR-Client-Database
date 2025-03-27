@@ -5,7 +5,7 @@
  * This class holds data for Insurance objects.
  * Only holds an insurance Name and PolicyNumber
  */
-class Insurance{
+export default class Insurance{
     #name = "";
     #policyNumber = "";
 
