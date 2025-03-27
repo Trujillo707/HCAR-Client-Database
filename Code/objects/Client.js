@@ -1,3 +1,5 @@
+import Address from "./Address.js";
+
 /**
  * @author Orlando Trujillo-Ortiz
  * @version 2025-03-17

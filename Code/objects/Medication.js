@@ -3,7 +3,7 @@
  * @author Orlando Trujillo-Ortiz
  * @version 2025-03-17
  */
-class Medication {
+export default class Medication {
     #name = "";
     #prn = false;
     #dosage = "";

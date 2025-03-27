@@ -6,7 +6,8 @@ const port = process.env.PORT || 3000;
 import { fileURLToPath } from 'url';
 import path from 'path';
 import {testClientArray} from "./testData.js"
-
+import QueryParser from "./objects/QueryParser.js";
+import QueryParserBuilder from "./objects/QueryParserBuilder.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -60,3 +61,16 @@ app.get('/client', (req, res) => {
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
+
+process.on('SIGTERM',async () => {
+    try {
+        if (QueryParser.hasInstance()) {
+            const queryParser = new QueryParserBuilder().build();
+            await queryParser.destructor();
+        }
+    } catch (error) {
+        console.error('Error while closing the database connection:', error);
+    } finally {
+        process.exit(0);
+    }
+});

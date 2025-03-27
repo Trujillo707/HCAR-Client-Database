@@ -1,5 +1,5 @@
 import {ClientBuilder} from "./objects/ClientBuilder.js";
-import {Program} from "./objects/Program.js";
+import {Programs} from "./objects/Programs.js";
 
 /**
  * @type {Client[]}
