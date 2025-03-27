@@ -1,5 +1,6 @@
 import {ClientBuilder} from "./objects/ClientBuilder.js";
-import {Programs} from "./objects/Programs.js";
+import Programs from "./objects/Programs.js";
+import Insurance from "./objects/Insurance.js";
 
 /**
  * @type {Client[]}
@@ -13,7 +14,9 @@ testClientArray.push(new ClientBuilder()
     .setSex("Female")
     .setPhoneNumber("707-777-7777")
     .setEmail("alice@foobar.com")
-    .setPrograms([new Program("Bay Center"), new Program("Clinical Services")])
+    .setPrograms([new Programs("Bay Center"), new Programs("Clinical Services")])
+    .setMaritalStatus("divorced")
+    .setPrimaryInsurance(new Insurance("Anthem Blue Cross", "123456789"))
     .build());
 testClientArray.push(new ClientBuilder()
     .setFirstName("Bob")
@@ -23,7 +26,7 @@ testClientArray.push(new ClientBuilder()
     .setSex("Female")
     .setPhoneNumber("707-777-7777")
     .setEmail("alice@foobar.com")
-    .setPrograms([new Program("Bay Center"), new Program("Clinical Services")])
+    .setPrograms([new Programs("Bay Center"), new Programs("Clinical Services")])
     .build());
 testClientArray.push(new ClientBuilder()
     .setFirstName("Cam")
@@ -41,7 +44,7 @@ testClientArray.push(new ClientBuilder()
     .setSex("Female")
     .setPhoneNumber("707-777-7777")
     .setEmail("alice@foobar.com")
-    .setPrograms([new Program("Bay Center"), new Program("Clinical Services")])
+    .setPrograms([new Programs("Bay Center"), new Programs("Clinical Services")])
     .build());
 testClientArray.push(new ClientBuilder()
     .setFirstName("Edward")
@@ -50,7 +53,7 @@ testClientArray.push(new ClientBuilder()
     .setDOB(new Date("2000-06-06"))
     .setSex("Female")
     .setEmail("alice@foobar.com")
-    .setPrograms([new Program("Bay Center"), new Program("Clinical Services")])
+    .setPrograms([new Programs("Bay Center"), new Programs("Clinical Services")])
     .build());
 testClientArray.push(new ClientBuilder()
     .setFirstName("Fred")
@@ -59,7 +62,7 @@ testClientArray.push(new ClientBuilder()
     .setDOB(new Date("2000-06-06"))
     .setPhoneNumber("707-777-7777")
     .setEmail("alice@foobar.com")
-    .setPrograms([new Program("Bay Center"), new Program("Clinical Services")])
+    .setPrograms([new Programs("Bay Center"), new Programs("Clinical Services")])
     .build());
 testClientArray.push(new ClientBuilder()
     .setLastName("Auger")
@@ -68,7 +71,7 @@ testClientArray.push(new ClientBuilder()
     .setSex("Female")
     .setPhoneNumber("707-777-7777")
     .setEmail("alice@foobar.com")
-    .setPrograms([new Program("Bay Center"), new Program("Clinical Services")])
+    .setPrograms([new Programs("Bay Center"), new Programs("Clinical Services")])
     .build());
 testClientArray.push(new ClientBuilder()
     .setFirstName("Harry")
@@ -77,7 +80,7 @@ testClientArray.push(new ClientBuilder()
     .setSex("Female")
     .setPhoneNumber("707-777-7777")
     .setEmail("alice@foobar.com")
-    .setPrograms([new Program("Bay Center"), new Program("Clinical Services")])
+    .setPrograms([new Programs("Bay Center"), new Programs("Clinical Services")])
     .build());
 testClientArray.push(new ClientBuilder()
     .setFirstName("Isaac")
@@ -86,7 +89,7 @@ testClientArray.push(new ClientBuilder()
     .setSex("Female")
     .setPhoneNumber("707-777-7777")
     .setEmail("alice@foobar.com")
-    .setPrograms([new Program("Bay Center"), new Program("Clinical Services")])
+    .setPrograms([new Programs("Bay Center"), new Programs("Clinical Services")])
     .build());
 testClientArray.push(new ClientBuilder()
     .setFirstName("James")
@@ -95,7 +98,7 @@ testClientArray.push(new ClientBuilder()
     .setDOB(new Date("2000-06-06"))
     .setSex("Female")
     .setPhoneNumber("707-777-7777")
-    .setPrograms([new Program("Bay Center"), new Program("Clinical Services")])
+    .setPrograms([new Programs("Bay Center"), new Programs("Clinical Services")])
     .build());
 
 export {testClientArray}
