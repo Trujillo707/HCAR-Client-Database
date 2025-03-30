@@ -4,7 +4,7 @@ import {Connector} from '@google-cloud/cloud-sql-connector';
 
 /**
  * @author Orlando Trujillo-Ortiz et al.
- * @version 2025-03-23
+ * @version 2025-03-30
  * @desc This class holds a mySQL2 database connection and executes queries.
  * It is implemented using the Singleton creation pattern, so although it
  * seems like programmers are making new instances, they are actually just
@@ -17,15 +17,15 @@ import {Connector} from '@google-cloud/cloud-sql-connector';
  * please report it immediately for an ASAP bugfix;
  *
  * @example Getting an instance of the singleton and using it
- * let foo = new QueryParserBuilder().build();
- * foo.connect();
- * let results = foo.getAllClients(staffID);
+ * let myQueryParser = new QueryParserBuilder().build();
+ * let results = myQueryParser.getAllClients(staffID);
  */
 export default class QueryParser{
     /**
      * @type {QueryParser}
      */
     static #instance;
+    /** @type {Pool} */
     #pool;
     #connector;
 
