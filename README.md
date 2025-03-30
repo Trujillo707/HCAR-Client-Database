@@ -16,7 +16,7 @@ worked on by developers can be found on their own branch, such as `orlando_dev` 
 # Build Instructions
 1. Clone our latest `dev`(latest code) or `main`(stable code) branch from our [repository](https://github.com/Trujillo707/HCAR-Client-Database.git).
 ```
-   git clone --branch https://github.com/Trujillo707/HCAR-Client-Database.git
+   git clone --branch <branchName> https://github.com/Trujillo707/HCAR-Client-Database.git
 ```
 2. Install project dependencies from our `package.json`
 ```
