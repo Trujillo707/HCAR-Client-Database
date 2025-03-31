@@ -9,20 +9,23 @@ export default class CaseNote {
     /** @type {Date} */
     #date = null;
     #postedBy = "";
+    #location = "";
     #isBehavioral = false;
     #isInformational = false;
 
     /**
-     * @param {string}subject
-     * @param {Date}date
-     * @param {string}postedBy
-     * @param {boolean}isBehavioral
-     * @param {boolean}isInformational
+     * @param {string} subject
+     * @param {Date} date
+     * @param {string} postedBy
+     * @param {string} location
+     * @param {boolean} isBehavioral
+     * @param {boolean} isInformational
      */
-    constructor(subject, date, postedBy, isBehavioral, isInformational) {
+    constructor(subject, date, postedBy, location, isBehavioral, isInformational) {
         this.#subject = subject;
         this.#date = date;
         this.#postedBy = postedBy;
+        this.#location = location;
         this.#isBehavioral = isBehavioral;
         this.#isInformational = isInformational;
     }
@@ -37,6 +40,10 @@ export default class CaseNote {
 
     getPostedBy() {
         return this.#postedBy;
+    }
+
+    getLocation() {
+        return this.#location;
     }
 
     getIsBehavioral() {

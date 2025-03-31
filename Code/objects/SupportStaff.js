@@ -35,23 +35,23 @@ export class SupportStaff {
         this.#dateRemoved = dateRemoved;
     }
 
-    get name() {
+    getName() {
         return this.#name;
     }
 
-    get title() {
+    getTitle() {
         return this.#title;
     }
 
-    get idNumber() {
+    getIdNumber() {
         return this.#idNumber;
     }
 
-    get dateAssigned() {
+    getDateAssigned() {
         return this.#dateAssigned;
     }
 
-    get dateRemoved() {
+    getDateRemoved() {
         return this.#dateRemoved;
     }
 }

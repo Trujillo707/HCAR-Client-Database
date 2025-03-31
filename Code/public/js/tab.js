@@ -21,7 +21,7 @@ function openTab(tabName) {
         tabcontent[i].style.display = "none";
     }
     tablinks = document.querySelectorAll(".tablinks");
-    tablinks.forEach(currLink =>{
+    tablinks.forEach(currLink => {
         if (currLink.getAttribute('data-tabName') === tabName){
             currLink.classList.add('active');
         }
