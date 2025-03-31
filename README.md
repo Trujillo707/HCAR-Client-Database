@@ -6,18 +6,31 @@ Latest formal Documentation is located in the documents folder
 Latest stable build code is in `main` branch, latest developmental build is in `dev` branch. Current features being 
 worked on by developers can be found on their own branch, such as `orlando_dev` or `justin_dev`.
 
+# Table of Contents
+1. [Build Instructions](#build-instructions)
+2. [Unit Testing](#unit-testing)
+   1. [Running Tests in WebStorm](#running-tests-in-webstorm)
+3. [Integration Testing](#integration-testing)
+4. [Coverage Report](#coverage-report)
+
 # Build Instructions
-
-*In progress*
-
+1. Clone our latest `dev`(latest code) or `main`(stable code) branch from our [repository](https://github.com/Trujillo707/HCAR-Client-Database.git).
+```
+   git clone --branch <branchName> https://github.com/Trujillo707/HCAR-Client-Database.git
+```
+2. Install project dependencies from our `package.json`
+```
+  npm install
+```
+---
 # Unit Testing
 Due to this project using ECMAScript Modules, Jest requires some additional setup.
 Fortunately, most of this is remedied by the provided `Code/jest.config.mjs` and `Code/package.json` files in the
 repository.
 
-To run all test suites, you can simply do the following in the terminal:
+To run all unit test suites, you can simply do the following in the terminal:
 ```
-npm test
+  npm test
 ```
 
 This uses the value for "test" in `package.json`, which just provides preconfigured arguments that *should* work.
@@ -53,6 +66,22 @@ For each seemingly faulty configuration, add the follwing:
 
 This should be enough to get your Jest up and running.
 
+---
+# Integration Testing
+> [!CAUTION]
+> This projects integration tests do in fact send queries to external APIs, so take care in deciding when it is appropriate
+> to run them manually. 
+> Otherwise, tests categorized as integration tests will be performed automatically during CI.
+
+If you decide to run these tests, there is a provided script in `package.json` that you can call as follows:
+``` 
+   npm run integration
+```
+This will run both unit and integration tests with the default settings in `jest.config.mjs`. Due to the nature of 
+calling external APIs, integration test suites will take longer to execute. If needed, consider implementing timeouts 
+in your written integration tests if you want to deem stalls as failures. 
+
+---
 # Coverage Report
 If you run Jest from the CLI, you will observe that you got a coverage folder in your project directory.
 Upon successful test runs (where Jest doesn't crash), Jest will generate a nice HTML document to view test results.

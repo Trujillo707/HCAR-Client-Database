@@ -293,7 +293,7 @@ export class ClientBuilder {
     }
 
     /**
-     * @param {Program[]} programs
+     * @param {Programs[]} programs
      * @returns {ClientBuilder} Returns this current ClientBuilder to allow method chaining.
      */
     setPrograms(programs){

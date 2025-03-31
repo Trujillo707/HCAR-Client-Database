@@ -44,7 +44,7 @@ export class Client {
     /** @type {CaseNote[]} */
     #caseNoteList = [];
     #pictureURL = "";
-    /** @type {Program[]} */
+    /** @type {Programs[]} */
     #programs = [];
 
     /**
@@ -206,7 +206,7 @@ export class Client {
         return this.#pictureURL;
     }
 
-    /** @returns {Program[]} */
+    /** @returns {Programs[]} */
     getPrograms(){
         return this.#programs;
     }
