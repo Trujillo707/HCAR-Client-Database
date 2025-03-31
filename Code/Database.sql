@@ -116,7 +116,7 @@ CREATE TABLE ProgramClient(
 );
 
 CREATE TABLE StaffClient(
-    accountID INT, 
+    staffID INT, 
     clientID INT
 );
 
