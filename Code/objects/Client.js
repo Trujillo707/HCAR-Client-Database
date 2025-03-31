@@ -33,6 +33,7 @@ export class Client {
     #primaryPhysician = null;
     /** @type {Medication[]} */
     #medicationList = [];
+    #vaccinationList = [];
     #likes = "";
     #dislikes = "";
     #goals = "";
@@ -69,6 +70,7 @@ export class Client {
         this.#pcp = builder.pcp;
         this.#primaryPhysician = builder.primaryPhysician;
         this.#medicationList = builder.medicationList;
+        this.#vaccinationList = builder.vaccinationList;
         this.#likes = builder.likes;
         this.#dislikes = builder.dislikes;
         this.#goals = builder.goals;
@@ -159,6 +161,11 @@ export class Client {
     /** @returns {Medication[]} */
     getMedicationList() {
         return this.#medicationList;
+    }
+
+    /** @returns {Vaccination[]} */
+    getVaccinationList() {
+        return this.#vaccinationList;
     }
 
     /** @returns {string} */

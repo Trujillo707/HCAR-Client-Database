@@ -44,6 +44,8 @@ export class ClientBuilder {
     primaryPhysician = null;
     /** @type {Medication[]} */
     medicationList = [];
+    /** @type{Vaccination[]} */
+    vaccinationList = [];
     /** @type {string} */
     likes = "";
     /** @type {string} */
@@ -208,6 +210,15 @@ export class ClientBuilder {
      */
     setMedicationList(medicationList) {
         this.medicationList = medicationList;
+        return this;
+    }
+
+    /**
+     * @param {Vaccination[]} vaccinationList
+     * @returns {ClientBuilder} Returns this current ClientBuilder to allow method chaining
+     */
+    setVaccinationList(vaccinationList) {
+        this.vaccinationList = vaccinationList;
         return this;
     }
 
