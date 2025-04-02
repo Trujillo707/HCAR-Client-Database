@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Client Details</title>
+    <%- include("fontLinks") -%>
+    <link href="../css/style.css" rel="stylesheet" type="text/css" />
+    <link href="../css/orlando.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Global variables for objects in Client to display -->
+    <%
+        let primaryInsurance = locals.theClient.getPrimaryInsurance();
+        let secondaryInsurance = locals.theClient.getSecondaryInsurance();
+        let medicationList = locals.theClient.getMedicationList();
+        let vaccinationList = locals.theClient.getVaccinationList();
+        let maritalStatusTypes = ["Single", "Married", "Divorced", "Other"];
+        let sexTypes = ["Male", "Female", "Other/Unspecified"];
+        let supportTeam = locals.theClient.getSupportTeam();
+        let caseNotes = locals.theClient.getCaseNoteList();
+
+    %>
+</head>
+<body>
+<%-include("header")-%>
+<div class="bodyContent">
+    <p>Showing information for
+        <% if(locals.theClient){
+        %><%= locals.theClient.getFirstName() + " " + locals.theClient.getLastName() %><%
+        }
+        else{
+        %> Unknown Client <%
+        } %></p>
+    <div id="tabContainer">
+        <div class="tab">
+            <button class="tablinks" data-tabName="clientID" id="defaultOpen" >Client ID</button>
+            <button class="tablinks" data-tabName="medInfo"> Medical Information</button>
+            <button class="tablinks" data-tabName="personalInfo"> Personal Information</button>
+            <button class="tablinks" data-tabName="supportTeam"> Support Team</button>
+            <button class="tablinks" data-tabName="caseNotes"> Case Notes</button>
+        </div>
+
+        <!-- clientID: inputs for firstName, middleName, lastName, email, address,
+             DoB (date of birth), sex, maritalStatus -->
+        <div id="clientID" class="tabcontent">
+            <label for="firstName">First Name: </label>
+            <input type="text" placeholder="First Name"
+                   value="<%= locals.theClient.getFirstName() %>" id="firstName" />
+
+            <label for="middleName">Middle: </label>
+            <input type="text" placeholder="Middle"
+                   value="<%=locals.theClient.getMiddleName()%>" id="middleName" />
+
+            <label for="lastName">Last Name: </label>
+            <input type="text" placeholder="Last Name"
+                   value="<%=locals.theClient.getLastName()%>" id="lastName" />
+            <br />
+
+            <label for="email">Email: </label>
+            <input type="text" placeholder="First Name"
+                   value="<%=locals.theClient.getEmail()%>" id="email" />
+
+            <label for="address">Street Address: </label>
+            <input type="text" placeholder="Address"
+                   value="<%=locals.theClient.getAddress()%>" id="address" />
+
+            <label for="DoB">Street Address: </label>
+            <input type="date" placeholder="Address"
+                   value="<%=locals.theClient.getAddress()%>" id="address" />
+
+            <% /** using sexTypes[] to remove current value, and use values as other sex options */
+            sexTypes = sexTypes.filter(e => e !== locals.theClient.getSex())
+            %>
+            <label for="sex">Sex: </label>
+            <select name="sex" id="sex">
+                <option value="<%=locals.theClient.getSex()%>" id="current"> <%=locals.theClient.getSex()%> </option>
+                <option value="<%=sexTypes[0]%>" id="option2"> <%=sexTypes[0]%> </option>
+                <option value="<%=sexTypes[1]%>" id="option3"> <%=sexTypes[1]%> </option>
+            </select>
+
+            <% /** using maritalStatusTypes[] to remove current value, and use values as other maritalStatus options */
+                maritalStatusTypes = maritalStatusTypes.filter(e => e !== locals.theClient.getMaritalStatus())
+            %>
+            <label for="maritalStatus">Marital Status: </label>
+            <select name="maritalStatus" id="maritalStatus">
+                <option value="<%=locals.theClient.getMaritalStatus()%>" id="current"> <%=locals.theClient.getMaritalStatus()%> </option>
+                <option value="<%=maritalStatusTypes[0]%>" id="option1"><%=maritalStatusTypes[0]%></option>
+                <option value="<%=maritalStatusTypes[1]%>" id="option2"><%=maritalStatusTypes[1]%></option>
+                <option value="<%=maritalStatusTypes[2]%>" id="option3"><%=maritalStatusTypes[2]%></option>
+            </select>
+        </div>
+
+        <div id="medInfo" class="tabcontent">
+            <div>
+                <label for="p_insurance">Primary Insurance Provider: </label>
+                <input type="text" placeholder="Primary Insurance Provider"
+                       value="<%=primaryInsurance.getName()%>" id="p_insurance" />
+
+                <label for="p_insurance_num"> Primary Ins. Number: </label>
+                <input type="text" placeholder="000000000"
+                       value="<%=primaryInsurance.getPolicyNumber()%>" id="p_insurance_num" />
+            </div>
+            <div>
+                <label for="s_insurance"> Secondary Insurance Provider: </label>
+                <input type="text" placeholder="Primary Insurance Provider"
+                       value="<%=secondaryInsurance.getName()%>" id="s_insurance" />
+
+                <label for="s_insurance_num">Secondary Ins. Number: </label>
+                <input type="text" placeholder="000000000"
+                       value="<%=secondaryInsurance.getPolicyNumber()%>" id="s_insurance_num" />
+            </div>
+
+            <label for="p_care_provider">Primary Care Provider: </label>
+            <input type="text" placeholder="Primary Care Provider"
+                   value="<%=locals.theClient.getPcp()%>" id="p_care_provider" />
+
+            <label for="p_physician">Primary Physician: </label>
+            <input type="text" placeholder="Primary Physician"
+                   value="<%=locals.theClient.getPrimaryPhysician()%>" id="p_physician" />
+
+            <label for="pref_hospital">Preferred Hospital: </label>
+            <input type="text" placeholder="Preferred Hospital"
+                   value="<%=locals.theClient.getPreferredHospital()%>" id="pref_hospital" />
+
+            <table class="medication">
+                <caption> Medication List </caption>
+                <tr>
+                    <th scope="col"> Medication </th>
+                    <th scope="col">PRN</th>
+                    <th scope="col">Dosage</th>
+                    <th scope="col">Time(s) of Day</th>
+                    <th scope="col">Purpose</th>
+                    <th scope="col">Possible Side Effects</th>
+                    <th scope="col">Prescribing Physician & Speciality</th>
+                </tr>
+                <% medicationList.forEach((medication) => { %>
+                        <tr>
+                            <td><%=medication.getName()%></td>
+                            <td><%=medication.getPrn()%></td>
+                            <td><%=medication.getDosage()%></td>
+                            <td><%=medication.getTimesOfDay()%></td>
+                            <td><%=medication.getPurpose()%></td>
+                            <td><%=medication.getSideEffects()%></td>
+                            <td><%=medication.getPrescriber()%></td>
+                        </tr>
+                        <%
+                    })
+                %>
+            </table>
+
+            <table class="vaccinationList">
+                <caption>Vaccinations: </caption>
+                <tr>
+                    <th>Shot Type</th>
+                    <th>Date Taken</th>
+                </tr>
+                <% vaccinationList.forEach((vaccination, index) => { %>
+                        <tr>
+                            <td><%=vaccination.getShotType()%></td>
+                            <td><%=vaccination.getDateTaken()%></td>
+                        </tr>
+                        <%
+                    })
+                %>
+            </table>
+        </div>
+
+        <div id="personalInfo" class="tabcontent">
+            <label for="cli_likes"> Client Likes: </label>
+            <input type="text" name="client_likes" id="cli_likes"
+                   value="<%=locals.theClient.getLikes()%>" placeholder="likes go here" />
+
+            <label for="cli_dislikes"> Client Dislikes: </label>
+            <input type="text" name="client_dislikes" id="cli_dislikes"
+                   value="<%=locals.theClient.getDislikes()%>" placeholder="dislikes go here" />
+
+            <label for="cli_goals"> Client Goals: </label>
+            <input type="text" name="client_goals" id="cli_goals"
+                   value="<%=locals.theClient.getGoals()%>" placeholder="goals go here" />
+
+            <label for="cli_hobs"> Client Hobbies / Favorite Activities: </label>
+            <input type="text" name="client_hobbies" id="cli_hobs"
+                   value="<%=locals.theClient.getHobbies()%>" placeholder="hobbies go here" />
+
+            <label for="cli_ach"> Client Achievements: </label>
+            <input type="text" name="client_achievements" id="cli_ach"
+                   value="<%=locals.theClient.getAchievements()%>" placeholder="achievements go here" />
+
+            <label for="cli_add_notes"> Additional Notes: </label>
+            <input type="text" name="client_additional_notes" id="cli_add_notes"
+                   value="<%=locals.theClient.getLikes()%>" placeholder="additional notes here" />
+        </div>
+
+        <div id="supportTeam" class="tabcontent">
+            <table class="supportTeam">
+                <caption> Support Team </caption>
+                <tr>
+                    <th>Employee Name</th>
+                    <th>Title</th>
+                    <th>Employee ID Number</th>
+                    <th>Date Assigned</th>
+                    <th>Date Removed</th>
+                </tr>
+                <% supportTeam.forEach((supportStaff) => { %>
+                        <tr>
+                            <td><%=supportStaff.getName()%></td>
+                            <td><%=supportStaff.getTitle()%></td>
+                            <td><%=supportStaff.getIdNumber()%></td>
+                            <td><%=new Intl.DateTimeFormat("en-US").format(supportStaff.getDateAssigned())%></td>
+                            <td><%=new Intl.DateTimeFormat("en-US").format(supportStaff.getDateRemoved())%></td>
+                        </tr>
+                        <%
+                    })
+                %>
+            </table>
+        </div>
+
+        <div id="caseNotes" class="tabcontent">
+            <table class="caseNotes">
+                <tr>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Posted By</th>
+                    <th>Location</th>
+                    <th>Behavioral Incident</th>
+                    <th>Informational Note</th>
+                </tr>
+                <% caseNotes.forEach((caseNote) => { %>
+                        <tr>
+                            <td><%=caseNote.getSubject()%></td>
+                            <td><%=caseNote.getDate()%></td>
+                            <td><%=caseNote.getPostedBy()%></td>
+                            <td><%=caseNote.getLocation()%></td>
+                            <td><%=caseNote.getIsBehavioral()%></td>
+                            <td><%=caseNote.getIsInformational()%></td>
+                        </tr>
+                        <%
+                    })
+                %>
+            </table>
+        </div>
+        <script src="js/tab.js"></script>
+    </div>
+</div>
+
+</body>

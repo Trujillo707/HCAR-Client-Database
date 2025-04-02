@@ -1,0 +1,31 @@
+{
+  "name": "hcar-client-database",
+  "version": "1.1.0",
+  "description": "Webserver Code for HCAR Client Database",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPattern=unit-tests",
+    "integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Trujillo707/HCAR-Client-Database.git"
+  },
+  "author": "Xplorers",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Trujillo707/HCAR-Client-Database/issues"
+  },
+  "homepage": "https://github.com/Trujillo707/HCAR-Client-Database#readme",
+  "dependencies": {
+    "@google-cloud/cloud-sql-connector": "^1.7.0",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "mysql2": "^3.14.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@jest/globals": "^29.7.0"
+  }
+}

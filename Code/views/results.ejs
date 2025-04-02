@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("fontLinks") -%>
+    <title>Search Results</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link href="css/orlando.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<%- include("header") -%>
+
+<div id="resultsBox">
+    <table>
+        <thead>
+        <tr>
+            <th scope="col">Photo</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">Pronouns</th>
+            <th scope="col">Gender</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Email</th>
+            <th scope="col">Date of Birth</th>
+            <th scope="col">Programs</th>
+            <th scope="col">PoS Status</th>
+        </tr>
+        </thead>
+        <!-- If there are Clients to display, show them! -->
+    <% if (locals.clientList && Array.isArray(clientList) && clientList.length > 0){ %>
+        <tbody>
+            <% clientList.forEach((current) => { %>
+                <tr>
+                    <td><img width="256" alt="Picture of <%= current.getFirstName() %>"
+                             src="<%= current.getPictureURL() %>">
+                    </td>
+                    <td><%= current.getFirstName() %></td>
+                    <td><%= current.getLastName() %></td>
+                    <td><%= current.getPronouns() %></td>
+                    <td><%= current.getSex() %></td>
+                    <td><%= current.getPhoneNumber() %></td>
+                    <td><%= current.getEmail() %></td>
+                    <td>
+                        <% if(current.getDOB() instanceof Date){ %>
+                            <%= current.getDOB().toLocaleDateString("en-US") %>
+                        <%}else { %>
+                            <%= current.getDOB() %>
+                        <%} %>
+                    </td>
+                    <td>
+                        <% current.getPrograms().forEach((currProgram) => { %>
+                            <%=currProgram.getName()%><br/>
+                        <% }) %>
+                    </td>
+                    <!--TODO: make this work! -->
+                    <td>Good</td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+    <% }
+    else { %>
+        </table>
+        <p>No search results found!</p>
+    <% } %>
+</div>
+<footer>
+    <a href="/search">Go Back</a>
+
+    <div id="pageChanger">
+        <button type="button" disabled="disabled">← Previous</button>
+        <button type="button">Next →</button>
+    </div>
+    <!-- Probably going to need JavaScript to make this button work nicely -->
+    <a class="dimHover" href="/client">Select</a>
+
+</footer>
+</body>
+
+</html>

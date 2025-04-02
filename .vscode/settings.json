@@ -1,0 +1,7 @@
+{
+    "terminal.integrated.drawBoldTextInBrightColors": true,
+    "workbench.colorCustomizations": {
+        "activityBar.foreground": "#01f4f0",
+        "activityBarBadge.background": "#8400ff"
+    }
+}
