@@ -80,7 +80,9 @@ app.get('/api/getAllClients', async (req, res) => {
 
   Purpose:
     Receives username and password combo and authenticates user session if credentials are valid.
-*/
+
+  TODO: Disallow disabled accounts from logging in
+    */
 
 app.post('/api/auth', async (req, res) => {
   const pool = await createTcpPool({ connectionLimit: 5 }); //Initializes connection to DB
