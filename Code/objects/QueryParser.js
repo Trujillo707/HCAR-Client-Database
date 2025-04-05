@@ -45,6 +45,17 @@ export default class QueryParser{
         return QueryParser.#instance;
     }
 
+    /**
+     *
+     * @param acctID
+     * @param offset
+     * @returns {*[]}
+     */
+    getAllClients(acctID, offset = 0){
+        return [];
+    }
+
+    // Methods below are more related to the Instance's properties and should be used sparingly
 
     /**
      * Access the current connection pool. This should be used with caution.
