@@ -65,9 +65,10 @@ CREATE TABLE Note(
 );
 
 CREATE TABLE Client(
-    CLIENTID INT AUTO_INCREMENT PRIMARY KEY, 
+    clientID INT AUTO_INCREMENT PRIMARY KEY, 
     fName VARCHAR(64), 
     lName VARCHAR(64), 
+    email VARCHAR(64),
     address VARCHAR(64), 
     addressType VARCHAR(64), 
     city VARCHAR(64), 
@@ -77,6 +78,8 @@ CREATE TABLE Client(
     phoneNumber VARCHAR(12), 
     phoneType VARCHAR(32), 
     sex VARCHAR(64), 
+    gender VARCHAR(64),
+    pronouns VARCHAR(64),
     greeting VARCHAR(64), 
     nickname VARCHAR(64), 
     maritalStatus INT, 
