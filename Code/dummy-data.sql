@@ -6,7 +6,7 @@ INSERT INTO Staff(staffID, fName, lName, address, city, state, zip, phoneNumber)
 ('5', 'Fay', 'Schaefer', '52398 Walsh Turnpike', 'Leuschkeborough', 'CA', '95919', '7071232222');
 	
 INSERT INTO Account(accountID, username, hash, admin, disabled, staffID) VALUES
-('1', 'TestUser', '$2b$10$9VV43ciXdrXYIP8k/uAXDunq8JVdCqcgzMMRWxwXUJAbQiK6e0.5C', '0', '0', '1'),
+('1', 'TestUser', '$2b$10$9VV43ciXdrXYIP8k/uAXDunq8JVdCqcgzMMRWxwXUJAbQiK6e0.5C', '1', '0', '1'),
 ('2', 'TestUser2', '$2b$10$9VV43ciXdrXYIP8k/uAXDunq8JVdCqcgzMMRWxwXUJAbQiK6e0.5C', '0', '0', '2'), 
 ('3', 'TestUser3', '$2b$10$9VV43ciXdrXYIP8k/uAXDunq8JVdCqcgzMMRWxwXUJAbQiK6e0.5C', '0', '1', '3'),
 ('4', 'TestUser4', '$2b$10$9VV43ciXdrXYIP8k/uAXDunq8JVdCqcgzMMRWxwXUJAbQiK6e0.5C', '0', '0', '4'),
@@ -44,9 +44,9 @@ VALUES
 INSERT INTO StaffClient (staffID, clientID)
 VALUES
 (1, 1),
-(2, 2),
-(3, 3),
-(1, 4),
+(1, 2),
+(2, 3),
+(3, 4),
 (1, 5);
 
 INSERT INTO File (filename, uploadDate, ClientID)
@@ -76,3 +76,77 @@ WHERE CLIENTID = 4;
 UPDATE Client 
 SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 5) 
 WHERE CLIENTID = 5;
+
+-- Add 20 more clients
+INSERT INTO Client (
+    fName, lName, address, addressType, city, state, zip,
+    dateOfBirth, phoneNumber, phoneType, sex, greeting, nickname,
+    maritalStatus, religPref, payee, preferredHospital, likes, dislikes,
+    goals, hobbies, achievements, conservator
+)
+VALUES
+('Mark', 'Wilson', '100 Cedar St', 'Home', 'Lakeview', 'WI', '33333', '1988-04-04', '555-2222', 'Mobile', 'M', 'Hey there', 'Marky', 0, 'None', 'None', 'Community Hospital', 'Tacos', 'Cold', 'Grow', 'Fishing', 'None', 'None'),
+('Laura', 'Lee', '200 Birch St', 'Apartment', 'Springfield', 'MO', '44444', '1979-09-09', '555-3333', 'Work', 'F', 'Hiya', 'Laur', 1, 'Buddhism', 'None', 'Hope Hospital', 'Rice', 'Noise', 'Balance', 'Yoga', 'None', 'None'),
+('Chris', 'Martinez', '300 Chestnut Blvd', 'Home', 'Mountainville', 'CO', '55555', '1995-12-12', '555-4444', 'Mobile', 'M', 'Sup', 'Chrisy', 0, 'Atheism', 'None', 'Valley Hospital', 'Wings', 'Heat', 'Win', 'Gaming', 'None', 'None'),
+('Sara', 'Nguyen', '400 Spruce Ln', 'Apartment', 'Greenwood', 'OR', '66666', '1993-02-02', '555-5555', 'Work', 'F', 'Hola', 'Sar', 1, 'None', 'None', 'Pine Hospital', 'Pho', 'Rain', 'Peace', 'Knitting', 'None', 'None'),
+('David', 'Kim', '500 Redwood Dr', 'Home', 'Seaside', 'WA', '77777', '1987-06-06', '555-6666', 'Home', 'M', 'Yo', 'Davy', 2, 'Christianity', 'None', 'Sunset Hospital', 'Soup', 'Crowds', 'Learn', 'Surfing', 'None', 'None'),
+('Grace', 'Patel', '600 Palm Ave', 'Apartment', 'Riverdale', 'AZ', '88888', '1991-08-08', '555-7777', 'Mobile', 'F', 'Howdy', 'Gracie', 0, 'Hinduism', 'None', 'River Hospital', 'Bread', 'Fire', 'Achieve', 'Drawing', 'None', 'None'),
+('Brian', 'Young', '700 Willow Way', 'Home', 'Westview', 'NV', '99999', '1982-03-03', '555-8888', 'Work', 'M', 'Greetings', 'Bri', 1, 'None', 'None', 'West Hospital', 'Meat', 'Dark', 'Build', 'Woodworking', 'None', 'None'),
+('Hannah', 'Lopez', '800 Fir Ct', 'Apartment', 'Sunnytown', 'UT', '10101', '1996-07-07', '555-9999', 'Home', 'F', 'Heyo', 'Han', 0, 'Islam', 'None', 'Hope Hospital', 'Curry', 'Cold', 'Shine', 'Dancing', 'None', 'None'),
+('Ethan', 'Clark', '900 Beech St', 'Home', 'Eastville', 'NM', '20202', '1983-01-01', '555-1212', 'Mobile', 'M', 'Yo', 'E', 2, 'None', 'None', 'East Hospital', 'Pizza', 'Heat', 'Win', 'Basketball', 'None', 'None'),
+('Olivia', 'Adams', '1010 Sycamore Blvd', 'Apartment', 'Foresthill', 'MT', '30303', '1999-10-10', '555-3434', 'Work', 'F', 'Hello', 'Liv', 1, 'None', 'None', 'Forest Hospital', 'Salads', 'Crowds', 'Flourish', 'Skiing', 'None', 'None'),
+-- 10 more for total of 25
+('Noah', 'Baker', '1111 Hemlock Rd', 'Home', 'Rivertown', 'ME', '40404', '1984-05-05', '555-4545', 'Home', 'M', 'Hey', 'N', 0, 'None', 'None', 'Riverside Hospital', 'Stew', 'Noise', 'Grow', 'Rowing', 'None', 'None'),
+('Sophia', 'Perez', '1212 Walnut Ave', 'Apartment', 'Brookvale', 'MA', '50505', '1997-11-11', '555-5656', 'Mobile', 'F', 'Hiya', 'Sophie', 1, 'None', 'None', 'Brook Hospital', 'Fruit', 'Cold', 'Calm', 'Painting', 'None', 'None'),
+('Liam', 'Harris', '1313 Magnolia St', 'Home', 'Hillview', 'NH', '60606', '1981-06-06', '555-6767', 'Work', 'M', 'Hi', 'Lee', 0, 'Judaism', 'None', 'Hill Hospital', 'Chicken', 'Crowds', 'Peace', 'Golfing', 'None', 'None'),
+('Isabella', 'Turner', '1414 Cypress Dr', 'Apartment', 'Clifftown', 'VT', '70707', '1994-04-04', '555-7878', 'Mobile', 'F', 'Hello', 'Izzy', 1, 'None', 'None', 'Cliff Hospital', 'Ice Cream', 'Rain', 'Shine', 'Writing', 'None', 'None'),
+('Mason', 'Wright', '1515 Juniper Ln', 'Home', 'Plainfield', 'RI', '80808', '1986-09-09', '555-8989', 'Home', 'M', 'Yo', 'Mace', 2, 'None', 'None', 'Plain Hospital', 'Toast', 'Dark', 'Thrive', 'Running', 'None', 'None'),
+('Mia', 'Hill', '1616 Alder Blvd', 'Apartment', 'Clearwater', 'DE', '90909', '1993-03-03', '555-9090', 'Mobile', 'F', 'Heya', 'Mimi', 0, 'None', 'None', 'Clear Hospital', 'Cake', 'Heat', 'Excel', 'Baking', 'None', 'None'),
+('Logan', 'Green', '1717 Dogwood Rd', 'Home', 'Fairfield', 'CT', '11112', '1980-12-12', '555-1010', 'Work', 'M', 'Sup', 'LG', 1, 'None', 'None', 'Fair Hospital', 'Tacos', 'Loud', 'Succeed', 'Coding', 'None', 'None'),
+('Ava', 'Scott', '1818 Ash Ct', 'Apartment', 'Graytown', 'ND', '22223', '1989-08-08', '555-1112', 'Home', 'F', 'Hi', 'Avy', 0, 'None', 'None', 'Gray Hospital', 'Smoothies', 'Crowds', 'Balance', 'Cycling', 'None', 'None'),
+('Lucas', 'Hall', '1919 Aspen Ave', 'Home', 'Whitetown', 'SD', '33334', '1992-02-02', '555-1213', 'Mobile', 'M', 'Yo', 'Luke', 2, 'None', 'None', 'White Hospital', 'Waffles', 'Rain', 'Shine', 'Sculpting', 'None', 'None'),
+('Ella', 'Allen', '2020 Hickory St', 'Apartment', 'Bluetown', 'WY', '44445', '1998-07-07', '555-1314', 'Work', 'F', 'Hello', 'El', 1, 'None', 'None', 'Blue Hospital', 'Pasta', 'Cold', 'Achieve', 'Photography', 'None', 'None');
+
+-- StaffClient associations (random staff IDs)
+INSERT INTO StaffClient (staffID, clientID)
+VALUES
+(2, 6), (2, 7), (2, 8), (2, 9), (2, 10),
+(2, 11), (2, 12), (2, 13), (2, 14), (2, 15),
+(2, 16), (3, 17), (1, 18), (2, 19), (3, 20),
+(1, 21), (2, 22), (3, 23), (1, 24), (2, 25);
+
+-- File inserts for profile pictures
+INSERT INTO File (filename, uploadDate, ClientID)
+VALUES
+('client6_file.png', NOW(), 6), ('client7_file.png', NOW(), 7),
+('client8_file.png', NOW(), 8), ('client9_file.png', NOW(), 9),
+('client10_file.png', NOW(), 10), ('client11_file.png', NOW(), 11),
+('client12_file.png', NOW(), 12), ('client13_file.png', NOW(), 13),
+('client14_file.png', NOW(), 14), ('client15_file.png', NOW(), 15),
+('client16_file.png', NOW(), 16), ('client17_file.png', NOW(), 17),
+('client18_file.png', NOW(), 18), ('client19_file.png', NOW(), 19),
+('client20_file.png', NOW(), 20), ('client21_file.png', NOW(), 21),
+('client22_file.png', NOW(), 22), ('client23_file.png', NOW(), 23),
+('client24_file.png', NOW(), 24), ('client25_file.png', NOW(), 25);
+
+-- Update profilePicture field
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 6) WHERE CLIENTID = 6;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 7) WHERE CLIENTID = 7;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 8) WHERE CLIENTID = 8;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 9) WHERE CLIENTID = 9;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 10) WHERE CLIENTID = 10;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 11) WHERE CLIENTID = 11;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 12) WHERE CLIENTID = 12;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 13) WHERE CLIENTID = 13;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 14) WHERE CLIENTID = 14;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 15) WHERE CLIENTID = 15;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 16) WHERE CLIENTID = 16;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 17) WHERE CLIENTID = 17;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 18) WHERE CLIENTID = 18;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 19) WHERE CLIENTID = 19;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 20) WHERE CLIENTID = 20;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 21) WHERE CLIENTID = 21;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 22) WHERE CLIENTID = 22;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 23) WHERE CLIENTID = 23;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 24) WHERE CLIENTID = 24;
+UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 25) WHERE CLIENTID = 25;
