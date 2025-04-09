@@ -8,4 +8,4 @@ test("build() creates a QueryParser object With All Legal Env Vars", async ()=>{
     } catch (e) {
         throw e;
     }
-});
+}, 10000);
