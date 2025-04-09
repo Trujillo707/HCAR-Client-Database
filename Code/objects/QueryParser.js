@@ -57,22 +57,27 @@ export default class QueryParser{
             return {"Error": "Invalid Authentication"};
         }
 
-        if (typeof offset !== "number"){
+        // NOTE: If HCAR ever expands to hold more than 1000 clients in the database, just increase the offset limit!
+        if (typeof offset !== "number" || offset >= 100){
             offset = 0;
         }else{
             offset = offset * 10;
         }
 
-        const sqlStmt = "SELECT Client.clientID, profilePicture, fName, lName, phoneNumber, DATE(dateOfBirth) as 'dateOfBirth', sex FROM Client, StaffClient WHERE Client.clientID = StaffClient.clientID AND staffID = ? LIMIT 10 OFFSET " + offset;
+        let results = [];
+
+        const sqlStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? LIMIT 10 OFFSET " + offset;
 
         try {
             const [rows] = await this.#pool.execute(sqlStmt, [acctID]);
-            console.log("ok")
-            return rows;
+            results.push(rows);
+
         } catch (e) {
-            console.log("failure")
+            console.log("failure getting Client demographics")
             return [];
         }
+
+        return results;
     }
 
     // TODO: there is space for one more filter!
@@ -104,7 +109,7 @@ export default class QueryParser{
             return {"Error": "Invalid Authentication"};
         }
 
-        const sqlStmt = "SELECT clientID, profilePicture, fName, lName, phoneNumber, dateOfBirth, sex FROM HCAR.Client WHERE fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND ";
+        const sqlStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND ";
 
         /*
             Pardon the absurd data validation.

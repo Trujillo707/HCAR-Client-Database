@@ -29,61 +29,73 @@ describe("QueryParser Class Tests", ()=>{
 
 
         test.each([
-            [1, [
+            [1, [[
                 {
                     "clientID": 1,
-                    "profilePicture": 1,
+                    "profilePictureFilename": "client1_file.png",
                     "fName": "John",
                     "lName": "Doe",
                     "phoneNumber": "555-1234",
-                    "dateOfBirth": "1980-01-01",
-                    "sex": "M"
+                    "email": null,
+                    "dateOfBirth": new Date("1980-01-01"),
+                    "pronouns": "he/him",
+                    "gender": "Male"
                 },
                 {
                     "clientID": 2,
-                    "profilePicture": 2,
+                    "profilePictureFilename": "client2_file.png",
                     "fName": "Jane",
                     "lName": "Smith",
                     "phoneNumber": "555-5678",
-                    "dateOfBirth": "1990-05-15",
-                    "sex": "F"
+                    "email": null,
+                    "dateOfBirth": new Date("1990-05-15"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
                 },
                 {
                     "clientID": 5,
-                    "profilePicture": 5,
+                    "profilePictureFilename": "client5_file.png",
                     "fName": "Emily",
                     "lName": "Davis",
                     "phoneNumber": "555-1111",
-                    "dateOfBirth": "1992-11-22",
-                    "sex": "F"
+                    "email": null,
+                    "dateOfBirth": new Date("1992-11-22"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
                 },
                 {
                     "clientID": 18,
-                    "profilePicture": 18,
+                    "profilePictureFilename": "client18_file.png",
                     "fName": "Liam",
                     "lName": "Harris",
                     "phoneNumber": "555-6767",
-                    "dateOfBirth": "1981-06-06",
-                    "sex": "M"
+                    "email": null,
+                    "dateOfBirth": new Date("1981-06-06"),
+                    "pronouns": "he/him",
+                    "gender": "Male"
                 },
                 {
                     "clientID": 21,
-                    "profilePicture": 21,
+                    "profilePictureFilename": "client21_file.png",
                     "fName": "Mia",
                     "lName": "Hill",
                     "phoneNumber": "555-9090",
-                    "dateOfBirth": "1993-03-03",
-                    "sex": "F"
+                    "email": null,
+                    "dateOfBirth": new Date("1993-03-03"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
                 },
                 {
                     "clientID": 24,
-                    "profilePicture": 24,
+                    "profilePictureFilename": "client24_file.png",
                     "fName": "Lucas",
                     "lName": "Hall",
                     "phoneNumber": "555-1213",
-                    "dateOfBirth": "1992-02-02",
-                    "sex": "M"
-                }
+                    "email": null,
+                    "dateOfBirth": new Date("1992-02-02"),
+                    "pronouns": "he/him",
+                    "gender": "Male"
+                }]
             ]]
         ])("Returns actual rows given valid acctID with records",  async (acctID, rows) => {
             await expect(qp.getAllClients(acctID)).resolves.toStrictEqual(rows);
@@ -93,7 +105,7 @@ describe("QueryParser Class Tests", ()=>{
          * This one is a simple 2-val BVA for the max num of rows returned
          */
         test.each([
-            [2]
+            2
         ])("Accounts with more than 10 clients only return 10 rows", async (acctID) => {
             let results = await qp.getAllClients(acctID);
 
@@ -103,7 +115,7 @@ describe("QueryParser Class Tests", ()=>{
 
     describe("getAllFilteredClients() method", ()=>{
         test("Reject calls with no acctID provided", async () => {
-            await expect(qp.getAllFilteredClients()).resolves.toBe({"Error": "Invalid Authentication"})
+            await expect(qp.getAllFilteredClients()).resolves.toStrictEqual({"Error": "Invalid Authentication"})
         })
     })
 })
