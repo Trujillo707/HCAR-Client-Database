@@ -3,26 +3,26 @@ import QueryParserBuilder from "../objects/QueryParserBuilder.js";
 import QueryParser from "../objects/QueryParser.js";
 // TODO: Create JSON or other list of expected outputs for tests
 
-describe("QueryParser Class Tests", ()=>{
+describe("QueryParser Class Tests", () => {
     let qp;
 
-    beforeAll(async ()=>{
-         qp = await new QueryParserBuilder().build();
+    beforeAll(async () => {
+        qp = await new QueryParserBuilder().build();
     });
 
-    afterAll(async () =>{
+    afterAll(async () => {
         await qp.destructor();
     })
 
-    describe("getAllClients() method", ()=>{
+    describe("getAllClients() method", () => {
 
         test("Rejects calls without acctID", async () => {
             await expect(qp.getAllClients()).resolves.toStrictEqual({"Error": "Invalid Authentication"});
         });
 
         test.each([
-            [4], /* No clients */
-            [42] /* does not exist */
+            4, /* No clients */
+            42 /* does not exist */
         ])("Return no rows if Account does not exist or have clients", async (acctID) => {
             await expect(qp.getAllClients(acctID)).resolves.toStrictEqual([])
         });
@@ -95,9 +95,39 @@ describe("QueryParser Class Tests", ()=>{
                     "dateOfBirth": new Date("1992-02-02"),
                     "pronouns": "he/him",
                     "gender": "Male"
-                }]
+                }],
+                [
+                    {
+                        "clientID": 1,
+                        "name": "Summit Support Services"
+                    },
+                    {
+                        "clientID": 1,
+                        "name": "Bay Center Day Servies"
+                    },
+                    {
+                        "clientID": 2,
+                        "name": "Bay Center Day Servies"
+                    },
+                    {
+                        "clientID": 5,
+                        "name": "Respite Services"
+                    },
+                    {
+                        "clientID": 18,
+                        "name": "Comprehensive Career Services"
+                    },
+                    {
+                        "clientID": 21,
+                        "name": "Self-Determination Program"
+                    },
+                    {
+                        "clientID": 24,
+                        "name": "Canvas + Clay Studio"
+                    }
+                ]
             ]]
-        ])("Returns actual rows given valid acctID with records",  async (acctID, rows) => {
+        ])("Returns actual rows given valid acctID with records", async (acctID, rows) => {
             await expect(qp.getAllClients(acctID)).resolves.toStrictEqual(rows);
         })
 
@@ -113,7 +143,7 @@ describe("QueryParser Class Tests", ()=>{
         })
     });
 
-    describe("getAllFilteredClients() method", ()=>{
+    describe("getAllFilteredClients() method", () => {
         test("Reject calls with no acctID provided", async () => {
             await expect(qp.getAllFilteredClients()).resolves.toStrictEqual({"Error": "Invalid Authentication"})
         })

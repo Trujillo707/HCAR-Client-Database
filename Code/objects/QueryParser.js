@@ -66,14 +66,24 @@ export default class QueryParser{
 
         let results = [];
 
-        const sqlStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? LIMIT 10 OFFSET " + offset;
+        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? ORDER BY Client.clientID LIMIT 10 OFFSET " + offset;
 
         try {
-            const [rows] = await this.#pool.execute(sqlStmt, [acctID]);
+            const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID]);
             results.push(rows);
 
         } catch (e) {
-            console.log("failure getting Client demographics")
+            console.log("failure getting Client demographics:" + e);
+            return [];
+        }
+
+        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID JOIN HCAR.StaffClient SC on PC.clientID = SC.clientID WHERE staffID = ? ORDER BY PC.clientID";
+
+        try{
+            const [rows] = await this.#pool.execute(programListStmt, [acctID]);
+            results.push(rows);
+        }catch (e) {
+            console.log("failure getting Client's Program list: " + e);
             return [];
         }
 
@@ -109,7 +119,14 @@ export default class QueryParser{
             return {"Error": "Invalid Authentication"};
         }
 
-        const sqlStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND ";
+        // NOTE: If HCAR ever expands to hold more than 1000 clients in the database, just increase the offset limit!
+        if (typeof offset !== "number" || offset >= 100){
+            offset = 0;
+        }else{
+            offset = offset * 10;
+        }
+
+        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND email LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
 
         /*
             Pardon the absurd data validation.
@@ -125,14 +142,27 @@ export default class QueryParser{
         values[7] = typeof filters.payee === "string" ? filters.payee : "%";
         values[8] = typeof filters.conservator === "string" ? filters.conservator : "%";
 
+        let results = []
+
         try{
-            const [rows] = await this.#pool.execute(sqlStmt, values);
-            return rows;
+            const [rows] = await this.#pool.execute(basicDetailsStmt, values);
+            results.push(rows);
         }catch (e) {
-            // something here probably
+            console.log("failure getting Client's details: " + e);
             return [];
         }
 
+        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID JOIN HCAR.StaffClient SC on PC.clientID = SC.clientID WHERE staffID = ? ORDER BY PC.clientID";
+
+        try{
+            const [rows] = await this.#pool.execute(programListStmt, [acctID]);
+            results.push(rows);
+        }catch (e) {
+            console.log("failure getting Client's Program list: " + e);
+            return [];
+        }
+
+        return results;
     }
 
     // Methods below are more related to the Instance's properties and should be used sparingly

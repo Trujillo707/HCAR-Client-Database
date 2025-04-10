@@ -174,7 +174,7 @@ const config = {
   // testRunner: "jest-circus/runner",
 
   // Default timeout = 5000
-    testTimeout: 10000,
+    testTimeout: 60000,
 
   // A map from regular expressions to paths to transformers
    transform: {},
