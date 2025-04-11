@@ -65,22 +65,28 @@ export default class QueryParser{
         }
 
         let results = [];
+        let clientIDs;
 
         const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? ORDER BY Client.clientID LIMIT 10 OFFSET " + offset;
 
         try {
             const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID]);
-            results.push(rows);
-
-        } catch (e) {
+                if (rows.length > 0) {
+                    results.push(rows);
+                    clientIDs = rows.map(client => client.clientID);
+                }else{
+                    // no need to return an array of an empty array
+                    return []
+                }
+            } catch (e) {
             console.log("failure getting Client demographics:" + e);
             return [];
         }
-
-        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID JOIN HCAR.StaffClient SC on PC.clientID = SC.clientID WHERE staffID = ? ORDER BY PC.clientID";
+        const placeholders = clientIDs.map(() => '?').join(', ');
+        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID JOIN HCAR.StaffClient SC on PC.clientID = SC.clientID WHERE PC.clientID IN (" + placeholders + ") ORDER BY PC.clientID";
 
         try{
-            const [rows] = await this.#pool.execute(programListStmt, [acctID]);
+            const [rows] = await this.#pool.execute(programListStmt, clientIDs);
             results.push(rows);
         }catch (e) {
             console.log("failure getting Client's Program list: " + e);
@@ -126,36 +132,48 @@ export default class QueryParser{
             offset = offset * 10;
         }
 
-        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND email LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
-
+        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
+        // TODO: this aint working chief
         /*
             Pardon the absurd data validation.
          */
         let values = [];
-        values[0] = typeof filters.firstName === "string" ? filters.firstName : "%";
-        values[1] = typeof filters.lastName === "string" ? filters.lastName : "%";
-        values[2] = typeof filters.phoneNumber === "string" ? filters.phoneNumber : "%";
-        values[3] = filters.dob instanceof Date ? filters.dob : "%";
-        values[4] = typeof filters.gender === "string" ? filters.gender : "%";
-        values[5] = typeof filters.maritalStatus === "string" ? filters.maritalStatus : "%";
-        values[6] = typeof filters.email === "string" ? filters.email : "%";
-        values[7] = typeof filters.payee === "string" ? filters.payee : "%";
-        values[8] = typeof filters.conservator === "string" ? filters.conservator : "%";
+        values.push(acctID);
+        values.push(typeof filters.firstName === "string" ? filters.firstName : "%");
+        values.push(typeof filters.lastName === "string" ? filters.lastName : "%");
+        values.push(typeof filters.phoneNumber === "string" ? filters.phoneNumber : "%");
+        values.push(filters.dob instanceof Date ? filters.dob.toISOString().slice(0,10) : "%");
+        values.push(typeof filters.gender === "string" ? filters.gender : "%");
+        values.push(typeof filters.maritalStatus === "string" ? filters.maritalStatus : "%");
+        values.push(typeof filters.email === "string" ? filters.email : "%");
+        values.push(typeof filters.payee === "string" ? filters.payee : "%");
+        values.push(typeof filters.conservator === "string" ? filters.conservator : "%");
 
-        let results = []
+
+        console.log(values)
+        let results = [];
+        let clientIDs;
 
         try{
             const [rows] = await this.#pool.execute(basicDetailsStmt, values);
-            results.push(rows);
+            if (rows.length > 0){
+                results.push(rows);
+                clientIDs = rows.map(client => client.clientID);
+            }
+            else{
+                // Dont bother getting programs
+                return [];
+            }
         }catch (e) {
             console.log("failure getting Client's details: " + e);
             return [];
         }
 
-        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID JOIN HCAR.StaffClient SC on PC.clientID = SC.clientID WHERE staffID = ? ORDER BY PC.clientID";
+        const placeholders = clientIDs.map(() => '?').join(', ');
+        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID JOIN HCAR.StaffClient SC on PC.clientID = SC.clientID WHERE PC.clientID IN (" + placeholders + ") ORDER BY PC.clientID";
 
         try{
-            const [rows] = await this.#pool.execute(programListStmt, [acctID]);
+            const [rows] = await this.#pool.execute(programListStmt, clientIDs);
             results.push(rows);
         }catch (e) {
             console.log("failure getting Client's Program list: " + e);

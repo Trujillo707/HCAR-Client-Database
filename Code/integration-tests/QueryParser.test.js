@@ -139,13 +139,65 @@ describe("QueryParser Class Tests", () => {
         ])("Accounts with more than 10 clients only return 10 rows", async (acctID) => {
             let results = await qp.getAllClients(acctID);
 
-            await expect(results.length).toBe(10);
+            await expect(results[0].length).toBe(10);
         })
     });
 
     describe("getAllFilteredClients() method", () => {
         test("Reject calls with no acctID provided", async () => {
             await expect(qp.getAllFilteredClients()).resolves.toStrictEqual({"Error": "Invalid Authentication"})
+        })
+
+        test("Gender Filter", async ()=>{
+            await expect(qp.getAllFilteredClients(1, {gender: "Female"})).resolves.toStrictEqual([[
+                    {
+                        "clientID": 2,
+                        "profilePictureFilename": "client2_file.png",
+                        "fName": "Jane",
+                        "lName": "Smith",
+                        "phoneNumber": "555-5678",
+                        "email": null,
+                        "dateOfBirth": new Date("1990-05-15"),
+                        "pronouns": "she/her",
+                        "gender": "Female"
+                    },
+                    {
+                        "clientID": 5,
+                        "profilePictureFilename": "client5_file.png",
+                        "fName": "Emily",
+                        "lName": "Davis",
+                        "phoneNumber": "555-1111",
+                        "email": null,
+                        "dateOfBirth": new Date("1992-11-22"),
+                        "pronouns": "she/her",
+                        "gender": "Female"
+                    },
+                    {
+                        "clientID": 21,
+                        "profilePictureFilename": "client21_file.png",
+                        "fName": "Mia",
+                        "lName": "Hill",
+                        "phoneNumber": "555-9090",
+                        "email": null,
+                        "dateOfBirth": new Date("1993-03-03"),
+                        "pronouns": "she/her",
+                        "gender": "Female"
+                    }],
+                [
+                    {
+                        "clientID": 2,
+                        "name": "Bay Center Day Servies"
+                    },
+                    {
+                        "clientID": 5,
+                        "name": "Respite Services"
+                    },
+                    {
+                        "clientID": 21,
+                        "name": "Self-Determination Program"
+                    }
+                ]]
+        )
         })
     })
 })
