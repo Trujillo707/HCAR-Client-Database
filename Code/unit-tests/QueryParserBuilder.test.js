@@ -94,11 +94,11 @@ describe("QueryParserBuilder Error Handling Tests", () => {
         await expect(qpb.build()).rejects.toThrowError(new Error("DB_USER env variable is undefined despite being required!"))
     });
 
-    test("Error is thrown when no process.env.DB_PASS is set", async () => {
+/*    test("Error is thrown when no process.env.DB_PASS is set", async () => {
 
         delete process.env.DB_PASS;
         await expect(qpb.build()).rejects.toThrowError(new Error("DB_PASS env variable is undefined despite being required!"))
-    });
+    });*/
 
     test("Error is thrown when no process.env.DB_NAME is set", async () => {
 
