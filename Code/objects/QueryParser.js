@@ -132,8 +132,9 @@ export default class QueryParser{
             offset = offset * 10;
         }
 
+        // TODO: consider changing schema to make sure what cols can be null and which cannot
+        //       filtering must nullcheck any searchable cols that may be null in the DB
         const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
-        // TODO: this aint working chief
         /*
             Pardon the absurd data validation.
          */

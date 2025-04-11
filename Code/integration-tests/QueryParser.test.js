@@ -148,6 +148,7 @@ describe("QueryParser Class Tests", () => {
             await expect(qp.getAllFilteredClients()).resolves.toStrictEqual({"Error": "Invalid Authentication"})
         })
 
+        // TODO: refactor into a more robust test for all search filters
         test("Gender Filter", async ()=>{
             await expect(qp.getAllFilteredClients(1, {gender: "Female"})).resolves.toStrictEqual([[
                     {
