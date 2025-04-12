@@ -80,8 +80,6 @@ app.get('/api/getAllClients', async (req, res) => {
 
   Purpose:
     Receives username and password combo and authenticates user session if credentials are valid.
-
-  TODO: Disallow disabled accounts from logging in
     */
 
 app.post('/api/auth', async (req, res) => {
@@ -89,7 +87,7 @@ app.post('/api/auth', async (req, res) => {
   try{
     let validation = validateInput(req.body.username, req.body.password)
     if(!validation.status) return res.send(validation.message);
-
+    
     let query = "SELECT * FROM Account WHERE username = ?"; 
     const rows = await pool.query(query, [req.body.username]);
 
@@ -99,6 +97,9 @@ app.post('/api/auth', async (req, res) => {
       return res.send("Incorrect username or password");
     }
     else if(await bcrypt.compare(req.body.password, rows[0].hash)){
+      if(rows[0].disabled === 1){
+        return res.send("Account has been disabled");
+      }
       req.session.accountID = rows[0].accountID;
       return res.send("Successful Login");
     }
@@ -113,6 +114,27 @@ app.post('/api/auth', async (req, res) => {
     await pool.end();
   }
 });
+
+
+
+app.post('/api/createUser', async (req, res) => {
+  if(isAdmin(req.session.accountID)){
+    createUser(req.body.fName, req.body.lName, req.body.address, req.body.city, req.body.state, req.body.zip, req.body.phoneNumber, req.body.username, req.body.password);
+  }
+});
+
+app.get('/api/createCaseNote', async (req, res) => {
+  
+});
+
+app.get('/api/deleteCaseNote', async (req, res) => {
+  
+});
+
+app.get('/api/modifyCaseNote', async (req, res) => {
+  
+});
+
 
 const createUnixSocketPool = async config => {
   return mysql.createPool({
@@ -154,5 +176,40 @@ function validateInput(username, password){
   }
   else{
     return {"status": true, "message": "Valid username/password input entered"};
+  }
+}
+
+
+async function createUser(fName, lName, address, city, state, zip, phoneNumber, username, password){
+  const pool = await createTcpPool({ connectionLimit: 5 });
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+
+    const accountQuery = "INSERT INTO Account(username, hash, admin, disabled) VALUES(?, ?, ?, ?)";
+    const accountResponse = await connection.query(accountQuery, [username, hash, 0, 0]);
+    const accountId = accountResponse.insertId;
+    console.log(accountId);
+
+    const staffQuery = "INSERT INTO Staff (fName, lName, address, city, state, zip, phoneNumber) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    const staffResponse = await connection.query(staffQuery, [fName, lName, address, city, state, zip, phoneNumber]);
+    const staffId = staffResponse.insertId;
+    console.log(staffId);
+    const updateAccountQuery = "UPDATE Account SET staffID = ? WHERE accountID = ?";
+    await connection.query(updateAccountQuery, [staffId, accountId]);
+
+    await connection.commit();
+    console.log("Successful user creation");
+    return true;
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error creating user:', error.sqlMessage);
+    return false;
+  } finally {
+    await connection.release();
   }
 }

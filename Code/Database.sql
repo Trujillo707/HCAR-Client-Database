@@ -60,6 +60,7 @@ CREATE TABLE Note(
     noteID INT AUTO_INCREMENT PRIMARY KEY, 
     staffID INT, 
     dateCreated DATETIME, 
+    dateModified DATETIME,
     content VARCHAR(2048),
     FOREIGN KEY (staffID) REFERENCES Staff(staffID)
 );
