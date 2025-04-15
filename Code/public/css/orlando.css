@@ -86,12 +86,6 @@ footer{
     padding: 0 20px;
     margin-bottom: 5px;
 }
-footer a {
-    padding: 10px 30px;
-    background-color: black;
-    color: #fff;
-    border-radius: 5px;
-}
 
 a {
     text-decoration: none;
@@ -146,6 +140,14 @@ select{
 }
 .dimHover:hover {
     background-color:black;
+}
+
+.footerButton {
+    padding: 10px 30px;
+    background-color: black;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 .lightHover {

@@ -100,12 +100,6 @@
     color: grey;
 }
 
-.header-link:active
-{
-    /* How do I make it so there's a background behind
-       the selected tab? */
-}
-
 .header-link:visited
 {
     color: grey;
@@ -196,6 +190,11 @@
     height: 53px;
     font-size: 20px;
     cursor: pointer;
+}
+
+#searchSubmit:hover
+{
+    background-color: #323232;
 }
 
 #moreOptions

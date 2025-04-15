@@ -5,6 +5,7 @@
 
 const moreOptionsButton = document.getElementById("moreOptions");
 const searchContainer = document.getElementById("searchContainer");
+const form = document.getElementById("searchForm");
 
 moreOptionsButton.addEventListener("click", () => {
     // Add CSS class for additional options + animation 
@@ -34,4 +35,20 @@ moreOptionsButton.addEventListener("click", () => {
         moreOptionsButton.querySelector("#buttonText").textContent = "More Options";
         moreOptionsButton.querySelector("#optionsIcon").src = "icons/chevron-double-down.svg"
     }
+});
+
+form.addEventListener("submit", (e) => {
+    // searchContainer.forEach((div) => {
+    //     // If there's a value in the search field
+    //     if (div.children.item(1).value)
+    //     {
+    //         // Send query to DB with where clause LIKE "%val%"
+    //     }
+    // });
+    e.preventDefault();
+    console.log("Event Listener!");
+    setTimeout(() =>
+    {
+        form.submit();
+    }, 10);
 });

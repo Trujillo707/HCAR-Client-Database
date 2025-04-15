@@ -23,18 +23,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, "public/html/index.html"))
 });
 
-app.post('/home', (req, res) => {
+app.post('/home', getPath, (req, res) => {
     // After verification of credentials
     res.render("home");
 });
 
 // Clicking home from home will re-render the page
-app.get('/home', (req, res) => {
-
+app.get('/home', getPath, (req, res) => {
     res.render("home");
 });
 
-app.get("/search", (req, res) => {
+app.get("/search", getPath, (req, res) => {
     res.render("search");
 })
 
@@ -47,7 +46,7 @@ app.post('/results', (req, res) => {
     res.render("results", {clientList: testClientArray});
 });
 
-app.get("/reports", (req, res) => {
+app.get("/reports", getPath, (req, res) => {
     res.render("reports", {availableReportsMap: reportTypes});
 });
 
@@ -74,3 +73,15 @@ process.on('SIGTERM',async () => {
         process.exit(0);
     }
 });
+
+function sanitize(req, res, next)
+{
+    console.log("Sanitize!");
+    next();
+}
+
+function getPath(req, res, next)
+{
+    res.locals.currentPath = req.path;
+    next();
+}
