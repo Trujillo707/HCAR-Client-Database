@@ -237,10 +237,31 @@
 
 /* Style the tab content */
 .tabcontent {
-    display: none;
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
+
+    min-height: 25em;
+}
+
+.clientIdContent {
+    display: grid;
+    grid-template-columns: 15% 15% 15% 15%;
+    grid-template-rows: 14% 14% 14% 14%;
+    gap: 1.2em;
+}
+
+.clientIdContent > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.medContent {
+    display: grid;
+    grid-template-columns: 15% 15% 15% 15%;
+    grid-template-rows: 10% 10% 10% 10% 10% 50%;
+    gap: 1.5em;
 }
 
 #tabContainer {
@@ -248,6 +269,20 @@
     height: 90%;
     margin: auto;
     background-color: #f5f5f5;
+}
+
+.tabcontent > input {
+    width: 15em;
+    height: 2em;
+}
+
+.tabcontent > select {
+    width: 9em;
+}
+
+.medication {
+    display: block;
+    float: right;
 }
 
 

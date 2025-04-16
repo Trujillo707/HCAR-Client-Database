@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Case Note</title>
+    <%- include("fontLinks") -%>
+
+    <link href="style.css" rel="stylesheet"  type="text/css" />
+    <link href="orlando.css" rel="stylesheet"  type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+    <div class="caseNoteContent">
+        <!-- <img src="" /> -->
+        <p>Client: <%=locals.theClient.getFirstName() +
+                " " + locals.theClient.getLastName()%></p>
+        <div>
+            <label for="program">Program:</label>
+            <input type="text" id="program" name="program" />
+        </div>
+        <div>
+    <!-- make sysdate for initial time, only when first made -->
+            <label for="time">Time:</label>
+            <input type="text" id="time" name="time" value="<%=%>"/>
+        </div>
+        <div>
+            <label for="date">Program:</label>
+            <input type="text" id="date" name="program" />
+        </div>
+        <div>
+            <input type="checkbox" id="behavioral_incident" name="behavioral_incident" value="" />
+            <label for="behavioral_incident">Behavioral Incident</label>
+            <input type="checkbox" id="informational_note" name="informational_note" value="" />
+            <label for="informational_note">Informational Note</label>
+        </div>
+        <div>
+            <label for="contact_type">Contact Type: </label>
+            <input type="checkbox" id="contact_type" name="in_person" value="" />
+            <input type="checkbox" id="contact_type" name="written" value="" />
+        </div>
+        <div>
+            <label for="goal_worked_on">Goal Worked On:</label>
+            <input type="checkbox" id="goal_worked_on" name="isp_goal" value="" />
+            <input type="checkbox" id="goal_worked_on" name="ipp_goal" value="" />
+            <input type="checkbox" id="goal_worked_on" name="personal_goal" value="" />
+        </div>
+        <div>
+            <label for="antecedent">What was the client doing just before the incident? (Antecedent)</label>
+            <input type="text" id="antecedent" name="antecedent" />
+        </div>
+        <div>
+            <label for="behavioral_description">Describe the incident (Objective Behavioral Description)</label>
+            <input type="text" id="behavioral_description" name="behavioral_description" value=""/>
+        </div>
+        <div>
+            <label for="consequence">What did you do? (Consequence)</label>
+            <input type="text" id="consequence" name="consequence" />
+        </div>
+    </div>
+</body>
+</html>
