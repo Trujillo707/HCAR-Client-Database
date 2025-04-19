@@ -24,7 +24,7 @@
 <div class="bodyContent">
     <p>Showing information for
         <% if(locals.theClient){
-        %><%= locals.theClient.getFirstName() + " " + locals.theCLient.getMiddleName() +
+        %><%= locals.theClient.getFirstName() + " " + locals.theClient.getMiddleName() +
             " " + locals.theClient.getLastName() %><%
         }
         else{
@@ -262,6 +262,11 @@
                     })
                 %>
             </table>
+            <input type="button" value="new" name="newCaseNote" />
+            <input type="button" value="view" name="viewCaseNote" />
+            <input type="button" value="edit" name="editCaseNote" />
+            <input type="button" value="download" name="downloadCaseNote" />
+
         </div>
         <script src="js/tab.js"></script>
     </div>
