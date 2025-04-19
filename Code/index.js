@@ -42,7 +42,9 @@ app.get('/results', (req, res) => {
     res.render("results", {clientList: testClientArray});
 });
 
+// Sanitize data sent to results
 app.post('/results', (req, res) => {
+    console.log(req.body);
     res.render("results", {clientList: testClientArray});
 });
 

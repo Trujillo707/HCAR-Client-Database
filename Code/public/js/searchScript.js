@@ -37,18 +37,18 @@ moreOptionsButton.addEventListener("click", () => {
     }
 });
 
-form.addEventListener("submit", (e) => {
-    // searchContainer.forEach((div) => {
-    //     // If there's a value in the search field
-    //     if (div.children.item(1).value)
-    //     {
-    //         // Send query to DB with where clause LIKE "%val%"
-    //     }
-    // });
-    e.preventDefault();
-    console.log("Event Listener!");
-    setTimeout(() =>
-    {
-        form.submit();
-    }, 10);
-});
+// form.addEventListener("submit", (e) => {
+//     // searchContainer.forEach((div) => {
+//     //     // If there's a value in the search field
+//     //     if (div.children.item(1).value)
+//     //     {
+//     //         // Send query to DB with where clause LIKE "%val%"
+//     //     }
+//     // });
+//     e.preventDefault();
+//     console.log("Event Listener!");
+//     setTimeout(() =>
+//     {
+//         form.submit();
+//     }, 10);
+// });
