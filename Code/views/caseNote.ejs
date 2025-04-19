@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Case Note</title>
     <%- include("fontLinks") -%>
-
-    <link href="style.css" rel="stylesheet"  type="text/css" />
-    <link href="orlando.css" rel="stylesheet"  type="text/css" />
+    <link href="../../public/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="../../public/css/orlando.css" rel="stylesheet" type="text/css" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
-    <div class="caseNoteContent">
+    <%-include("header")-%>
+    <div class="bodyContent">
         <!-- <img src="" /> -->
         <p>Client: <%=locals.theClient.getFirstName() +
                 " " + locals.theClient.getLastName()%></p>
@@ -54,6 +54,94 @@
         <div>
             <label for="consequence">What did you do? (Consequence)</label>
             <input type="text" id="consequence" name="consequence" />
+        </div>
+        <div>
+            <label for="clarification">Clarification / Follow-Up:</label>
+            <input type="text" id="clarification" name="clarification" />
+        </div>
+        <div>
+            <label for="goal_progress">Progress on Goal / What is Being Worked on:</label>
+            <input type="text" id="goal_progress" name="goal_progress" />
+        </div>
+        <div>
+            <label for="cp_notified">C/P Notified:</label>
+            <input type="text" id="cp_notified" name="cp_notified" />
+        </div>
+        <div>
+            <label for="cp_notified_by">By:</label>
+            <input type="text" id="cp_notified_by" name="cp_notified_by" />
+        </div>
+        <div>
+            <label for="cp_notified_date">Date:</label>
+            <input type="date" id="cp_notified_date" name="cp_notified_date" />
+        </div>
+        <div>
+            <label for="client_emergency_contact">CLient Emergency Contact:</label>
+            <input type="text" id="client_emergency_contact" name="client_emergency_contact" />
+        </div>
+        <div>
+            <label for="emergency_contact_email">Emergency Contact Email:</label>
+            <input type="text" id="emergency_contact_email" name="emergency_contact_email" />
+        </div>
+        <div>
+            <label for="licensing_notified">Licensing Notified:</label>
+            <input type="text" id="licensing_notified" name="licensing_notified" />
+        </div>
+        <div>
+            <label for="licensing_notified_by">By:</label>
+            <input type="text" id="licensing_notified_by" name="licensing_notified_by" />
+        </div>
+        <div>
+            <label for="licensing_notified_date">Date:</label>
+            <input type="date" id="licensing_notified_date" name="licensing_notified_date" />
+        </div>
+        <div>
+            <label for="emergency_contact_phone">Emergency Contact Phone:</label>
+            <input type="text" id="emergency_contact_phone" name="emergency_contact_phone" />
+        </div>
+
+
+        <div>
+            <p>S.I.R. Completed?</p>
+            <label for="sir_completed_y">Yes</label>
+            <input type="radio" id="cp_notified_y" name="cp_notified" />
+            <label for="cp_notified_n">No</label>
+            <input type="radio" id="cp_notified_n" name="cp_notified" />
+        </div>
+        <div>
+            <label for="sir_completed_by">By:</label>
+            <input type="text" id="sir_completed_by" name="sir_completed_by" />
+        </div>
+        <div>
+            <label for="sir_completed_date">Date:</label>
+            <input type="date" id="sir_completed_date" name="sir_completed_date" />
+        </div>
+
+
+
+        <div>
+            <label for="cp_notified">C/P Notified:</label>
+            <input type="text" id="cp_notified" name="cp_notified" />
+        </div>
+        <div>
+            <label for="cp_notified_by">By:</label>
+            <input type="text" id="cp_notified_by" name="cp_notified_by" />
+        </div>
+        <div>
+            <label for="cp_notified_date">Date:</label>
+            <input type="date" id="cp_notified_date" name="cp_notified_date" />
+        </div>
+        <div>
+            <label for="cp_notified">C/P Notified:</label>
+            <input type="text" id="cp_notified" name="cp_notified" />
+        </div>
+        <div>
+            <label for="cp_notified_by">By:</label>
+            <input type="text" id="cp_notified_by" name="cp_notified_by" />
+        </div>
+        <div>
+            <label for="cp_notified_date">Date:</label>
+            <input type="date" id="cp_notified_date" name="cp_notified_date" />
         </div>
     </div>
 </body>
