@@ -56,6 +56,12 @@ app.get('/client', (req, res) => {
     res.render("clientDetails", {theClient: testClientArray[0]});
 });
 
+app.get("/test", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    let results = await qp.getAllClients(1)
+    res.send(results);
+})
+
 /* Port Number should be an environment variable fyi */
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
