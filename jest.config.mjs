@@ -173,6 +173,9 @@ const config = {
   // This option allows use of a custom test runner
   // testRunner: "jest-circus/runner",
 
+  // Default timeout = 5000
+    testTimeout: 60000,
+
   // A map from regular expressions to paths to transformers
    transform: {},
 

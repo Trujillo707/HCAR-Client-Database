@@ -4,11 +4,12 @@ import mysql from "mysql2/promise";
 
 /**
  * @author Orlando Trujillo-Ortiz
- * @version 2025-03-25
+ * @version 2025-03-30
  * @desc This is a Builder for QueryParser instances. However, due to QueryParser being a singleton, you still
  * ultimately receive the singleton instance upon the build() call on a QueryParserBuilder object.
  */
 export default class QueryParserBuilder {
+    /** @type {mysql.Pool} */
     #pool;
     /** @type {Connector} */
     #connector;
@@ -32,19 +33,30 @@ export default class QueryParserBuilder {
         if (!QueryParser.hasInstance()){
             this.#connector = new Connector();
 
-            if(!process.env.DB_INSTANCE){
+            // Error handling
+            if(process.env.DB_INSTANCE == null){
                 throw new Error("DB_INSTANCE env variable is undefined despite being required!");
+            }
+            if (process.env.DB_USER == null){
+                throw new Error("DB_USER env variable is undefined despite being required!");
+            }
+            /*if (process.env.DB_PASS == null){
+                throw new Error("DB_PASS env variable is undefined despite being required!");
+            }*/
+            if (process.env.DB_NAME == null){
+                throw new Error("DB_NAME env variable is undefined despite being required!");
             }
 
             try{
+                //console.log(process.env.DB_USER)
                 const clientOpts = await this.#connector.getOptions({
                     instanceConnectionName: process.env.DB_INSTANCE,
-                    ipType: 'PUBLIC',
+                    authType: 'IAM',
+                    ipType: "PUBLIC"
                 });
                 this.#pool = await mysql.createPool({
                     ...clientOpts,
                     user: process.env.DB_USER,
-                    password: process.env.DB_PASS,
                     database: process.env.DB_NAME,
                 });
             } catch (e) {
@@ -59,8 +71,7 @@ export default class QueryParserBuilder {
     }
 
     /**
-     *
-     * @returns {*}
+     * @returns {mysql.Pool}
      */
     get pool() {
         return this.#pool;
