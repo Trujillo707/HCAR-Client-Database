@@ -61,8 +61,14 @@ CREATE TABLE Note(
     staffID INT, 
     dateCreated DATETIME, 
     dateModified DATETIME,
-    content VARCHAR(2048),
-    FOREIGN KEY (staffID) REFERENCES Staff(staffID)
+    contactType VARCHAR(64);
+    goal VARCHAR(2048),
+    goalProgress VARCHAR(2048),
+    narrative VARCHAR(2048),
+    nextSteps VARCHAR(2048),
+    employeeSignOff Int,
+    FOREIGN KEY (staffID) REFERENCES Staff(staffID),
+    FOREIGN KEY (employeeSignOff) REFERENCES(staffID)
 );
 
 CREATE TABLE Client(
