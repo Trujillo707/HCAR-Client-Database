@@ -2,7 +2,7 @@ import express from "express"
 const app = express()
 import {reportTypes} from "./reportsLogic.js";
 import {ClientBuilder} from "./objects/ClientBuilder.js";
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 import { fileURLToPath } from 'url';
 import path from 'path';
 import {testClientArray} from "./testData.js"
