@@ -59,16 +59,14 @@ CREATE TABLE Account(
 CREATE TABLE Note(
     noteID INT AUTO_INCREMENT PRIMARY KEY, 
     staffID INT, 
-    dateCreated DATETIME, 
+    dateCreated DATETIME NOT NULL, 
     dateModified DATETIME,
-    contactType VARCHAR(64);
-    goal VARCHAR(2048),
+    contactType priority ENUM('In-Person', 'Written', 'Over the Phone') NOT NULL,
+    goal ENUM('ISP Goal', 'IPP Goal', 'Personal Goal') NOT NULL,
     goalProgress VARCHAR(2048),
     narrative VARCHAR(2048),
     nextSteps VARCHAR(2048),
-    employeeSignOff Int,
-    FOREIGN KEY (staffID) REFERENCES Staff(staffID),
-    FOREIGN KEY (employeeSignOff) REFERENCES(staffID)
+    FOREIGN KEY (staffID) REFERENCES Staff(staffID)
 );
 
 CREATE TABLE Client(
@@ -163,3 +161,55 @@ ADD CONSTRAINT fk_staffClient_client FOREIGN KEY (clientID) REFERENCES Client(cl
 ALTER TABLE NoteClient 
 ADD CONSTRAINT fk_noteClient_note FOREIGN KEY (noteID) REFERENCES Note(noteID),
 ADD CONSTRAINT fk_noteClient_client FOREIGN KEY (clientID) REFERENCES Client(clientID);
+
+DELIMITER $$
+
+CREATE PROCEDURE CreateCaseNote(
+  IN in_staffID INT,
+  IN in_clientID INT,
+  IN in_contactType ENUM('In-Person', 'Written', 'Over the Phone'),
+  IN in_goal ENUM('ISP Goal', 'IPP Goal', 'Personal Goal'),
+  IN in_goalProgress VARCHAR(2048),
+  IN in_narrative VARCHAR(2048),
+  IN in_nextSteps VARCHAR(2048)
+)
+BEGIN
+  DECLARE newNoteID INT;
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    -- Rollback if there's any SQL error
+    ROLLBACK;
+    RESIGNAL;
+  END;
+
+  START TRANSACTION;
+
+  -- Insert into Note
+  INSERT INTO Note (
+    staffID,
+    dateCreated,
+    contactType,
+    goal,
+    goalProgress,
+    narrative,
+    nextSteps
+  ) VALUES (
+    in_staffID,
+    CURRENT_TIMESTAMP(),
+    in_contactType,
+    in_goal,
+    in_goalProgress,
+    in_narrative,
+    in_nextSteps
+  );
+
+  -- Get the new note ID
+  SET newNoteID = LAST_INSERT_ID();
+
+  -- Insert into NoteClient
+  INSERT INTO NoteClient (noteID, clientID) VALUES (newNoteID, in_clientID);
+
+  COMMIT;
+END$$
+
+DELIMITER ;
