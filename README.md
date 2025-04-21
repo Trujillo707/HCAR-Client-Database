@@ -6,7 +6,7 @@ Latest formal Documentation is located in the documents folder
 Latest stable build code is in `main` branch, latest developmental build is in `dev` branch. Current features being 
 worked on by developers can be found on their own branch, such as `orlando_dev` or `justin_dev`.
 
-View the latest deployment via [this link](https://hcar-client-database-166569971807.us-west1.run.app).
+View the latest deployment via [this link.](https://hcar-client-database-166569971807.us-west1.run.app)
 
 # Table of Contents
 1. [Build Instructions](#build-instructions)
