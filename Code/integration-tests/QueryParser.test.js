@@ -103,11 +103,11 @@ describe("QueryParser Class Tests", () => {
                     },
                     {
                         "clientID": 1,
-                        "name": "Bay Center Day Servies"
+                        "name": "Bay Center Day Services"
                     },
                     {
                         "clientID": 2,
-                        "name": "Bay Center Day Servies"
+                        "name": "Bay Center Day Services"
                     },
                     {
                         "clientID": 5,
@@ -187,7 +187,7 @@ describe("QueryParser Class Tests", () => {
                 [
                     {
                         "clientID": 2,
-                        "name": "Bay Center Day Servies"
+                        "name": "Bay Center Day Services"
                     },
                     {
                         "clientID": 5,
