@@ -2,7 +2,7 @@ import express from "express"
 const app = express()
 import {reportTypes} from "./reportsLogic.js";
 import {ClientBuilder} from "./objects/ClientBuilder.js";
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 import { fileURLToPath } from 'url';
 import path from 'path';
 import {testClientArray} from "./testData.js"
@@ -56,6 +56,12 @@ app.get('/client', (req, res) => {
     let rawData = req.body.clientID;
     res.render("clientDetails", {theClient: testClientArray[0]});
 });
+
+app.get("/test", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    let results = await qp.getAllClients(1)
+    res.send(results);
+})
 
 /* Port Number should be an environment variable fyi */
 app.listen(port, () => {
