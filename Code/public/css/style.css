@@ -1,5 +1,5 @@
-/* Justin Crittenden
-   Last Modified: March 10, 2025
+/* Justin Crittenden / Michael Goodwyn
+   Last Modified: April 22, 2025
 */
 
 *
@@ -35,6 +35,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    min-width: 40em;
 }
 
 .header > h1
@@ -90,6 +92,7 @@
     background-color: white;
     padding: 32px;
     height: 96px;
+    min-width: 52.1875em;
 }
 
 .header-link
@@ -319,6 +322,13 @@
     border-top: none;
 
     min-height: 25em;
+    min-width: 52.1875em;
+}
+
+.bodyContent {
+    padding: 0 1em;
+    min-height: 25em;
+    min-width: 52.1875em;
 }
 
 .clientIdContent {
@@ -332,6 +342,10 @@
     display: flex;
     flex-direction: column;
     gap: 0.5em;
+}
+
+.clientIdContent > div > input[type="text"] {
+    border-radius: 0.5em;
 }
 
 .medContent {
@@ -357,20 +371,26 @@
     width: 9em;
 }
 
-.medication {
-    display: block;
-    float: right;
+.personalInfoContent {
+    display: grid;
+    grid-template-columns: 30% 30% 30%;
+}
+.personalInfoContent > div > textarea{
+    width: 90%;
+    height: 80%;
+    border-radius: 1em;
+    border-collapse: collapse;
+    padding: 0.5em;
 }
 
-
-
+.personalInfoContent > div > label {
+    height: 20%;
+    width: 90%;
+    text-size-adjust: 75%;
+}
 
 
 
 
 
 /* END: stuff for the clientDetails.ejs */
-
-.bodyContent {
-    padding: 0 1em;
-}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
     <title>Client Details</title>
     <%- include("fontLinks") -%>
@@ -102,14 +102,18 @@
                         <option value="<%=maritalStatusTypes[2]%>" id="option3"><%=maritalStatusTypes[2]%></option>
                     </select>
                 </div>
-                <div>
-                    <p>Photo:
-                    <!--<img src="" /> -->
-                    </p>
-                </div>
+                <div></div>
+                <div></div>
                 <div>
                     <p>Regional Center ID: <br />
                        <%=//locals.theClient.getRegionalCenterID()%>
+                    </p>
+                </div>
+                <div></div>
+                <div></div>
+                <div>
+                    <p>Photo:
+                        <!--<img src="" /> -->
                     </p>
                 </div>
             </div>
@@ -117,13 +121,17 @@
 
         <div id="medInfo" class="tabcontent">
             <div class="medContent">
-                <label for="p_insurance">Primary Insurance Provider: </label>
-                <input type="text" placeholder="Primary Insurance Provider"
-                       value="<%=primaryInsurance.getName()%>" id="p_insurance" />
+                <div>
+                    <label for="p_insurance">Primary Insurance Provider: </label>
+                    <input type="text" placeholder="Primary Insurance Provider"
+                           value="<%=primaryInsurance.getName()%>" id="p_insurance" />
+                    <label for="p_insurance_num"> Primary Ins. Number: </label>
+                    <input type="text" placeholder="000000000"
+                           value="<%=primaryInsurance.getPolicyNumber()%>" id="p_insurance_num" />
+                </div>
+                <div>
 
-                <label for="p_insurance_num"> Primary Ins. Number: </label>
-                <input type="text" placeholder="000000000"
-                       value="<%=primaryInsurance.getPolicyNumber()%>" id="p_insurance_num" />
+                </div>
 
                 <label for="s_insurance"> Secondary Insurance Provider: </label>
                 <input type="text" placeholder="Primary Insurance Provider"
@@ -190,29 +198,32 @@
         </div>
 
         <div id="personalInfo" class="tabcontent">
-            <label for="cli_likes"> Client Likes: </label>
-            <input type="text" name="client_likes" id="cli_likes"
-                   value="<%=locals.theClient.getLikes()%>" placeholder="likes go here" />
-
-            <label for="cli_dislikes"> Client Dislikes: </label>
-            <input type="text" name="client_dislikes" id="cli_dislikes"
-                   value="<%=locals.theClient.getDislikes()%>" placeholder="dislikes go here" />
-
-            <label for="cli_goals"> Client Goals: </label>
-            <input type="text" name="client_goals" id="cli_goals"
-                   value="<%=locals.theClient.getGoals()%>" placeholder="goals go here" />
-
-            <label for="cli_hobs"> Client Hobbies / Favorite Activities: </label>
-            <input type="text" name="client_hobbies" id="cli_hobs"
-                   value="<%=locals.theClient.getHobbies()%>" placeholder="hobbies go here" />
-
-            <label for="cli_ach"> Client Achievements: </label>
-            <input type="text" name="client_achievements" id="cli_ach"
-                   value="<%=locals.theClient.getAchievements()%>" placeholder="achievements go here" />
-
-            <label for="cli_add_notes"> Additional Notes: </label>
-            <input type="text" name="client_additional_notes" id="cli_add_notes"
-                   value="<%=locals.theClient.getLikes()%>" placeholder="additional notes here" />
+            <div class="personalInfoContent">
+                <div>
+                    <label for="cli_likes"> Client Likes: </label>
+                    <textarea name="client_likes" id="cli_likes"><%=locals.theClient.getLikes()%></textarea>
+                </div>
+                <div>
+                    <label for="cli_dislikes"> Client Dislikes: </label>
+                    <textarea name="client_dislikes" id="cli_dislikes"><%=locals.theClient.getDislikes()%></textarea>
+                </div>
+                <div>
+                    <label for="cli_goals"> Client Goals: </label>
+                    <textarea name="client_goals" id="cli_goals"><%=locals.theClient.getGoals()%></textarea>
+                </div>
+                <div>
+                    <label for="cli_hobs"> Client Hobbies / Favorite Activities: </label>
+                    <textarea name="client_hobbies" id="cli_hobs"><%=locals.theClient.getHobbies()%></textarea>
+                </div>
+                <div>
+                    <label for="cli_ach"> Client Achievements: </label>
+                    <textarea name="client_achievements" id="cli_ach"><%=locals.theClient.getAchievements()%></textarea>
+                </div>
+                <div>
+                    <label for="cli_add_notes"> Additional Notes: </label>
+                    <textarea name="client_additional_notes" id="cli_add_notes"><%=locals.theClient.getLikes()%></textarea>
+                </div>
+            </div>
         </div>
 
         <div id="supportTeam" class="tabcontent">
@@ -262,19 +273,21 @@
                     })
                 %>
             </table>
-            <input type="button" value="new" name="newCaseNote" />
-            <input type="button" value="view" name="viewCaseNote" />
-            <input type="button" value="edit" name="editCaseNote" />
-            <input type="button" value="download" name="downloadCaseNote" />
 
+            <!-- Buttons for CaseNote Navigation, handled with caseNoteHandling.js -->
+            <input type="button" value="new" name="newCaseNote" id="newCaseNote"/>
+            <input type="button" value="edit" name="editCaseNote" id="editCaseNote" />
+            <input type="button" value="view" name="viewCaseNote" id="viewCaseNote" />
+            <input type="button" value="download" name="downloadCaseNote" id="downloadCaseNote" />
+
+            <script src="../js/caseNoteHandling.js"></script>
         </div>
         <script src="js/tab.js"></script>
     </div>
-
-    <div>
-        <input type="submit" />
-        <input type="button" value="Back" id="backbutton" />
-    </div>
 </div>
+<footer>
+    <input type="button" value="Back" id="backbutton" />
+    <input type="submit" />
+</footer>
 
 </body>
