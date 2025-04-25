@@ -4,6 +4,7 @@ import QueryParser from "../objects/QueryParser.js";
 // TODO: Create JSON or other list of expected outputs for tests
 
 describe("QueryParser Class Tests", () => {
+    /** @type {QueryParser} */
     let qp;
 
     beforeAll(async () => {
@@ -199,6 +200,12 @@ describe("QueryParser Class Tests", () => {
                     }
                 ]]
         )
+        })
+    })
+
+    describe("getClientDemographics() method", () => {
+        test("Reject calls with no clientID provided", async () => {
+            await expect(qp.getClientDemographics()).resolves.toStrictEqual({"Error" : "Invalid ClientID"})
         })
     })
 })
