@@ -185,7 +185,7 @@ BEGIN
     RESIGNAL;
   END;
 
-  START TRANSACTION;
+  -- START TRANSACTION;
 
   -- Insert into Note
   INSERT INTO Note (
@@ -212,7 +212,7 @@ BEGIN
   -- Insert into NoteClient
   INSERT INTO NoteClient (noteID, clientID) VALUES (newNoteID, in_clientID);
 
-  COMMIT;
+  -- COMMIT;
 END$$
 
 DELIMITER ;
@@ -231,16 +231,15 @@ BEGIN
         RESIGNAL;
     END;
 
-    START TRANSACTION;
+    -- START TRANSACTION;
     
     -- Delete from NoteClient
     DELETE FROM NoteClient WHERE NoteID = in_noteID AND ClientID = in_clientID;
 
     -- Delete from NOTE
-
     DELETE FROM Note WHERE NoteID = in_noteID;
 
-    COMMIT;
+    -- COMMIT;
 END$$
 
 DELIMITER ;
