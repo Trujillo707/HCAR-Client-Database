@@ -3,8 +3,7 @@
 <head>
     <title>Case Note</title>
     <%- include("fontLinks") -%>
-    <link href="../../public/css/style.css" rel="stylesheet" type="text/css" />
-    <link href="../../public/css/orlando.css" rel="stylesheet" type="text/css" />
+    <link href="../css/style.css" rel="stylesheet" type="text/css" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
@@ -12,136 +11,56 @@
     <div class="bodyContent">
         <!-- <img src="" /> -->
         <p>Client: <%=locals.theClient.getFirstName() +
-                " " + locals.theClient.getLastName()%></p>
-        <div>
-            <label for="program">Program:</label>
-            <input type="text" id="program" name="program" />
-        </div>
-        <div>
-    <!-- make sysdate for initial time, only when first made -->
-            <label for="time">Time:</label>
-            <input type="text" id="time" name="time" value="<%=%>"/>
-        </div>
-        <div>
-            <label for="date">Program:</label>
-            <input type="text" id="date" name="program" />
-        </div>
-        <div>
-            <input type="checkbox" id="behavioral_incident" name="behavioral_incident" value="" />
-            <label for="behavioral_incident">Behavioral Incident</label>
-            <input type="checkbox" id="informational_note" name="informational_note" value="" />
-            <label for="informational_note">Informational Note</label>
-        </div>
-        <div>
-            <label for="contact_type">Contact Type: </label>
-            <input type="checkbox" id="contact_type" name="in_person" value="" />
-            <input type="checkbox" id="contact_type" name="written" value="" />
-        </div>
-        <div>
-            <label for="goal_worked_on">Goal Worked On:</label>
-            <input type="checkbox" id="goal_worked_on" name="isp_goal" value="" />
-            <input type="checkbox" id="goal_worked_on" name="ipp_goal" value="" />
-            <input type="checkbox" id="goal_worked_on" name="personal_goal" value="" />
-        </div>
-        <div>
-            <label for="antecedent">What was the client doing just before the incident? (Antecedent)</label>
-            <input type="text" id="antecedent" name="antecedent" />
-        </div>
-        <div>
-            <label for="behavioral_description">Describe the incident (Objective Behavioral Description)</label>
-            <input type="text" id="behavioral_description" name="behavioral_description" value=""/>
-        </div>
-        <div>
-            <label for="consequence">What did you do? (Consequence)</label>
-            <input type="text" id="consequence" name="consequence" />
-        </div>
-        <div>
-            <label for="clarification">Clarification / Follow-Up:</label>
-            <input type="text" id="clarification" name="clarification" />
-        </div>
-        <div>
-            <label for="goal_progress">Progress on Goal / What is Being Worked on:</label>
-            <input type="text" id="goal_progress" name="goal_progress" />
-        </div>
-        <div>
-            <label for="cp_notified">C/P Notified:</label>
-            <input type="text" id="cp_notified" name="cp_notified" />
-        </div>
-        <div>
-            <label for="cp_notified_by">By:</label>
-            <input type="text" id="cp_notified_by" name="cp_notified_by" />
-        </div>
-        <div>
-            <label for="cp_notified_date">Date:</label>
-            <input type="date" id="cp_notified_date" name="cp_notified_date" />
-        </div>
-        <div>
-            <label for="client_emergency_contact">CLient Emergency Contact:</label>
-            <input type="text" id="client_emergency_contact" name="client_emergency_contact" />
-        </div>
-        <div>
-            <label for="emergency_contact_email">Emergency Contact Email:</label>
-            <input type="text" id="emergency_contact_email" name="emergency_contact_email" />
-        </div>
-        <div>
-            <label for="licensing_notified">Licensing Notified:</label>
-            <input type="text" id="licensing_notified" name="licensing_notified" />
-        </div>
-        <div>
-            <label for="licensing_notified_by">By:</label>
-            <input type="text" id="licensing_notified_by" name="licensing_notified_by" />
-        </div>
-        <div>
-            <label for="licensing_notified_date">Date:</label>
-            <input type="date" id="licensing_notified_date" name="licensing_notified_date" />
-        </div>
-        <div>
-            <label for="emergency_contact_phone">Emergency Contact Phone:</label>
-            <input type="text" id="emergency_contact_phone" name="emergency_contact_phone" />
-        </div>
-
-
-        <div>
-            <p>S.I.R. Completed?</p>
-            <label for="sir_completed_y">Yes</label>
-            <input type="radio" id="cp_notified_y" name="cp_notified" />
-            <label for="cp_notified_n">No</label>
-            <input type="radio" id="cp_notified_n" name="cp_notified" />
-        </div>
-        <div>
-            <label for="sir_completed_by">By:</label>
-            <input type="text" id="sir_completed_by" name="sir_completed_by" />
-        </div>
-        <div>
-            <label for="sir_completed_date">Date:</label>
-            <input type="date" id="sir_completed_date" name="sir_completed_date" />
-        </div>
-
-
-
-        <div>
-            <label for="cp_notified">C/P Notified:</label>
-            <input type="text" id="cp_notified" name="cp_notified" />
-        </div>
-        <div>
-            <label for="cp_notified_by">By:</label>
-            <input type="text" id="cp_notified_by" name="cp_notified_by" />
-        </div>
-        <div>
-            <label for="cp_notified_date">Date:</label>
-            <input type="date" id="cp_notified_date" name="cp_notified_date" />
-        </div>
-        <div>
-            <label for="cp_notified">C/P Notified:</label>
-            <input type="text" id="cp_notified" name="cp_notified" />
-        </div>
-        <div>
-            <label for="cp_notified_by">By:</label>
-            <input type="text" id="cp_notified_by" name="cp_notified_by" />
-        </div>
-        <div>
-            <label for="cp_notified_date">Date:</label>
-            <input type="date" id="cp_notified_date" name="cp_notified_date" />
+            " " + locals.theClient.getLastName()%></p>
+        <div class="tabContainer">
+            <div class="tabcontent">
+                <div>
+                    <label for="program">Program:</label>
+                    <input type="text" id="program" name="program" />
+                </div>
+                <div>
+                    <label for="contact_type">Contact Type: </label>
+                    <p id="contact_type">
+                        <input type="radio" name="contact_type" id="in_person" />
+                        <label for="in_person">In-Person</label>
+                        <input type="radio" name="contact_type" id="written"/>
+                        <label for="written">Written</label>
+                        <input type="radio" name="contact_type" id="over_the_phone"/>
+                        <label for="over_the_phone">Over the Phone</label>
+                    </p>
+                </div>
+                <div>
+                    <label for="goal_worked_on">Goal Worked on: </label>
+                    <p id="goal_worked_on">
+                        <input type="radio" name="goal_worked_on" id="isp_goal" />
+                        <label for="isp_goal">ISP Goal</label>
+                        <input type="radio" name="goal_worked_on" id="ipp_goal"/>
+                        <label for="ipp_goal">IPP Goal</label>
+                        <input type="radio" name="goal_worked_on" id="personal_goal"/>
+                        <label for="personal_goal">Personal Goal</label>
+                    </p>
+                </div>
+                <div>
+                    <label for="narrative">Narrative: </label>
+                    <input type="text" id="narrative" name="narrative" />
+                </div>
+                <div>
+                    <label for="progress_on_goal">Progress on Goal / What is Being Worked on: </label>
+                    <input type="text" id="progress_on_goal" name="progress_on_goal" />
+                </div>
+                <div>
+                    <label for="next_steps">Next Steps: </label>
+                    <input type="text" id="next_steps" name="next_steps" />
+                </div>
+                <div>
+                    <label for="empl_signoff">Employee Sign-Off: </label>
+                    <input type="text" id="empl_signoff" name="empl_sign_off" />
+                </div>
+                <div>
+                    <label for="date_of_signoff">Date of Sign-Off: </label>
+                    <input type="text" id="date_of_signoff" name="date_of_signoff" />
+                </div>
+            </div>
         </div>
     </div>
 </body>
