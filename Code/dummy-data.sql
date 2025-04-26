@@ -135,3 +135,37 @@ UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 22)
 UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 23) WHERE CLIENTID = 23;
 UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 24) WHERE CLIENTID = 24;
 UPDATE Client SET profilePicture = (SELECT fileID FROM File WHERE ClientID = 25) WHERE CLIENTID = 25;
+
+INSERT INTO HCAR.Program (programID, address, city, state, zip, phoneNumber, name) VALUES (1, '1707 E St, Suite 2', 'Eureka', 'CA', '95501', '707-443-7077', 'Summit Support Services');
+INSERT INTO HCAR.Program (programID, address, city, state, zip, phoneNumber, name) VALUES (2, '1001 Searles St', 'Eureka', 'CA', '95501', '707-441-8625', 'Bay Center Day Services');
+INSERT INTO HCAR.Program (programID, address, city, state, zip, phoneNumber, name) VALUES (3, '272 C St', 'Eureka', 'CA', '95501', '707-443-1428', 'Canvas + Clay Studio');
+INSERT INTO HCAR.Program (programID, address, city, state, zip, phoneNumber, name) VALUES (4, '1707 E St, Suite 4', 'Eureka', 'CA', '95501', '707-443-7077', 'Comprehensive Career Services');
+INSERT INTO HCAR.Program (programID, address, city, state, zip, phoneNumber, name) VALUES (5, '1707 E St, Suite 2', 'Eureka', 'CA', '95501', '707-443-7077', 'Respite Services');
+INSERT INTO HCAR.Program (programID, address, city, state, zip, phoneNumber, name) VALUES (6, '1707 E St, Suite 2', 'Eureka', 'CA', '95501', '707-296-0646', 'Clinical Services');
+INSERT INTO HCAR.Program (programID, address, city, state, zip, phoneNumber, name) VALUES (7, '1707 E St, Suite 2', 'Eureka', 'CA', '95501', '707-443-7077', 'Self-Determination Program');
+
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (1, 1);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (2, 2);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (3, 3);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (4, 4);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (5, 5);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (6, 6);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (7, 7);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (8, 1);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (9, 2);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (10, 3);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (11, 4);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (12, 5);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (13, 6);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (14, 7);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (15, 1);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (16, 2);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (17, 3);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (18, 4);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (19, 5);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (20, 6);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (21, 7);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (22, 1);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (23, 2);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (24, 3);
+INSERT INTO HCAR.ProgramClient (clientID, programID) VALUES (25, 4);

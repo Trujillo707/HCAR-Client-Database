@@ -11,6 +11,8 @@ DROP TABLE IF EXISTS Account;
 DROP TABLE IF EXISTS Staff;
 DROP TABLE IF EXISTS ContactInfo;
 DROP TABLE IF EXISTS Insurance;
+DROP PROCEDURE IF EXISTS CreateCaseNote;
+DROP PROCEDURE IF EXISTS DeleteCaseNote;
 SET FOREIGN_KEY_CHECKS = 1;
 
 
@@ -32,7 +34,8 @@ CREATE TABLE Program(
     city VARCHAR(64) NOT NULL, 
     state CHAR(2) NOT NULL,
     zip VARCHAR(9) NOT NULL,
-    phoneNumber VARCHAR(12) NOT NULL
+    phoneNumber VARCHAR(12) NOT NULL,
+    name VARCHAR(32) NOT NULL
 );
 
 CREATE TABLE Staff(
@@ -61,7 +64,7 @@ CREATE TABLE Note(
     staffID INT, 
     dateCreated DATETIME NOT NULL, 
     dateModified DATETIME,
-    contactType priority ENUM('In-Person', 'Written', 'Over the Phone') NOT NULL,
+    contactType ENUM('In-Person', 'Written', 'Over the Phone') NOT NULL,
     goal ENUM('ISP Goal', 'IPP Goal', 'Personal Goal') NOT NULL,
     goalProgress VARCHAR(2048),
     narrative VARCHAR(2048),
@@ -210,6 +213,34 @@ BEGIN
   INSERT INTO NoteClient (noteID, clientID) VALUES (newNoteID, in_clientID);
 
   COMMIT;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE DeleteCaseNote(
+    IN in_clientID INT,
+    IN in_noteID INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- Rollback if there's any SQL error
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+    
+    -- Delete from NoteClient
+    DELETE FROM NoteClient WHERE NoteID = in_noteID AND ClientID = in_clientID;
+
+    -- Delete from NOTE
+
+    DELETE FROM Note WHERE NoteID = in_noteID;
+
+    COMMIT;
 END$$
 
 DELIMITER ;
