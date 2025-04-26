@@ -134,57 +134,8 @@ app.post('/api/createUser', async (req, res) => {
   }
 });
 
+
 app.post('/api/createCaseNote', async (req, res) => {
-  const pool = await createTcpPool({ connectionLimit: 5 }); //Initializes connection to DB
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-    const accountID = req.session.accountID;
-    if(accountID){
-      let query = "SELECT staffID, disabled, admin FROM Account WHERE accountID = ?"; 
-      const Account = await connection.query(query, [accountID]);
-      if(Account[0].disabled === 1){
-        return res.send({"Error":"Account has been disabled"});
-      }
-      const clientID = parseInt(req.body.clientID);
-      if(!Number.isInteger(clientID)){
-        return res.send({"Error":"Invalid Request"});
-      }
-      const staffID = Account[0].staffID;
-      
-      if(Account[0].admin != 1){
-        const staffClientQuery = "SELECT COUNT(*) FROM StaffClient WHERE staffID = ? AND clientID = ?"; 
-        var staffClient = await connection.query(staffClientQuery, [staffID, clientID]);
-      }
-      if(Account[0].admin === 1 || staffClient[0]['COUNT(*)'] === 1){
-        const caseNoteCreationQuery = "INSERT INTO Note(staffID, dateCreated, content) VALUES (?, CURRENT_TIMESTAMP(), ?)"; 
-        const caseNote = await connection.query(caseNoteCreationQuery, [staffID, req.body.content]);
-        const noteID = caseNote.insertId;
-        const noteClientCreationQuery = "INSERT INTO NoteClient(noteID, clientID) VALUES (?, ?)"; 
-        const noteClient = await connection.query(noteClientCreationQuery, [noteID, clientID]);
-        await connection.commit();
-        return res.send("Case note successfully created");
-      }
-      else{
-        return res.send({"Error":"User does not have access to this client"});
-      }
-    }
-    else{
-      return res.send({"Error":"Invalid authentication"});
-    }
-  }
-  catch(err){
-    await connection.rollback();
-    return res.send({"Error":"Error creating casenote"});
-  }
-  finally{
-    await connection.release();
-    await pool.end();
-  }
-});
-
-
-app.post('/api/v2/createCaseNote', async (req, res) => {
   const pool = await createTcpPool({ connectionLimit: 5 }); //Initializes connection to DB
   const connection = await pool.getConnection();
   try {
@@ -266,13 +217,18 @@ app.post('/api/deleteCaseNote', async (req, res) => {
         var staffClient = await connection.query(staffClientQuery, [staffID, clientID]);
       }
       if(Account[0].admin === 1 || staffClient[0]['COUNT(*)'] === 1){
-        const NoteClientDeletionQuery = "DELETE FROM NoteClient WHERE noteID = ? AND clientID = ?"; 
-        const noteCient = await connection.query(NoteClientDeletionQuery, [noteID, clientID]);
-
-        const NoteDeletionQuery = "DELETE FROM Note WHERE noteID = ?"; 
-        const note = await connection.query(NoteDeletionQuery, [noteID]);
+        var deleteResults = await connection.query("CALL DeleteCaseNote(?, ?)", [
+          clientID,
+          noteID
+        ]);
         await connection.commit();
-        return res.send("Case note successfully deleted");
+        console.log(deleteResults);
+        if(deleteResults.affectedRows === 0){
+          return res.send({"Error":"Case note already deleted/does not exist"});
+        }
+        else{
+          return res.send("Case note successfully deleted");
+        }
       }
       else{
         return res.send({"Error":"User does not have access to this client"});
@@ -284,7 +240,7 @@ app.post('/api/deleteCaseNote', async (req, res) => {
   }
   catch(err){
     await connection.rollback();
-    return res.send({"Error":"Error creating casenote"});
+    return res.send({"Error":"Error deleting casenote"});
   }
   finally{
     await connection.release();
@@ -295,7 +251,6 @@ app.post('/api/deleteCaseNote', async (req, res) => {
 app.get('/api/modifyCaseNote', async (req, res) => {
   
 });
-
 
 const createUnixSocketPool = async config => {
   return mysql.createPool({
