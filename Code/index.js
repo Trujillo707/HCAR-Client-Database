@@ -62,7 +62,7 @@ app.post('/results', sanitize, async (req, res) => {
             .setFirstName(client.fName !== null ? client.fName : "Empty")
             .setLastName(client.lName !== null ? client.lName : "Empty")
             .setPhoneNumber(client.phoneNumber !== null ? client.phoneNumber : "Empty")
-            .setEmail(client.email !== null ? client.email !== null : "Empty")
+            .setEmail(client.email !== null ? client.email : "Empty")
             .setDOB(client.dateOfBirth !== null ? new Date(client.dateOfBirth) : "Empty")
             .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
             .setSex(client.gender !== null ? client.gender : "Empty")
