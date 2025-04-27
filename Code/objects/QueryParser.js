@@ -240,6 +240,20 @@ export default class QueryParser{
         }
     }
 
+    getInsuranceAndMedicalPreferences(clientID){
+        if (clientID == null || (typeof clientID != "number")){
+            return {"Error" : "Invalid ClientID"};
+        }
+
+        let results = {primaryInsurance: null, secondaryInsurance: null,
+        pcp: null, primaryPhysician: null};
+
+        let primaryInsuranceStmt = "SELECT name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.primaryInsurance FROM Client WHERE clientID = ?)";
+        let secondaryInsuranceStmt = "SELECT name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.secondaryInsurance FROM Client WHERE clientID = ?)";
+        let pcpStmt = "SELECT name, phoneNumber FROM ContactInfo WHERE contactID = (SELECT Client.primaryCareProvider FROM Client WHERE clientID = ?)";
+
+    }
+
     // Methods below are more related to the Instance's properties and should be used sparingly
 
     /**
