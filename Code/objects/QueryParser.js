@@ -250,7 +250,8 @@ export default class QueryParser{
 
         let primaryInsuranceStmt = "SELECT name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.primaryInsurance FROM Client WHERE clientID = ?)";
         let secondaryInsuranceStmt = "SELECT name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.secondaryInsurance FROM Client WHERE clientID = ?)";
-        let pcpStmt = "SELECT name, phoneNumber FROM ContactInfo WHERE contactID = (SELECT Client.primaryCareProvider FROM Client WHERE clientID = ?)";
+        let pcpStmt = "SELECT name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryCareProvider FROM Client WHERE clientID = ?)";
+        let primaryPhysicianStmt = "SELECT name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryPhysician FROM Client WHERE clientID = ?)";
 
     }
 
