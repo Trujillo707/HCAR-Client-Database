@@ -134,22 +134,54 @@ export default class QueryParser{
 
         // TODO: consider changing schema to make sure what cols can be null and which cannot
         //       filtering must nullcheck any searchable cols that may be null in the DB
-        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
+        // const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
+        // const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
         /*
             Pardon the absurd data validation.
          */
         let values = [];
         values.push(acctID);
-        values.push(typeof filters.firstName === "string" ? filters.firstName : "%");
-        values.push(typeof filters.lastName === "string" ? filters.lastName : "%");
-        values.push(typeof filters.phoneNumber === "string" ? filters.phoneNumber : "%");
-        values.push(filters.dob instanceof Date ? filters.dob.toISOString().slice(0,10) : "%");
-        values.push(typeof filters.gender === "string" ? filters.gender : "%");
-        values.push(typeof filters.maritalStatus === "string" ? filters.maritalStatus : "%");
-        values.push(typeof filters.email === "string" ? filters.email : "%");
-        values.push(typeof filters.payee === "string" ? filters.payee : "%");
-        values.push(typeof filters.conservator === "string" ? filters.conservator : "%");
+        // values.push(filters.firstName !== "" ? filters.firstName : "%");
+        // values.push(filters.lastName !== "" ? filters.lastName : "%");
+        // values.push(filters.phoneNumber !== "" ? filters.phoneNumber : "%");
+        // values.push(filters.dob instanceof Date ? filters.dob.toISOString().slice(0,10) : "%");
+        // values.push(filters.gender !== "Other" ? filters.gender : "%"); // Change later
+        // values.push(filters.maritalStatus !== "Other" ? filters.maritalStatus : "%");
+        // values.push(filters.email !== "" ? filters.email : "%");
+        // values.push(filters.payee !== "" ? filters.payee : "%");
+        // values.push(filters.conservator !== "" ? filters.conservator : "%");
 
+        // Build query with chosen filters
+        let basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID";
+        for (const key of Object.keys(filters)) {
+            if (filters[key] !== "" && filters[key] !== "%")
+            {
+                // Handling date conversion from js to mysql FIX ME
+                if (key === "dob")
+                {
+                    values.push(filters[key].toISOString().slice(0,10));
+                    basicDetailsStmt += ` AND dateOfBirth LIKE ?`;
+                }
+                else if (key === "gender" || key ==="maritalStatus")
+                {
+                    values.push(filters[key]);
+                    basicDetailsStmt += ` AND LOWER(${key}) = LOWER(?)`; // DB has "Male" instead of "male"
+                }
+                else
+                {
+                    values.push(`%${filters[key]}%`);
+                    if (key ==="firstName")
+                        basicDetailsStmt += ` AND fName LIKE ?`;
+                    else if (key === "lastName")
+                        basicDetailsStmt += ` AND lName LIKE ?`;
+                    else
+                        basicDetailsStmt += ` AND ${key} LIKE ?`;
+                }
+            }
+        }
+
+        console.log(values)
+        console.log("Query: ", basicDetailsStmt);
 
         let results = [];
         let clientIDs;
