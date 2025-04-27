@@ -11,6 +11,8 @@ import QueryParserBuilder from "./objects/QueryParserBuilder.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+app.disable('x-powered-by');
+
 app.use(express.static(__dirname + '/public'));
 
 // For handling form data

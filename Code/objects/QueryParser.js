@@ -67,7 +67,7 @@ export default class QueryParser{
         let results = [];
         let clientIDs;
 
-        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? ORDER BY Client.clientID LIMIT 10 OFFSET " + offset;
+        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID ORDER BY Client.clientID LIMIT 10 OFFSET " + offset;
 
         try {
             const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID]);
@@ -83,7 +83,7 @@ export default class QueryParser{
             return [];
         }
         const placeholders = clientIDs.map(() => '?').join(', ');
-        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID JOIN HCAR.StaffClient SC on PC.clientID = SC.clientID WHERE PC.clientID IN (" + placeholders + ") ORDER BY PC.clientID";
+        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID WHERE PC.clientID IN (" + placeholders + ") ORDER BY PC.clientID";
 
         try{
             const [rows] = await this.#pool.execute(programListStmt, clientIDs);
@@ -134,7 +134,7 @@ export default class QueryParser{
 
         // TODO: consider changing schema to make sure what cols can be null and which cannot
         //       filtering must nullcheck any searchable cols that may be null in the DB
-        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
+        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
         /*
             Pardon the absurd data validation.
          */
@@ -151,7 +151,6 @@ export default class QueryParser{
         values.push(typeof filters.conservator === "string" ? filters.conservator : "%");
 
 
-        console.log(values)
         let results = [];
         let clientIDs;
 
@@ -171,7 +170,7 @@ export default class QueryParser{
         }
 
         const placeholders = clientIDs.map(() => '?').join(', ');
-        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID JOIN HCAR.StaffClient SC on PC.clientID = SC.clientID WHERE PC.clientID IN (" + placeholders + ") ORDER BY PC.clientID";
+        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID WHERE PC.clientID IN (" + placeholders + ") ORDER BY PC.clientID";
 
         try{
             const [rows] = await this.#pool.execute(programListStmt, clientIDs);
@@ -182,6 +181,31 @@ export default class QueryParser{
         }
 
         return results;
+    }
+
+
+    async getClientDemographics(clientID){
+        if (clientID == null || (typeof clientID != "number")){
+            return {"Error" : "Invalid ClientID"};
+        }
+
+        const demoStmt = "SELECT Client.clientID, fName, lName, email, address, addressType, city, state, zip, dateOfBirth, phoneNumber, " +
+            "       phoneType, sex, gender, pronouns, greeting, nickname, maritalStatus, religPref, payee, preferredHospital, likes, " +
+            "       dislikes, goals, hobbies, achievements, conservator, F.filename as profilePicture " +
+            "FROM Client " +
+            "JOIN HCAR.File F on Client.profilePicture = F.fileID " +
+            "WHERE Client.clientID = ?"
+
+        try {
+            const [rows] = await this.#pool.execute(demoStmt, [clientID]);
+            if (rows.length > 0) {
+                return rows[0];
+            } else {
+                return {"Error": "Client not found"};
+            }
+        } catch (e) {
+            return {"Error": "Failure getting Client's demographics: " + e};
+        }
     }
 
     // Methods below are more related to the Instance's properties and should be used sparingly
