@@ -2,7 +2,7 @@ import express from "express"
 const app = express()
 import {reportTypes} from "./reportsLogic.js";
 import {ClientBuilder} from "./objects/ClientBuilder.js";
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 import { fileURLToPath } from 'url';
 import path from 'path';
 import {testClientArray} from "./testData.js"
@@ -23,17 +23,18 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, "public/html/index.html"))
 });
 
-app.post('/home', getPath, (req, res) => {
+app.post('/home', (req, res) => {
     // After verification of credentials
     res.render("home");
 });
 
 // Clicking home from home will re-render the page
-app.get('/home', getPath, (req, res) => {
+app.get('/home', (req, res) => {
+
     res.render("home");
 });
 
-app.get("/search", getPath, (req, res) => {
+app.get("/search", (req, res) => {
     res.render("search");
 })
 
@@ -42,13 +43,11 @@ app.get('/results', (req, res) => {
     res.render("results", {clientList: testClientArray});
 });
 
-// Sanitize data sent to results
 app.post('/results', (req, res) => {
-    console.log(req.body);
     res.render("results", {clientList: testClientArray});
 });
 
-app.get("/reports", getPath, (req, res) => {
+app.get("/reports", (req, res) => {
     res.render("reports", {availableReportsMap: reportTypes});
 });
 
@@ -81,15 +80,3 @@ process.on('SIGTERM',async () => {
         process.exit(0);
     }
 });
-
-function sanitize(req, res, next)
-{
-    console.log("Sanitize!");
-    next();
-}
-
-function getPath(req, res, next)
-{
-    res.locals.currentPath = req.path;
-    next();
-}
