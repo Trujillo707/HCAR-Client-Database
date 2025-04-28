@@ -70,7 +70,7 @@ export default class QueryParser{
         const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID ORDER BY Client.clientID LIMIT 10 OFFSET " + offset;
 
         try {
-            const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID]);
+            const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID, offset]);
                 if (rows.length > 0) {
                     results.push(rows);
                     clientIDs = rows.map(client => client.clientID);
@@ -214,8 +214,11 @@ export default class QueryParser{
 
         return results;
     }
-
-
+    /**
+     * Queries the database for detailed demographic information of a specific client.
+     * @param {number} clientID The ID of the client whose demographics are being queried
+     * @returns {Promise<Object>} An object containing the client's demographic details or an error message
+     */
     async getClientDemographics(clientID){
         if (clientID == null || (typeof clientID != "number")){
             return {"Error" : "Invalid ClientID"};
