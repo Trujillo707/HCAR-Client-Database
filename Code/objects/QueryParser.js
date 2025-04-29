@@ -51,7 +51,7 @@ export default class QueryParser {
      *       particular order.
      * @param {number} acctID Account ID for the current logged-in staff
      * @param {number} offset Page offset for results, in multiples of 10 (e.g. offset = 1 --> Clients 11-20)
-     * @returns {Promise<Object>} Array of Objects containing raw SQL column results for each client returned
+     * @returns {Promise<Object[]>} Array of Objects containing raw SQL column results for each client returned
      */
     async getAllClients(acctID, offset = 0) {
         if (acctID == null) {
@@ -113,7 +113,7 @@ export default class QueryParser {
      * @param {string} filters.payee Payee
      * @param {string} filters.conservator Conservator
      * @param offset {number} Page offset for results, in multiples of 10 (e.g. offset = 1 --> Clients 11-20)
-     * @returns {Promise<Object>} Array of Objects containing raw SQL column results for each client returned
+     * @returns {Promise<Object[]>} Array of Objects containing raw SQL column results for each client returned
      */
     async getAllFilteredClients(acctID,
                                 filters = {
@@ -234,10 +234,16 @@ export default class QueryParser {
                 return {"Error": "Client not found"};
             }
         } catch (e) {
-            return {"Error": "Failure getting Client's demographics: " + e};
+            console.log("Error: Failure getting Client's demographics" + e);
+            return {"Error": "Failure getting Client's demographics"};
         }
     }
 
+    /**
+     * Queries the database for the client's insurance and medical preferences.
+     * @param {number} clientID
+     * @returns {Promise<{primaryInsurance: null, secondaryInsurance: null, pcp: null, primaryPhysician: null}|{Error: string}>}
+     */
     async getInsuranceAndMedicalPreferences(clientID) {
         if (clientID == null || (typeof clientID != "number")) {
             return {"Error": "Invalid ClientID"};
@@ -268,10 +274,16 @@ export default class QueryParser {
 
             return results;
         } catch (e) {
-            return {"Error": "Failure getting Client's insurance and medical preferences: " + e};
+            console.log("Error: Failure getting Client's insurance and medical preferences" + e);
+            return {"Error": "Failure getting Client's insurance and medical preferences"};
         }
     }
 
+    /**
+     * Queries the database for the client's medication list.
+     * @param {number} clientID
+     * @returns {Promise<*|{Error: string}>}
+     */
     async getMedicationList(clientID){
         if (clientID == null || (typeof clientID != "number")) {
             return {"Error": "Invalid ClientID"};
@@ -283,7 +295,29 @@ export default class QueryParser {
             const [rows] = await this.#pool.execute(medicationStmt, [clientID]);
             return rows;
         } catch (e) {
-            return {"Error": "Failure getting Client's medication list: " + e};
+            console.log("Error: Failure getting Client's medication list" + e);
+            return {"Error": "Failure getting Client's medication list"};
+        }
+    }
+
+    /**
+     * Queries the database for the client's vaccination list (newest dates first).
+     * @param clientID
+     * @returns {Promise<*|{Error: string}>}
+     */
+    async getVaccinationList(clientID){
+        if (clientID == null || (typeof clientID != "number")) {
+            return {"Error": "Invalid ClientID"};
+        }
+
+        let vaccinationStmt = "SELECT clientID, name, dateTaken FROM Vaccination WHERE clientID = ? ORDER BY dateTaken desc";
+
+        try {
+            const [rows] = await this.#pool.execute(vaccinationStmt, [clientID]);
+            return rows;
+        } catch (e) {
+            console.log("Error: Failure getting Client's vaccination list" + e);
+            return {"Error": "Failure getting Client's vaccination list"};
         }
     }
 
