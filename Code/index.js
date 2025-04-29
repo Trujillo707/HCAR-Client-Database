@@ -51,6 +51,10 @@ app.get("/reports", (req, res) => {
     res.render("reports", {availableReportsMap: reportTypes});
 });
 
+app.get("/caseNote", (req, res) => {
+    res.render("caseNote", {theClient: testClientArray[0]});
+})
+
 // TODO: MAKE THIS POST OBVIOUSLY 
 app.get('/client', (req, res) => {
     let rawData = req.body.clientID;

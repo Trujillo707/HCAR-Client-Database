@@ -264,6 +264,7 @@ select{
 #hcar-header
 {
     font-size: 20px;
+    text-wrap: nowrap;
 }
 .hcar-body
 {
@@ -279,7 +280,7 @@ select{
     background-color: white;
     padding: 32px;
     height: 96px;
-    min-width: 52.1875em;
+    min-width: 70em;
 }
 
 .header-link
@@ -509,7 +510,7 @@ select{
     border-top: none;
 
     min-height: 25em;
-    min-width: 52.1875em;
+    min-width: 90%;
 }
 
 .bodyContent {
@@ -520,29 +521,129 @@ select{
 
 .clientIdContent {
     display: grid;
-    grid-template-columns: 15% 15% 15% 15%;
-    grid-template-rows: 14% 14% 14% 14%;
-    gap: 1.2em;
+    grid-template-areas: "fName midName lName DoB"
+                         "phone address email ."
+                         "sex maritalStatus . ."
+                         "regionalCenterID . . photo";
+    justify-content: center;
+    grid-template-columns: 21% 21% 26% 30%;
+    grid-template-rows: 25% 25% 36% 12%;
+    min-width: 90%;
+}
+
+.cli_fName { grid-area: fName; }
+.cli_midName { grid-area: midName; }
+.cli_lName { grid-area: lName; }
+.cli_DoB { grid-area: DoB; }
+.cli_phone { grid-area: phone; }
+.cli_address { grid-area: address; }
+.cli_email { grid-area: email; }
+.cli_sex { grid-area: sex; }
+.cli_maritalStatus { grid-area: maritalStatus; }
+.cli_regionalCenterID { grid-area: regionalCenterID; }
+.cli_image { grid-area: photo; }
+
+.clientIdContent > div > *:not(label) {
+    display: block;
+    margin-top: 0.5em;
+    padding: 0.3em;
+    border-radius: 0.5em;
+    width: 85%;
+    max-width: 16em;
+}
+
+#DoB {
+    width: 9em;
+}
+
+.cli_regionalCenterID {
+
 }
 
 .clientIdContent > div {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5em;
-}
-
-.clientIdContent > div > input[type="text"] {
-    border-radius: 0.5em;
+    padding-top: 0.5em;
 }
 
 .medContent {
     display: grid;
-    grid-template-columns: 15% 15% 15% 15%;
-    grid-template-rows: 10% 10% 10% 10% 10% 50%;
-    gap: 1.5em;
+    justify-content: center;
+    grid-template-areas: "p_insurance p_insurance_num p_care_provider"
+                         "s_insurance s_insurance_num p_physician"
+                         "pref_hospital . ."
+                         "vaccinationList . ."
+                         "medicationList . .";
+    grid-template-columns: 33% 33% 33%;
+    row-gap: 1em;
+    min-width: 90%;
 }
 
-#tabContainer {
+.medicationListDiv { grid-area: medicationList; }
+.vaccinationListDiv { grid-area: vaccinationList; }
+.p_insurance { grid-area: p_insurance; }
+.p_insurance_num { grid-area: p_insurance_num; }
+.s_insurance { grid-area: s_insurance; }
+.s_insurance_num { grid-area: s_insurance_num; }
+.p_care_provider { grid-area: p_care_provider; }
+.p_physician { grid-area: p_physician; }
+.pref_hospital { grid-area: pref_hospital; }
+
+.medContent > div > *:not(label, table, th, td) {
+    display: block;
+    margin-top: 0.5em;
+    padding: 0.3em;
+    border-radius: 0.5em;
+    width: 85%;
+    max-width: 16em;
+}
+
+.medicationList {
+    border-collapse: collapse;
+    margin: 0.75em;
+}
+
+.medicationList th, .medicationList td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.medicationList th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    width: 100%;
+}
+
+.medicationList > tbody > tr > th > *, .medicationList > tbody > tr > td > * {
+    width: 7em;
+    padding: 0.5em;
+}
+
+
+
+
+.personalInfoContent {
+    display: grid;
+    grid-template-areas: "cli_likes cli_hobs cli_add_notes"
+                         "cli_dislikes cli_hobs cli_add_notes"
+                         "cli_goals cli_ach cli_add_notes";
+    justify-content: left;
+    column-gap: 6%;
+    row-gap: 2%;
+    padding: 0.5em 0.3em 0.5em 0.3em;
+    min-width: 90%;
+}
+
+.cli_hobs { grid-area: cli_hobs; }
+.cli_likes { grid-area: cli_likes; }
+.cli_dislikes { grid-area: cli_dislikes; }
+.cli_add_notes { grid-area: cli_add_notes; }
+.cli_goals { grid-area: cli_goals; }
+.cli_ach { grid-area: cli_ach; }
+
+.personalInfoContent > div > *:not(label) {
+    margin-top: 0.5em;
+}
+
+.tabContainer {
     width: 95%;
     height: 90%;
     margin: auto;
@@ -585,9 +686,115 @@ div#supportTeam.tabcontent {
     height: 1em;
 }
 
+.clientNameHeader {
+    padding-left: 2.5%;
+}
 
+.supportTeamDiv {
+    display: grid;
+    justify-content: center;
+    min-width: 90%;
+}
 
+.supportTeam {
+    height: fit-content;
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25em 0;
+    font-size: 1em;
+    text-align: left;
+}
 
+.supportTeam th, .supportTeam td {
+    border: 0.0625em solid #ddd;
+    width: fit-content;
+    padding: 0.5em;
+}
 
+.supportTeam th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.supportTeam tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.supportTeam tr:hover {
+    background-color: #f1f1f1;
+}
+
+.caseNotes {
+    display: grid;
+    grid-template-areas: "caseNoteTable caseNoteButtons"
+                         "caseNoteTable .";
+    grid-template-columns: 80% 20%;
+    min-width: 90%;
+}
+
+.caseNoteTable { grid-area: caseNoteTable }
+.caseNoteButtons {grid-area: caseNoteButtons }
+
+.caseNoteTable {
+    border-collapse: collapse;
+    width: 90%;
+    height: fit-content;
+}
+
+.caseNoteButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.caseNoteButtons > input {
+    padding: 0.625em 1.875em;
+    background-color: grey;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
 /* END: stuff for the clientDetails.ejs */
+
+
+.caseNoteContent {
+    display: grid;
+    grid-template-areas: "program date_of_case date_of_case ."
+                         "contact_type contact_type goal_worked_on goal_worked_on"
+                         "narrative progress_on_goal progress_on_goal next_steps"
+                         "empl_signoff date_of_signoff . .";
+    padding: 0.625em 1em;
+    grid-template-columns: 33% 16.5% 16.5% 33%;
+    border: 1px solid #ccc;
+    border-top: none;
+
+    min-height: 25em;
+    min-width: 90%;
+}
+
+.cn_program { grid-area: program; }
+.cn_date_of_case { grid-area: date_of_case; }
+.cn_contact_type { grid-area: contact_type; }
+.cn_goal_worked_on { grid-area: goal_worked_on; }
+.cn_narrative { grid-area: narrative; }
+.cn_progress_on_goal { grid-area: progress_on_goal; }
+.cn_next_steps { grid-area: next_steps; }
+.cn_empl_signoff { grid-area: empl_signoff; }
+.cn_date_of_signoff { grid-area: date_of_signoff; }
+
+.cn_narrative > *:not(label), .cn_progress_on_goal > *:not(label), .cn_next_steps > *:not(label) {
+    height: 15em;
+    width: 90%;
+}
+
+.caseNoteContent > div > *:not(label) {
+    display: block;
+    padding: 0.25em;
+    margin: 1em 1em 1em 0em;
+}
+
+.caseNoteFooter {
+    min-width: 52.1875em;
+    padding: 0.5em 3.7% 0.5em 3.7%;
+}

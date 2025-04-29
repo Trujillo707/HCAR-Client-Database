@@ -10,15 +10,35 @@
     <%-include("header")-%>
     <div class="bodyContent">
         <!-- <img src="" /> -->
-        <p>Client: <%=locals.theClient.getFirstName() +
+        <p class="clientNameHeader">Case Note for Client: <%=locals.theClient.getFirstName() +
             " " + locals.theClient.getLastName()%></p>
         <div class="tabContainer">
-            <div class="tabcontent">
-                <div>
+            <div class="caseNoteContent">
+                <div class="cn_program">
                     <label for="program">Program:</label>
-                    <input type="text" id="program" name="program" />
+                    <select name="program" id="program">
+                        <%
+                            let programs = ["Summit Support Services", "Bay Center Day Services",
+                                "Canvas and Clay Studio", "Comprehensive Career Service", "Respite Services",
+                                "Clinical Services", "Self-Determination Program"];
+                            // programs = programs.filter(e => e !== )
+                        %>
+                        <option value="" selected="selected">Select Program</option>
+                        <option value="Summit_Support_Services">Summit Support Services</option>
+                        <option value="Bay_Center_Day_Services">Bay Center Day Services</option>
+                        <option value="canvas_and_clay_studio">Canvas and Clay Studio</option>
+                        <option value="comprehensive_career_services">Comprehensive Career Services</option>
+                        <option value="respite_services">Respite Services</option>
+                        <option value="clinical_services">Clinical Services</option>
+                        <option value="self_determination_program">Self-Determination Program</option>
+                    </select>
                 </div>
-                <div>
+                <div class="cn_date_of_case">
+                    <label for="date_of_case">Date of Meeting/Activity:</label>
+                    <input type="date" name="date_of_case" id="date_of_case" />
+                </div>
+                <div></div>
+                <div class="cn_contact_type">
                     <label for="contact_type">Contact Type: </label>
                     <p id="contact_type">
                         <input type="radio" name="contact_type" id="in_person" />
@@ -29,7 +49,7 @@
                         <label for="over_the_phone">Over the Phone</label>
                     </p>
                 </div>
-                <div>
+                <div class="cn_goal_worked_on">
                     <label for="goal_worked_on">Goal Worked on: </label>
                     <p id="goal_worked_on">
                         <input type="radio" name="goal_worked_on" id="isp_goal" />
@@ -40,28 +60,32 @@
                         <label for="personal_goal">Personal Goal</label>
                     </p>
                 </div>
-                <div>
+                <div class="cn_narrative">
                     <label for="narrative">Narrative: </label>
-                    <input type="text" id="narrative" name="narrative" />
+                    <textarea id="narrative" name="narrative">placeholder</textarea>
                 </div>
-                <div>
-                    <label for="progress_on_goal">Progress on Goal / What is Being Worked on: </label>
-                    <input type="text" id="progress_on_goal" name="progress_on_goal" />
+                <div class="cn_progress_on_goal">
+                    <label for="progress_on_goal">Progress on Goal: </label>
+                    <textarea id="progress_on_goal" name="progress_on_goal"></textarea>
                 </div>
-                <div>
+                <div class="cn_next_steps">
                     <label for="next_steps">Next Steps: </label>
-                    <input type="text" id="next_steps" name="next_steps" />
+                    <textarea id="next_steps" name="next_steps"></textarea>
                 </div>
-                <div>
+                <div class="cn_empl_signoff">
                     <label for="empl_signoff">Employee Sign-Off: </label>
                     <input type="text" id="empl_signoff" name="empl_sign_off" />
                 </div>
-                <div>
+                <div class="cn_date_of_signoff">
                     <label for="date_of_signoff">Date of Sign-Off: </label>
                     <input type="text" id="date_of_signoff" name="date_of_signoff" />
                 </div>
             </div>
         </div>
     </div>
+<footer class="caseNoteFooter">
+    <button id="cancelButton" class="dimHover footerButton">Cancel</button>
+    <button id="saveButton" class="dimHover footerButton">Save</button>
+</footer>
 </body>
 </html>
