@@ -21,13 +21,14 @@
                     <input type="text" class="searchField" id="phoneNumber" name="phoneNumber" placeholder="0123456789" />
                 </div>
                 <div id="birthDateFilter">
-                    <label for="birthDate">Birthdate</label> <br />
-                    <input type="date" class="searchField" id="birthDate" name="birthDate" />
+                    <label for="dob">Birthdate</label> <br />
+                    <input type="date" class="searchField" id="dob" name="dob" />
                 </div>
                 <!-- Additional Fields with More Options -->
                 <div id="sexTypeFilter" class="hidden">
-                    <label for="sex">Sex</label> <br />
-                    <select class="searchField" id="sex" name="sex" >
+                    <label for="gender">Sex</label> <br />
+                    <select class="searchField" id="gender" name="gender" >
+                        <option value="" selected>-- Select an option --</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
                         <option value="other">Other</option>
@@ -36,6 +37,7 @@
                 <div id="maritalStatusFilter" class="hidden">
                     <label for="maritalStatus">Marital Status</label> <br />
                     <select class="searchField" id="maritalStatus" name="maritalStatus">
+                        <option value="" selected>-- Select an option --</option>
                         <option value="single">Single</option>
                         <option value="married">Married</option>
                         <option value="divorced">Divorced</option>
@@ -45,7 +47,7 @@
                 </div>
                 <div id="emailFilter" class="hidden">
                     <label for="email">Email</label> <br />
-                    <input type="text" class="searchField" id="email" name="email" placeholder="None"/>
+                    <input type="email" class="searchField" id="email" name="email" placeholder="None"/>
                 </div>
                 <div id="payeeFilter" class="hidden">
                     <label for="payee">Payee</label> <br />

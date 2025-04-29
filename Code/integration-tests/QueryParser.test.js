@@ -4,6 +4,7 @@ import QueryParser from "../objects/QueryParser.js";
 // TODO: Create JSON or other list of expected outputs for tests
 
 describe("QueryParser Class Tests", () => {
+    /** @type {QueryParser} */
     let qp;
 
     beforeAll(async () => {
@@ -103,11 +104,11 @@ describe("QueryParser Class Tests", () => {
                     },
                     {
                         "clientID": 1,
-                        "name": "Bay Center Day Servies"
+                        "name": "Bay Center Day Services"
                     },
                     {
                         "clientID": 2,
-                        "name": "Bay Center Day Servies"
+                        "name": "Bay Center Day Services"
                     },
                     {
                         "clientID": 5,
@@ -187,7 +188,7 @@ describe("QueryParser Class Tests", () => {
                 [
                     {
                         "clientID": 2,
-                        "name": "Bay Center Day Servies"
+                        "name": "Bay Center Day Services"
                     },
                     {
                         "clientID": 5,
@@ -200,5 +201,51 @@ describe("QueryParser Class Tests", () => {
                 ]]
         )
         })
+    })
+
+    describe("getClientDemographics() method", () => {
+        test("Reject calls with no clientID provided", async () => {
+            await expect(qp.getClientDemographics()).resolves.toStrictEqual({"Error" : "Invalid ClientID"})
+        });
+        test("Non existent clientID returns error string", async ()=>{
+            await expect(qp.getClientDemographics(99999)).resolves.toStrictEqual({"Error": "Client not found"});
+        });
+
+        test.each([
+            [1,
+                {
+                    "clientID": 1,
+                    "fName": "John",
+                    "lName": "Doe",
+                    "email": null,
+                    "address": "123 Main St",
+                    "addressType": "Home",
+                    "city": "Anytown",
+                    "state": "NY",
+                    "zip": "12345",
+                    "dateOfBirth": new Date("1980-01-01"),
+                    "phoneNumber": "555-1234",
+                    "phoneType": "Mobile",
+                    "sex": "M",
+                    "gender": "Male",
+                    "pronouns": "he/him",
+                    "greeting": "Hello",
+                    "nickname": "Johnny",
+                    "maritalStatus": 0,
+                    "religPref": "None",
+                    "payee": "None",
+                    "preferredHospital": "General Hospital",
+                    "likes": "Pizza",
+                    "dislikes": "Traffic",
+                    "goals": "Succeed",
+                    "hobbies": "Reading",
+                    "achievements": "None",
+                    "conservator": "None",
+                    "profilePicture": "client1_file.png"
+                }
+            ]
+        ])("Valid clientID returns client demographics", async (clientID, result) => {
+            await expect(qp.getClientDemographics(1)).resolves.toStrictEqual(result)
+        });
     })
 })
