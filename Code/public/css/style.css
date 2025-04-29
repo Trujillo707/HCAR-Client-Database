@@ -1,10 +1,197 @@
-/* Justin Crittenden
-   Last Modified: March 10, 2025
+/* Justin Crittenden / Michael Goodwyn / Orlando Trujillo-Ortiz
+   Last Modified: April 22, 2025
 */
 
 *
 {
+    font-family: "Inter", sans-serif;
     box-sizing: border-box;
+}
+
+body {
+    background-color: #d3d3d3;
+    margin: 0;
+}
+
+header {
+    background-color: #fff;
+    display:flex;
+    align-items: center;
+    padding: 0 5px;
+}
+
+@media (max-width: 650px){
+    header{
+        flex-direction: column;
+    }
+    header div{
+        margin-bottom: 15px;
+    }
+    button{
+        margin-top: 5px;
+    }
+}
+
+header * {
+    padding: 0 5px;
+}
+
+header p{
+    font-weight: bold;
+    font-size: 1.6em;
+    padding-right: 10px;
+}
+
+header a {
+    padding: 10px 15px;
+    border-radius: 15px;
+    color: black;
+}
+
+header a:hover {
+    background-color: #d3d3d3;
+}
+
+#resultsBox {
+    background-color: #fff;
+    height: 80%;
+    margin: 20px 20px;
+    border-radius: 5px;
+}
+
+#resultsBox table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+tr {
+    margin: 10px 0;
+    position: relative;
+
+}
+td,th {
+    border: 1px solid black;
+}
+
+td {
+    padding-left: 5px;
+}
+
+tr img{
+    max-height: 50px;
+    width: auto;
+}
+
+tr img:hover{
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-height: 150px;
+    z-index: 10;
+}
+
+footer{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    margin-bottom: 5px;
+}
+
+a {
+    text-decoration: none;
+}
+
+select{
+    display: block;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#pageChanger {
+    border: 1px solid black;
+    border-radius: 6px;
+    display: flex;
+}
+
+#pageChanger button {
+    border: none;
+    cursor: pointer;
+    background-color: #d3d3d3;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+#pageChanger button:hover {
+    background-color: #989898;
+}
+
+#reportForm {
+    margin: 2.5% 5%;
+    padding: 10px 15px;
+    height: 25%;
+    background-color: #B3B3B3;
+}
+
+#reportForm form{
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    align-content: flex-start;
+    flex-wrap: wrap;
+}
+
+#reportForm form>*{
+    margin-right: 5px;
+}
+
+.dimHover {
+    background-color: #323232;
+}
+.dimHover:hover {
+    background-color:black;
+}
+
+.footerButton {
+    padding: 10px 30px;
+    background-color: black;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.lightHover {
+    background-color: white;
+}
+
+.lightHover:hover {
+    background-color: #989898;
+}
+
+#reportForm button{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    padding: 7px 30px;
+    border-radius: 5px;
+}
+
+#reportForm span {
+    margin-left: 2px;
+    font-size: 1.2em;
+}
+
+#reportForm div{
+    margin-right: auto;
+}
+
+#reportForm img {
+    height: 1.2em;
 }
 
 /* Style for login page */
@@ -35,6 +222,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    min-width: 40em;
 }
 
 .header > h1
@@ -75,6 +264,7 @@
 #hcar-header
 {
     font-size: 20px;
+    text-wrap: nowrap;
 }
 .hcar-body
 {
@@ -90,6 +280,7 @@
     background-color: white;
     padding: 32px;
     height: 96px;
+    min-width: 70em;
 }
 
 .header-link
@@ -98,12 +289,6 @@
     padding: 8px;
     border-radius: 8px;
     color: grey;
-}
-
-.header-link:active
-{
-    /* How do I make it so there's a background behind
-       the selected tab? */
 }
 
 .header-link:visited
@@ -196,6 +381,11 @@
     height: 53px;
     font-size: 20px;
     cursor: pointer;
+}
+
+#searchSubmit:hover
+{
+    background-color: #323232;
 }
 
 #moreOptions
@@ -315,28 +505,296 @@
 
 /* Style the tab content */
 .tabcontent {
-    display: none;
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
+
+    min-height: 25em;
+    min-width: 90%;
 }
 
-#tabContainer {
+.bodyContent {
+    padding: 0 1em;
+    min-height: 25em;
+    min-width: 52.1875em;
+}
+
+.clientIdContent {
+    display: grid;
+    grid-template-areas: "fName midName lName DoB"
+                         "phone address email ."
+                         "sex maritalStatus . ."
+                         "regionalCenterID . . photo";
+    justify-content: center;
+    grid-template-columns: 21% 21% 26% 30%;
+    grid-template-rows: 25% 25% 36% 12%;
+    min-width: 90%;
+}
+
+.cli_fName { grid-area: fName; }
+.cli_midName { grid-area: midName; }
+.cli_lName { grid-area: lName; }
+.cli_DoB { grid-area: DoB; }
+.cli_phone { grid-area: phone; }
+.cli_address { grid-area: address; }
+.cli_email { grid-area: email; }
+.cli_sex { grid-area: sex; }
+.cli_maritalStatus { grid-area: maritalStatus; }
+.cli_regionalCenterID { grid-area: regionalCenterID; }
+.cli_image { grid-area: photo; }
+
+.clientIdContent > div > *:not(label) {
+    display: block;
+    margin-top: 0.5em;
+    padding: 0.3em;
+    border-radius: 0.5em;
+    width: 85%;
+    max-width: 16em;
+}
+
+#DoB {
+    width: 9em;
+}
+
+.cli_regionalCenterID {
+
+}
+
+.clientIdContent > div {
+    padding-top: 0.5em;
+}
+
+.medContent {
+    display: grid;
+    justify-content: center;
+    grid-template-areas: "p_insurance p_insurance_num p_care_provider"
+                         "s_insurance s_insurance_num p_physician"
+                         "pref_hospital . ."
+                         "vaccinationList . ."
+                         "medicationList . .";
+    grid-template-columns: 33% 33% 33%;
+    row-gap: 1em;
+    min-width: 90%;
+}
+
+.medicationListDiv { grid-area: medicationList; }
+.vaccinationListDiv { grid-area: vaccinationList; }
+.p_insurance { grid-area: p_insurance; }
+.p_insurance_num { grid-area: p_insurance_num; }
+.s_insurance { grid-area: s_insurance; }
+.s_insurance_num { grid-area: s_insurance_num; }
+.p_care_provider { grid-area: p_care_provider; }
+.p_physician { grid-area: p_physician; }
+.pref_hospital { grid-area: pref_hospital; }
+
+.medContent > div > *:not(label, table, th, td) {
+    display: block;
+    margin-top: 0.5em;
+    padding: 0.3em;
+    border-radius: 0.5em;
+    width: 85%;
+    max-width: 16em;
+}
+
+.medicationList {
+    border-collapse: collapse;
+    margin: 0.75em;
+}
+
+.medicationList th, .medicationList td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.medicationList th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    width: 100%;
+}
+
+.medicationList > tbody > tr > th > *, .medicationList > tbody > tr > td > * {
+    width: 7em;
+    padding: 0.5em;
+}
+
+
+
+
+.personalInfoContent {
+    display: grid;
+    grid-template-areas: "cli_likes cli_hobs cli_add_notes"
+                         "cli_dislikes cli_hobs cli_add_notes"
+                         "cli_goals cli_ach cli_add_notes";
+    justify-content: left;
+    column-gap: 6%;
+    row-gap: 2%;
+    padding: 0.5em 0.3em 0.5em 0.3em;
+    min-width: 90%;
+}
+
+.cli_hobs { grid-area: cli_hobs; }
+.cli_likes { grid-area: cli_likes; }
+.cli_dislikes { grid-area: cli_dislikes; }
+.cli_add_notes { grid-area: cli_add_notes; }
+.cli_goals { grid-area: cli_goals; }
+.cli_ach { grid-area: cli_ach; }
+
+.personalInfoContent > div > *:not(label) {
+    margin-top: 0.5em;
+}
+
+.tabContainer {
     width: 95%;
     height: 90%;
     margin: auto;
     background-color: #f5f5f5;
 }
 
+.tabcontent > input {
+    width: 15em;
+    height: 2em;
+}
 
+.tabcontent > select {
+    width: 9em;
+}
 
+.personalInfoContent {
+    display: grid;
+    grid-template-columns: 30% 30% 30%;
+}
+.personalInfoContent > div > textarea{
+    width: 90%;
+    height: 80%;
+    border-radius: 1em;
+    border-collapse: collapse;
+    padding: 0.5em;
+}
 
+.personalInfoContent > div > label {
+    height: 20%;
+    width: 90%;
+    text-size-adjust: 75%;
+}
 
+/* support team table */
+div#supportTeam.tabcontent {
+    min-width: 52.1875em;
+}
 
+#supportTeam > tr {
+    height: 1em;
+}
 
+.clientNameHeader {
+    padding-left: 2.5%;
+}
+
+.supportTeamDiv {
+    display: grid;
+    justify-content: center;
+    min-width: 90%;
+}
+
+.supportTeam {
+    height: fit-content;
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25em 0;
+    font-size: 1em;
+    text-align: left;
+}
+
+.supportTeam th, .supportTeam td {
+    border: 0.0625em solid #ddd;
+    width: fit-content;
+    padding: 0.5em;
+}
+
+.supportTeam th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.supportTeam tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.supportTeam tr:hover {
+    background-color: #f1f1f1;
+}
+
+.caseNotes {
+    display: grid;
+    grid-template-areas: "caseNoteTable caseNoteButtons"
+                         "caseNoteTable .";
+    grid-template-columns: 80% 20%;
+    min-width: 90%;
+}
+
+.caseNoteTable { grid-area: caseNoteTable }
+.caseNoteButtons {grid-area: caseNoteButtons }
+
+.caseNoteTable {
+    border-collapse: collapse;
+    width: 90%;
+    height: fit-content;
+}
+
+.caseNoteButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.caseNoteButtons > input {
+    padding: 0.625em 1.875em;
+    background-color: grey;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
 /* END: stuff for the clientDetails.ejs */
 
-.bodyContent {
-    padding: 0 1em;
+
+.caseNoteContent {
+    display: grid;
+    grid-template-areas: "program date_of_case date_of_case ."
+                         "contact_type contact_type goal_worked_on goal_worked_on"
+                         "narrative progress_on_goal progress_on_goal next_steps"
+                         "empl_signoff date_of_signoff . .";
+    padding: 0.625em 1em;
+    grid-template-columns: 33% 16.5% 16.5% 33%;
+    border: 1px solid #ccc;
+    border-top: none;
+
+    min-height: 25em;
+    min-width: 90%;
+}
+
+.cn_program { grid-area: program; }
+.cn_date_of_case { grid-area: date_of_case; }
+.cn_contact_type { grid-area: contact_type; }
+.cn_goal_worked_on { grid-area: goal_worked_on; }
+.cn_narrative { grid-area: narrative; }
+.cn_progress_on_goal { grid-area: progress_on_goal; }
+.cn_next_steps { grid-area: next_steps; }
+.cn_empl_signoff { grid-area: empl_signoff; }
+.cn_date_of_signoff { grid-area: date_of_signoff; }
+
+.cn_narrative > *:not(label), .cn_progress_on_goal > *:not(label), .cn_next_steps > *:not(label) {
+    height: 15em;
+    width: 90%;
+}
+
+.caseNoteContent > div > *:not(label) {
+    display: block;
+    padding: 0.25em;
+    margin: 1em 1em 1em 0em;
+}
+
+.caseNoteFooter {
+    min-width: 52.1875em;
+    padding: 0.5em 3.7% 0.5em 3.7%;
 }

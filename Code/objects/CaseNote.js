@@ -1,56 +1,94 @@
 /**
- * @author Orlando Trujillo-Ortiz
- * @version 2025-03-26
+ * @author Orlando Trujillo-Ortiz, Michael Goodwyn
+ * @version 2025-04-27
  * @desc
  * This class holds information for a single Case Note associated with a particular client.
  */
 export default class CaseNote {
     #subject = "";
+    #program = "";
     /** @type {Date} */
     #date = null;
-    #postedBy = "";
-    #location = "";
-    #isBehavioral = false;
-    #isInformational = false;
+    #contactType = {
+        IN_PERSON: "inPerson",
+        WRITTEN: "written",
+        OVER_THE_PHONE: "overThePhone"
+    };
+    #goalWorkedOn = {
+        ISP_GOAL: "ISP Goal",
+        IPP_GOAL: "IPP Goal",
+        PERSONAL_GOAL: "Personal Goal"
+    };
+    #narrative = "";
+    #progressOnGoal = "";
+    #nextSteps = "";
+    #employeeSign = "";
+    /** @type {Date} */
+    #signDate = null;
 
     /**
      * @param {string} subject
+     * @param {string} program
      * @param {Date} date
-     * @param {string} postedBy
-     * @param {string} location
-     * @param {boolean} isBehavioral
-     * @param {boolean} isInformational
+     * @enum {string} contactType
+     * @enum {string} goalWorkedOn
+     * @param {string} narrative
+     * @param {string} progressOnGoal
+     * @param {string} nextSteps
+     * @param {string} employeeSign
+     * @param {Date} signDate
      */
-    constructor(subject, date, postedBy, location, isBehavioral, isInformational) {
+    constructor(subject, program, date, contactType, goalWorkedOn, narrative,
+                progressOnGoal, nextSteps, employeeSign, signDate) {
         this.#subject = subject;
+        this.#program = program;
         this.#date = date;
-        this.#postedBy = postedBy;
-        this.#location = location;
-        this.#isBehavioral = isBehavioral;
-        this.#isInformational = isInformational;
+        this.#contactType = contactType;
+        this.#goalWorkedOn = goalWorkedOn;
+        this.#narrative = narrative;
+        this.#progressOnGoal = progressOnGoal;
+        this.#nextSteps = nextSteps;
+        this.#employeeSign = employeeSign;
+        this.#signDate = signDate;
     }
 
     getSubject() {
         return this.#subject;
     }
 
+    getProgram() {
+        return this.#program;
+    }
+
     getDate() {
         return this.#date;
     }
 
-    getPostedBy() {
-        return this.#postedBy;
+    getContactType() {
+        return this.#contactType;
     }
 
-    getLocation() {
-        return this.#location;
+    getGoalWorkedOn() {
+        return this.#goalWorkedOn;
     }
 
-    getIsBehavioral() {
-        return this.#isBehavioral;
+    getNarrative() {
+        return this.#narrative;
     }
 
-    getIsInformational() {
-        return this.#isInformational;
+    getProgressOnGoal() {
+        return this.#progressOnGoal;
+    }
+
+    getNextSteps() {
+        return this.#nextSteps;
+    }
+
+    getEmployeeSign() {
+        return this.#employeeSign;
+    }
+
+    getSignDate() {
+        return this.#signDate;
     }
 }

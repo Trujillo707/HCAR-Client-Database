@@ -6,11 +6,12 @@
 
 export default class Vaccination {
     #shotType = "";
-    #dateTaken = "";
+    /** @type {Date} */
+    #dateTaken = null;
 
     /** Creates a Vaccination for a Client
      * @param {string} shotType
-     * @param {string} dateTaken
+     * @param {Date} dateTaken
      */
     constructor(shotType, dateTaken) {
         this.#shotType = shotType;
@@ -22,7 +23,7 @@ export default class Vaccination {
         return this.#shotType;
     }
 
-    /** @returns {string} */
+    /** @returns {Date} */
     getDateTaken() {
         return this.#dateTaken;
     }

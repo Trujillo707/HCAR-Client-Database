@@ -26,16 +26,19 @@ testClientArray.push(new ClientBuilder()
                             "pain relief", "addiction, dryness of mouth", "Michael"),
                         new Medication("Hydrocodone", false, "5 mg", "once every 6 hours",
                             "pain relief", "dryness of mouth, addiction", "Bartholomew")])
-    .setVaccinationList([new Vaccination("Tetanus", "12/25/2025"),
-                         new Vaccination("Influenza", "3/30/2025")])
-    .setSupportTeam([new SupportStaff("Nathaniel Post", "Caretaker", 1234567890,
+    .setVaccinationList([new Vaccination("Tetanus", new Date("2025-12-01")),
+                         new Vaccination("Influenza", new Date("2022-04-11"))])
+    .setSupportTeam([new SupportStaff("Nathaniel Emery", "Caretaker", 1234567890,
                         new Date("2025-01-03"), new Date("2025-07-05")),
                      new SupportStaff("Howard Hill", "Worker 2", 123,
                         new Date("2005-05-06"), new Date("2012-03-04")),
                      new SupportStaff("Nigel Noodle", "Worker 1", 456,
                         new Date("2012-03-04"))])
-    .setCaseNoteList([new CaseNote("This is a casenote", "2/4/2022", "Michael", "bay center", true, false),
-                      new CaseNote("casenote wooo", "3/3/2024", "drew", "home visit", false, true)])
+    .setCaseNoteList([new CaseNote("this note", "Bay Center", "2022-02-04", "In-Person", "ISP Goal",
+                          "text here", "text here", "text here", "employee", new Date("2022-02-04")),
+                      new CaseNote("that note", "Bay Center", "2024-03-24", "Written", "IPP Goal",
+                          "text here", "text here", "text here", "employee", new Date("2024-03-24"))])
+    .setPictureURL("/icons/remove_later.jfif")
     .build());
 testClientArray.push(new ClientBuilder()
     .setFirstName("Bob")
