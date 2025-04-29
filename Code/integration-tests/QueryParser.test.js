@@ -230,7 +230,7 @@ describe("QueryParser Class Tests", () => {
 
             compareClientsPrograms(expected, actual);
         })
-    })
+    });
 
     describe("getClientDemographics() method", () => {
         test("Reject calls with no clientID provided", async () => {
@@ -280,6 +280,58 @@ describe("QueryParser Class Tests", () => {
                 compareJSON(key, expected, actual);
             }
         });
-    })
+    });
+
+    describe("getMedicationList() method",  () => {
+        test("Reject calls with no clientID provided", async () => {
+            await expect(qp.getMedicationList()).resolves.toStrictEqual({"Error": "Invalid ClientID"});
+        })
+
+        test("Non-existent clientID returns empty array", async () => {
+            await expect(qp.getMedicationList(99999)).resolves.toStrictEqual([]);
+        });
+
+        test.each([
+            [1, [
+                {
+                    "medicationID": 1,
+                    "name": "Advil",
+                    "prn": 1,
+                    "dosage": "50mg",
+                    "frequency": "One dosage per 4 hours",
+                    "purpose": "Pain relief",
+                    "sideEffects": "Heartburn",
+                    "prescriber": "Dr. Anthony Bennet, GP"
+                },
+                {
+                    "medicationID": 3,
+                    "name": "Dextromethorphan",
+                    "prn": 1,
+                    "dosage": "10mg",
+                    "frequency": "One dosage per 5 hours",
+                    "purpose": "Cough Suppressant ",
+                    "sideEffects": "nausea, vomiting, drowsiness, dizziness, difficulty breathing, fast heartbeat, seizures",
+                    "prescriber": "Dr. Luis Packard, Pulmonologist"
+                },
+                {
+                    "medicationID": 2,
+                    "name": "Vitamin D",
+                    "prn": 0,
+                    "dosage": "10mg",
+                    "frequency": "One a day",
+                    "purpose": "Vitamin D deficiency ",
+                    "sideEffects": null,
+                    "prescriber": "Dr. Anthony Bennet, GP"
+                }
+            ]]
+        ])("Valid clientID returns medication list", async (clientID, expected) => {
+            const actual = await qp.getMedicationList(clientID);
+            for (let i = 0; i < expected.length; i++) {
+                for (const key of Object.keys(expected[i])) {
+                    compareJSON(key, expected[i], actual[i]);
+                }
+            }
+        })
+    });
 
 })

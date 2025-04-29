@@ -272,6 +272,21 @@ export default class QueryParser {
         }
     }
 
+    async getMedicationList(clientID){
+        if (clientID == null || (typeof clientID != "number")) {
+            return {"Error": "Invalid ClientID"};
+        }
+
+        let medicationStmt = "SELECT medicationID, name, prn, dosage, frequency, purpose, sideEffects, prescriber FROM Medication WHERE clientID = ? ORDER BY name";
+
+        try {
+            const [rows] = await this.#pool.execute(medicationStmt, [clientID]);
+            return rows;
+        } catch (e) {
+            return {"Error": "Failure getting Client's medication list: " + e};
+        }
+    }
+
     // Methods below are more related to the Instance's properties and should be used sparingly
 
     /**
