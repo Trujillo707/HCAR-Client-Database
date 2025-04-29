@@ -223,7 +223,7 @@ select{
     justify-content: center;
     align-items: center;
 
-    min-width: 40em;
+    /*min-width: 40em;*/
 }
 
 .header > h1
