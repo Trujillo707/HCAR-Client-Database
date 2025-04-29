@@ -20,7 +20,7 @@ import {Connector} from '@google-cloud/cloud-sql-connector';
  * let myQueryParser = new QueryParserBuilder().build();
  * let results = myQueryParser.getAllClients(staffID);
  */
-export default class QueryParser{
+export default class QueryParser {
     /**
      * @type {QueryParser}
      */
@@ -36,7 +36,7 @@ export default class QueryParser{
      * @returns {QueryParser} The Singleton instance of QueryParser
      */
     constructor(builder) {
-        if (!QueryParser.#instance){
+        if (!QueryParser.#instance) {
             this.#pool = builder.pool;
             this.#connector = builder.connector;
             QueryParser.#instance = this;
@@ -51,44 +51,45 @@ export default class QueryParser{
      *       particular order.
      * @param {number} acctID Account ID for the current logged-in staff
      * @param {number} offset Page offset for results, in multiples of 10 (e.g. offset = 1 --> Clients 11-20)
+     * @returns {Promise<Object>} Array of Objects containing raw SQL column results for each client returned
      */
     async getAllClients(acctID, offset = 0) {
-        if (acctID == null){
+        if (acctID == null) {
             return {"Error": "Invalid Authentication"};
         }
 
         // NOTE: If HCAR ever expands to hold more than 1000 clients in the database, just increase the offset limit!
-        if (typeof offset !== "number" || offset >= 100){
+        if (typeof offset !== "number" || offset >= 100) {
             offset = 0;
-        }else{
+        } else {
             offset = offset * 10;
         }
 
         let results = [];
         let clientIDs;
 
-        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? ORDER BY Client.clientID LIMIT 10 OFFSET " + offset;
+        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID ORDER BY Client.clientID LIMIT 10 OFFSET " + offset;
 
         try {
             const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID]);
-                if (rows.length > 0) {
-                    results.push(rows);
-                    clientIDs = rows.map(client => client.clientID);
-                }else{
-                    // no need to return an array of an empty array
-                    return []
-                }
-            } catch (e) {
+            if (rows.length > 0) {
+                results.push(rows);
+                clientIDs = rows.map(client => client.clientID);
+            } else {
+                // no need to return an array of an empty array
+                return []
+            }
+        } catch (e) {
             console.log("failure getting Client demographics:" + e);
             return [];
         }
         const placeholders = clientIDs.map(() => '?').join(', ');
-        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID JOIN HCAR.StaffClient SC on PC.clientID = SC.clientID WHERE PC.clientID IN (" + placeholders + ") ORDER BY PC.clientID";
+        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID WHERE PC.clientID IN (" + placeholders + ") ORDER BY PC.clientID";
 
-        try{
+        try {
             const [rows] = await this.#pool.execute(programListStmt, clientIDs);
             results.push(rows);
-        }catch (e) {
+        } catch (e) {
             console.log("failure getting Client's Program list: " + e);
             return [];
         }
@@ -112,7 +113,7 @@ export default class QueryParser{
      * @param {string} filters.payee Payee
      * @param {string} filters.conservator Conservator
      * @param offset {number} Page offset for results, in multiples of 10 (e.g. offset = 1 --> Clients 11-20)
-     * @returns {*[]} Array of Objects containing raw SQL column results for each client returned
+     * @returns {Promise<Object>} Array of Objects containing raw SQL column results for each client returned
      */
     async getAllFilteredClients(acctID,
                                 filters = {
@@ -121,67 +122,169 @@ export default class QueryParser{
                                 },
                                 offset = 0) {
 
-        if (acctID == null){
+        if (acctID == null) {
             return {"Error": "Invalid Authentication"};
         }
 
         // NOTE: If HCAR ever expands to hold more than 1000 clients in the database, just increase the offset limit!
-        if (typeof offset !== "number" || offset >= 100){
+        if (typeof offset !== "number" || offset >= 100) {
             offset = 0;
-        }else{
+        } else {
             offset = offset * 10;
         }
 
         // TODO: consider changing schema to make sure what cols can be null and which cannot
         //       filtering must nullcheck any searchable cols that may be null in the DB
-        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
+        // const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
+        // const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
         /*
             Pardon the absurd data validation.
          */
         let values = [];
         values.push(acctID);
-        values.push(typeof filters.firstName === "string" ? filters.firstName : "%");
-        values.push(typeof filters.lastName === "string" ? filters.lastName : "%");
-        values.push(typeof filters.phoneNumber === "string" ? filters.phoneNumber : "%");
-        values.push(filters.dob instanceof Date ? filters.dob.toISOString().slice(0,10) : "%");
-        values.push(typeof filters.gender === "string" ? filters.gender : "%");
-        values.push(typeof filters.maritalStatus === "string" ? filters.maritalStatus : "%");
-        values.push(typeof filters.email === "string" ? filters.email : "%");
-        values.push(typeof filters.payee === "string" ? filters.payee : "%");
-        values.push(typeof filters.conservator === "string" ? filters.conservator : "%");
+        // values.push(filters.firstName !== "" ? filters.firstName : "%");
+        // values.push(filters.lastName !== "" ? filters.lastName : "%");
+        // values.push(filters.phoneNumber !== "" ? filters.phoneNumber : "%");
+        // values.push(filters.dob instanceof Date ? filters.dob.toISOString().slice(0,10) : "%");
+        // values.push(filters.gender !== "Other" ? filters.gender : "%"); // Change later
+        // values.push(filters.maritalStatus !== "Other" ? filters.maritalStatus : "%");
+        // values.push(filters.email !== "" ? filters.email : "%");
+        // values.push(filters.payee !== "" ? filters.payee : "%");
+        // values.push(filters.conservator !== "" ? filters.conservator : "%");
 
+        // Build query with chosen filters
+        let basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID";
+        for (const key of Object.keys(filters)) {
+            if (filters[key] !== "" && filters[key] !== "%") {
+                // Handling date conversion from js to mysql FIX ME
+                if (key === "dob") {
+                    values.push(filters[key].toISOString().slice(0, 10));
+                    basicDetailsStmt += ` AND dateOfBirth LIKE ?`;
+                } else if (key === "gender" || key === "maritalStatus") {
+                    values.push(filters[key]);
+                    basicDetailsStmt += ` AND LOWER(${key}) = LOWER(?)`; // DB has "Male" instead of "male"
+                } else {
+                    values.push(`%${filters[key]}%`);
+                    if (key === "firstName")
+                        basicDetailsStmt += ` AND fName LIKE ?`;
+                    else if (key === "lastName")
+                        basicDetailsStmt += ` AND lName LIKE ?`;
+                    else
+                        basicDetailsStmt += ` AND ${key} LIKE ?`;
+                }
+            }
+        }
 
         console.log(values)
+        console.log("Query: ", basicDetailsStmt);
+
         let results = [];
         let clientIDs;
 
-        try{
+        try {
             const [rows] = await this.#pool.execute(basicDetailsStmt, values);
-            if (rows.length > 0){
+            if (rows.length > 0) {
                 results.push(rows);
                 clientIDs = rows.map(client => client.clientID);
-            }
-            else{
+            } else {
                 // Dont bother getting programs
                 return [];
             }
-        }catch (e) {
+        } catch (e) {
             console.log("failure getting Client's details: " + e);
             return [];
         }
 
         const placeholders = clientIDs.map(() => '?').join(', ');
-        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID JOIN HCAR.StaffClient SC on PC.clientID = SC.clientID WHERE PC.clientID IN (" + placeholders + ") ORDER BY PC.clientID";
+        const programListStmt = "SELECT PC.clientID, Program.name FROM Program JOIN HCAR.ProgramClient PC on Program.programID = PC.programID WHERE PC.clientID IN (" + placeholders + ") ORDER BY PC.clientID";
 
-        try{
+        try {
             const [rows] = await this.#pool.execute(programListStmt, clientIDs);
             results.push(rows);
-        }catch (e) {
+        } catch (e) {
             console.log("failure getting Client's Program list: " + e);
             return [];
         }
 
         return results;
+    }
+
+    /**
+     * Queries the database for detailed demographic information of a specific client.
+     * @param {number} clientID The ID of the client whose demographics are being queried
+     * @returns {Promise<Object>} An object containing the client's demographic details or an error message
+     */
+    async getClientDemographics(clientID) {
+        if (clientID == null || (typeof clientID != "number")) {
+            return {"Error": "Invalid ClientID"};
+        }
+
+        const demoStmt = "SELECT Client.clientID, fName, lName, email, address, addressType, city, state, zip, dateOfBirth, phoneNumber, " +
+            "       phoneType, sex, gender, pronouns, greeting, nickname, maritalStatus, religPref, payee, preferredHospital, likes, " +
+            "       dislikes, goals, hobbies, achievements, conservator, F.filename as profilePicture " +
+            "FROM Client " +
+            "JOIN HCAR.File F on Client.profilePicture = F.fileID " +
+            "WHERE Client.clientID = ?"
+
+        try {
+            const [rows] = await this.#pool.execute(demoStmt, [clientID]);
+            if (rows.length > 0) {
+                return rows[0];
+            } else {
+                return {"Error": "Client not found"};
+            }
+        } catch (e) {
+            return {"Error": "Failure getting Client's demographics: " + e};
+        }
+    }
+
+    async getInsuranceAndMedicalPreferences(clientID) {
+        if (clientID == null || (typeof clientID != "number")) {
+            return {"Error": "Invalid ClientID"};
+        }
+
+        let results = {
+            primaryInsurance: null, secondaryInsurance: null,
+            pcp: null, primaryPhysician: null
+        };
+
+        let primaryInsuranceStmt = "SELECT name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.primaryInsurance FROM Client WHERE clientID = ?)";
+        let secondaryInsuranceStmt = "SELECT name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.secondaryInsurance FROM Client WHERE clientID = ?)";
+        let pcpStmt = "SELECT name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryCareProvider FROM Client WHERE clientID = ?)";
+        let primaryPhysicianStmt = "SELECT name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryPhysician FROM Client WHERE clientID = ?)";
+
+        try {
+            const [primaryInsuranceRows, secondaryInsuranceRows, pcpRows, primaryPhysicianRows] = await Promise.all([
+                this.#pool.execute(primaryInsuranceStmt, [clientID]),
+                this.#pool.execute(secondaryInsuranceStmt, [clientID]),
+                this.#pool.execute(pcpStmt, [clientID]),
+                this.#pool.execute(primaryPhysicianStmt, [clientID])
+            ]);
+
+            results.primaryInsurance = primaryInsuranceRows;
+            results.secondaryInsurance = secondaryInsuranceRows;
+            results.pcp = pcpRows;
+            results.primaryPhysician = primaryPhysicianRows;
+
+            return results;
+        } catch (e) {
+            return {"Error": "Failure getting Client's insurance and medical preferences: " + e};
+        }
+    }
+
+    async getMedicationList(clientID){
+        if (clientID == null || (typeof clientID != "number")) {
+            return {"Error": "Invalid ClientID"};
+        }
+
+        let medicationStmt = "SELECT medicationID, name, prn, dosage, frequency, purpose, sideEffects, prescriber FROM Medication WHERE clientID = ? ORDER BY name";
+
+        try {
+            const [rows] = await this.#pool.execute(medicationStmt, [clientID]);
+            return rows;
+        } catch (e) {
+            return {"Error": "Failure getting Client's medication list: " + e};
+        }
     }
 
     // Methods below are more related to the Instance's properties and should be used sparingly
@@ -190,7 +293,7 @@ export default class QueryParser{
      * Access the current connection pool. This should be used with caution.
      * @returns {mysql.Pool}
      */
-    getPool(){
+    getPool() {
         return this.#pool;
     }
 
@@ -198,7 +301,7 @@ export default class QueryParser{
      * Access the Google CloudSQL Connector object. This should be used with extreme caution.
      * @returns {Connector}
      */
-    getGoogleConnector(){
+    getGoogleConnector() {
         return this.#connector;
     }
 
@@ -207,7 +310,7 @@ export default class QueryParser{
      * really useful for cleanup activities.
      * @returns {boolean}
      */
-    static hasInstance(){
+    static hasInstance() {
         return QueryParser.#instance !== undefined && QueryParser.#instance !== null;
     }
 
@@ -215,12 +318,12 @@ export default class QueryParser{
      * This will destruct the
      * @returns {Promise<void>} This function is asynchronous and should handle the promise
      */
-    async destructor(){
-        if (this.#pool){
+    async destructor() {
+        if (this.#pool) {
             await this.#pool.end();
             this.#pool = null;
         }
-        if(this.#connector){
+        if (this.#connector) {
             this.#connector.close();
             this.#connector = null;
         }

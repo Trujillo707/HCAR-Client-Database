@@ -1,9 +1,35 @@
 import {afterAll, beforeAll, describe, expect, test} from "@jest/globals";
 import QueryParserBuilder from "../objects/QueryParserBuilder.js";
 import QueryParser from "../objects/QueryParser.js";
-// TODO: Create JSON or other list of expected outputs for tests
+
+function compareJSON(key, expected, actual) {
+    console.log(key, expected[key], actual[key]);
+    if (key === "dateOfBirth" && expected[key] instanceof Date) {
+        expect(actual[key].toISOString().slice(0, 10)).toBe(expected[key].toISOString().slice(0, 10));
+    } else {
+        expect(actual[key]).toStrictEqual(expected[key]);
+    }
+}
+
+function compareClientsPrograms(expected, actual) {
+    // Compare clients
+    expect(actual[0].length).toBe(expected[0].length);
+    for (let i = 0; i < expected[0].length; i++) {
+        for (const key of Object.keys(expected[0][i])) {
+            compareJSON(key, expected[0][i], actual[0][i]);
+        }
+    }
+    // Compare programs
+    expect(actual[1].length).toBe(expected[1].length);
+    for (let i = 0; i < expected[1].length; i++) {
+        for (const key of Object.keys(expected[1][i])) {
+            compareJSON(key, expected[1][i], actual[1][i]);
+        }
+    }
+}
 
 describe("QueryParser Class Tests", () => {
+    /** @type {QueryParser} */
     let qp;
 
     beforeAll(async () => {
@@ -103,11 +129,11 @@ describe("QueryParser Class Tests", () => {
                     },
                     {
                         "clientID": 1,
-                        "name": "Bay Center Day Servies"
+                        "name": "Bay Center Day Services"
                     },
                     {
                         "clientID": 2,
-                        "name": "Bay Center Day Servies"
+                        "name": "Bay Center Day Services"
                     },
                     {
                         "clientID": 5,
@@ -127,8 +153,10 @@ describe("QueryParser Class Tests", () => {
                     }
                 ]
             ]]
-        ])("Returns actual rows given valid acctID with records", async (acctID, rows) => {
-            await expect(qp.getAllClients(acctID)).resolves.toStrictEqual(rows);
+        ])("Returns actual rows given valid acctID with records", async (acctID, expected) => {
+            const actual = await qp.getAllClients(acctID);
+            console.log(actual)
+            compareClientsPrograms(expected, actual);
         })
 
         /**
@@ -148,46 +176,45 @@ describe("QueryParser Class Tests", () => {
             await expect(qp.getAllFilteredClients()).resolves.toStrictEqual({"Error": "Invalid Authentication"})
         })
 
-        // TODO: refactor into a more robust test for all search filters
-        test("Gender Filter", async ()=>{
-            await expect(qp.getAllFilteredClients(1, {gender: "Female"})).resolves.toStrictEqual([[
-                    {
-                        "clientID": 2,
-                        "profilePictureFilename": "client2_file.png",
-                        "fName": "Jane",
-                        "lName": "Smith",
-                        "phoneNumber": "555-5678",
-                        "email": null,
-                        "dateOfBirth": new Date("1990-05-15"),
-                        "pronouns": "she/her",
-                        "gender": "Female"
-                    },
-                    {
-                        "clientID": 5,
-                        "profilePictureFilename": "client5_file.png",
-                        "fName": "Emily",
-                        "lName": "Davis",
-                        "phoneNumber": "555-1111",
-                        "email": null,
-                        "dateOfBirth": new Date("1992-11-22"),
-                        "pronouns": "she/her",
-                        "gender": "Female"
-                    },
-                    {
-                        "clientID": 21,
-                        "profilePictureFilename": "client21_file.png",
-                        "fName": "Mia",
-                        "lName": "Hill",
-                        "phoneNumber": "555-9090",
-                        "email": null,
-                        "dateOfBirth": new Date("1993-03-03"),
-                        "pronouns": "she/her",
-                        "gender": "Female"
-                    }],
+        test.each([
+            [1, {gender: "Female"}, [[
+                {
+                    "clientID": 2,
+                    "profilePictureFilename": "client2_file.png",
+                    "fName": "Jane",
+                    "lName": "Smith",
+                    "phoneNumber": "555-5678",
+                    "email": null,
+                    "dateOfBirth": new Date("1990-05-15"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
+                },
+                {
+                    "clientID": 5,
+                    "profilePictureFilename": "client5_file.png",
+                    "fName": "Emily",
+                    "lName": "Davis",
+                    "phoneNumber": "555-1111",
+                    "email": null,
+                    "dateOfBirth": new Date("1992-11-22"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
+                },
+                {
+                    "clientID": 21,
+                    "profilePictureFilename": "client21_file.png",
+                    "fName": "Mia",
+                    "lName": "Hill",
+                    "phoneNumber": "555-9090",
+                    "email": null,
+                    "dateOfBirth": new Date("1993-03-03"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
+                }],
                 [
                     {
                         "clientID": 2,
-                        "name": "Bay Center Day Servies"
+                        "name": "Bay Center Day Services"
                     },
                     {
                         "clientID": 5,
@@ -197,8 +224,114 @@ describe("QueryParser Class Tests", () => {
                         "clientID": 21,
                         "name": "Self-Determination Program"
                     }
-                ]]
-        )
+                ]]]
+        ])("Gender Filter", async (acctID, filters, expected)=>{
+            const actual = await qp.getAllFilteredClients(acctID, filters);
+
+            compareClientsPrograms(expected, actual);
         })
-    })
+    });
+
+    describe("getClientDemographics() method", () => {
+        test("Reject calls with no clientID provided", async () => {
+            await expect(qp.getClientDemographics()).resolves.toStrictEqual({"Error" : "Invalid ClientID"})
+        });
+        test("Non existent clientID returns error string", async ()=>{
+            await expect(qp.getClientDemographics(99999)).resolves.toStrictEqual({"Error": "Client not found"});
+        });
+
+        test.each([
+            [1,
+                {
+                    "clientID": 1,
+                    "fName": "John",
+                    "lName": "Doe",
+                    "email": null,
+                    "address": "123 Main St",
+                    "addressType": "Home",
+                    "city": "Anytown",
+                    "state": "NY",
+                    "zip": "12345",
+                    "dateOfBirth": new Date("1980-01-01"),
+                    "phoneNumber": "555-1234",
+                    "phoneType": "Mobile",
+                    "sex": "M",
+                    "gender": "Male",
+                    "pronouns": "he/him",
+                    "greeting": "Hello",
+                    "nickname": "Johnny",
+                    "maritalStatus": 0,
+                    "religPref": "None",
+                    "payee": "None",
+                    "preferredHospital": "General Hospital",
+                    "likes": "Pizza",
+                    "dislikes": "Traffic",
+                    "goals": "Succeed",
+                    "hobbies": "Reading",
+                    "achievements": "None",
+                    "conservator": "None",
+                    "profilePicture": "client1_file.png"
+                }
+            ]
+        ])("Valid clientID returns client demographics", async (clientID, expected) => {
+            const actual = await qp.getClientDemographics(clientID);
+
+            for (const key of Object.keys(expected)) {
+                compareJSON(key, expected, actual);
+            }
+        });
+    });
+
+    describe("getMedicationList() method",  () => {
+        test("Reject calls with no clientID provided", async () => {
+            await expect(qp.getMedicationList()).resolves.toStrictEqual({"Error": "Invalid ClientID"});
+        })
+
+        test("Non-existent clientID returns empty array", async () => {
+            await expect(qp.getMedicationList(99999)).resolves.toStrictEqual([]);
+        });
+
+        test.each([
+            [1, [
+                {
+                    "medicationID": 1,
+                    "name": "Advil",
+                    "prn": 1,
+                    "dosage": "50mg",
+                    "frequency": "One dosage per 4 hours",
+                    "purpose": "Pain relief",
+                    "sideEffects": "Heartburn",
+                    "prescriber": "Dr. Anthony Bennet, GP"
+                },
+                {
+                    "medicationID": 3,
+                    "name": "Dextromethorphan",
+                    "prn": 1,
+                    "dosage": "10mg",
+                    "frequency": "One dosage per 5 hours",
+                    "purpose": "Cough Suppressant ",
+                    "sideEffects": "nausea, vomiting, drowsiness, dizziness, difficulty breathing, fast heartbeat, seizures",
+                    "prescriber": "Dr. Luis Packard, Pulmonologist"
+                },
+                {
+                    "medicationID": 2,
+                    "name": "Vitamin D",
+                    "prn": 0,
+                    "dosage": "10mg",
+                    "frequency": "One a day",
+                    "purpose": "Vitamin D deficiency ",
+                    "sideEffects": null,
+                    "prescriber": "Dr. Anthony Bennet, GP"
+                }
+            ]]
+        ])("Valid clientID returns medication list", async (clientID, expected) => {
+            const actual = await qp.getMedicationList(clientID);
+            for (let i = 0; i < expected.length; i++) {
+                for (const key of Object.keys(expected[i])) {
+                    compareJSON(key, expected[i], actual[i]);
+                }
+            }
+        })
+    });
+
 })

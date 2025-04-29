@@ -29,7 +29,7 @@ function openTab(tabName) {
             currLink.classList.remove('active');
         }
     });
-    document.getElementById(tabName).style.display = "block";
+    document.getElementById(tabName).style.display = "grid";
 }
 
 // Get the element with id="defaultOpen" and click on it
