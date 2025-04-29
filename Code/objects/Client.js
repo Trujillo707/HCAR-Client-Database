@@ -9,6 +9,7 @@ import Address from "./Address.js";
  */
 export class Client {
     // Keep these private to prevent any changes!
+    #clientID = -1;
     #firstName = "";
     #middleName = "";
     #lastName = "";
@@ -54,6 +55,7 @@ export class Client {
      * @param {ClientBuilder} builder
      */
     constructor( builder ) {
+        this.#clientID = builder.clientID;
         this.#firstName = builder.firstName;
         this.#middleName = builder.middleName;
         this.#lastName = builder.lastName;
@@ -81,6 +83,11 @@ export class Client {
         this.#caseNoteList = builder.caseNoteList;
         this.#pictureURL = builder.pictureURL;
         this.#programs = builder.programs;
+    }
+
+    /** @returns {number} */
+    getClientID() {
+        return this.#clientID;
     }
 
     /** @returns {string} */

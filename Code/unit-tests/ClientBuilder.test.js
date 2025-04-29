@@ -24,6 +24,11 @@ describe("ClientBuilder Setters", () => {
         theBuilder = new ClientBuilder();
     });
 
+    test("clientID", () => {
+        let theClient = theBuilder.setClientID(123).build();
+        expect(theClient.getClientID()).toBe(123);
+    })
+
     test("firstName", () => {
         let theClient = theBuilder.setFirstName("Alice").build();
         expect(theClient.getFirstName()).toBe("Alice");
