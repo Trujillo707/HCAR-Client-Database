@@ -15,6 +15,8 @@ export class ClientBuilder {
     /** @type {number} */
     clientID = -1;
     /** @type {string} */
+    clientID = "";
+    /** @type {string} */
     firstName = "";
     /** @type {string} */
     middleName = "";
@@ -73,6 +75,16 @@ export class ClientBuilder {
 
     /**
      * @param {number} clientID
+     * @returns {ClientBuilder} Returns this current ClientBuilder to allow method chaining.
+     */
+    setClientID(clientID) {
+        this.clientID = clientID;
+        return this;
+    }
+
+    /**
+     *
+     * @param {string} clientID
      * @returns {ClientBuilder} Returns this current ClientBuilder to allow method chaining.
      */
     setClientID(clientID) {

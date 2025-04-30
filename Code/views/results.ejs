@@ -9,7 +9,7 @@
 
 <%- include("header") -%>
 
-<div id="resultsBox">
+<div id="resultsBox" class="">
     <table>
         <thead>
         <tr>
@@ -27,9 +27,9 @@
         </thead>
         <!-- If there are Clients to display, show them! -->
     <% if (locals.clientList && Array.isArray(clientList) && clientList.length > 0){ %>
-        <tbody>
+        <tbody id="clientTableBody">
             <% clientList.forEach((current) => { %>
-                <tr>
+                <tr id="clientRow" class="lightHover" data-id="<%= current.getClientID() %>">
                     <td><img width="256" alt="Picture of <%= current.getFirstName() %>"
                              src="<%= current.getPictureURL() %>">
                     </td>
@@ -47,7 +47,7 @@
                         <%} %>
                     </td>
                     <td>
-                        <% current.getPrograms().forEach((currProgram) => { %>
+                        <% Array.from(current.getPrograms()).forEach((currProgram) => { %>
                             <%=currProgram.getName()%><br/>
                         <% }) %>
                     </td>
@@ -65,14 +65,17 @@
 </div>
 <footer>
     <button id="goBackButton" class="dimHover footerButton">Go Back</button>
+    <button id="goBackButton" class="dimHover footerButton">Go Back</button>
 
     <div id="pageChanger">
         <button type="button" disabled="disabled">← Previous</button>
         <button type="button">Next →</button>
     </div>
     <!-- Probably going to need JavaScript to make this button work nicely -->
-    <button id="selectButton" class="footerButton dimHover">Select</button>
+    <button id="selectButton" class="dimHover footerButton">Select</button>
+
 </footer>
+<script src="../js/resultsScript.js"></script>
 </body>
 
 </html>
