@@ -320,15 +320,22 @@ export default class QueryParser {
             return {"Error": "Failure getting Client's vaccination list"};
         }
     }
-/*
+
     async getCaseNoteList(clientID){
         if (clientID == null || (typeof clientID != "number")) {
             return {"Error": "Invalid ClientID"};
         }
 
         let caseNoteStmt = "SELECT Note.noteID, dateCreated, fname || ' ' || lname as creator, name as programName FROM Note JOIN Staff ON Staff.staffID = Note.staffID JOIN Program ON Program.programID = Note.programID JOIN HCAR.NoteClient NC on Note.noteID = NC.noteID WHERE clientID = ? ORDER BY dateCreated DESC";
+
+        try {
+            const [rows] = await this.#pool.execute(caseNoteStmt, [clientID]);
+            return rows;
+        } catch (e) {
+            console.log("Error: Failure getting Client's case note list:" + e);
+            return {"Error": "Failure getting Client's case note list"};
+        }
     }
-*/
     // Methods below are more related to the Instance's properties and should be used sparingly
 
     /**

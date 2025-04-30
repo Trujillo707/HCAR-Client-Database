@@ -403,4 +403,24 @@ describe("QueryParser Class Tests", () => {
         })
     })
 
+    describe("getCaseNoteList() method", () => {
+        test("Reject calls with no clientID provided", async () => {
+            await expect(qp.getCaseNoteList()).resolves.toStrictEqual({"Error": "Invalid ClientID"});
+        });
+
+        test("Non-existent clientID returns empty array", async () => {
+            await expect(qp.getCaseNoteList(99999)).resolves.toStrictEqual([]);
+        });
+
+        test.each()("Valid clientID returns Case Note list", async (clientID, expected) => {
+            const actual = await qp.getCaseNoteList(clientID);
+            for (let i = 0; i < expected.length; i++) {
+                for (const key of Object.keys(expected[i])) {
+                    compareJSON(key, expected[i], actual[i]);
+                }
+            }
+        })
+
+    })
+
 })
