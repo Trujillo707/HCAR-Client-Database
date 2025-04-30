@@ -2,6 +2,7 @@ import express from "express"
 const app = express()
 import {reportTypes} from "./reportsLogic.js";
 import {ClientBuilder} from "./objects/ClientBuilder.js";
+import Programs from "./objects/Programs.js";
 const port = process.env.PORT || 8080;
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -17,6 +18,9 @@ app.use(express.static(__dirname + '/public'));
 
 // For handling form data
 app.use(express.urlencoded({extended: true}));
+
+// Handling JSON payloads
+app.use(express.json());
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + "/views");
@@ -50,15 +54,17 @@ app.post('/results', sanitize, async (req, res) => {
     /* const resClients = req.clients; */
     const searchData = req.body;
     let qp = await new QueryParserBuilder().build()
-    let results = await qp.getAllFilteredClients(1, searchData);    // How to handle empty search data?
+    let results = await qp.getAllFilteredClients(1, searchData);    // Later replace with accID
     // Build Clients for each returned row
-    // console.log("Results: ", results[0]);   // Uncomment for debugging
     let clients = [];
     if (results[0] !== undefined)
     {
+        console.log("Results: ", results[0]);   // Uncomment for debugging
+        console.log("Programs: ", results[1]);   // Uncomment for debugging
         for (const client of results[0])
         {
             clients.push(new ClientBuilder()
+            .setClientID(client.clientID !== null ? client.clientID : "Empty")
             .setFirstName(client.fName !== null ? client.fName : "Empty")
             .setLastName(client.lName !== null ? client.lName : "Empty")
             .setPhoneNumber(client.phoneNumber !== null ? client.phoneNumber : "Empty")
@@ -66,6 +72,7 @@ app.post('/results', sanitize, async (req, res) => {
             .setDOB(client.dateOfBirth !== null ? new Date(client.dateOfBirth) : "Empty")
             .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
             .setSex(client.gender !== null ? client.gender : "Empty")
+            .setPrograms(new Programs(results[1].filter(program => program.clientID === client.clientID)))
             .build());
         }
     }
@@ -83,6 +90,13 @@ app.get("/caseNote", (req, res) => {
 // TODO: MAKE THIS POST OBVIOUSLY 
 app.get('/client', (req, res) => {
     let rawData = req.body.clientID;
+    res.render("clientDetails", {theClient: testClientArray[0]});
+});
+
+// Probably use sanitize here
+app.post('/client', sanitize, (req, res) => {
+    let cliID = req.body.clientID;
+    console.log("Client ID received: ", cliID);
     res.render("clientDetails", {theClient: testClientArray[0]});
 });
 
