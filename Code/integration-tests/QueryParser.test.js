@@ -4,7 +4,7 @@ import QueryParser from "../objects/QueryParser.js";
 
 function compareJSON(key, expected, actual) {
     console.log(key, expected[key], actual[key]);
-    if (key === "dateOfBirth" && expected[key] instanceof Date) {
+    if (expected[key] instanceof Date) {
         expect(actual[key].toISOString().slice(0, 10)).toBe(expected[key].toISOString().slice(0, 10));
     } else {
         expect(actual[key]).toStrictEqual(expected[key]);
@@ -333,5 +333,74 @@ describe("QueryParser Class Tests", () => {
             }
         })
     });
+
+    describe("getVaccinationList() method", () => {
+        test("Reject calls with no clientID provided", async () => {
+            await expect(qp.getVaccinationList()).resolves.toStrictEqual({"Error": "Invalid ClientID"});
+        });
+
+        test("Non-existent clientID returns empty array", async () => {
+            await expect(qp.getVaccinationList(99999)).resolves.toStrictEqual([]);
+        });
+
+        test.each([
+            [1, [
+                {
+                    "clientID": 1,
+                    "name": "Influenza",
+                    "dateTaken": new Date("2023-10-05")
+                },
+                {
+                    "clientID": 1,
+                    "name": "COVID-19 - Dose 2",
+                    "dateTaken": new Date("2023-05-08")
+                },
+                {
+                    "clientID": 1,
+                    "name": "COVID-19 - Dose 1",
+                    "dateTaken": new Date("2023-04-10")
+                },
+                {
+                    "clientID": 1,
+                    "name": "Hepatitis B - Dose 3",
+                    "dateTaken": new Date("2022-08-01")
+                },
+                {
+                    "clientID": 1,
+                    "name": "Hepatitis B - Dose 2",
+                    "dateTaken": new Date("2022-03-01")
+                },
+                {
+                    "clientID": 1,
+                    "name": "Hepatitis B - Dose 1",
+                    "dateTaken": new Date("2022-02-01")
+                },
+                {
+                    "clientID": 1,
+                    "name": "MMR",
+                    "dateTaken": new Date("2022-01-15")
+                },
+                {
+                    "clientID": 1,
+                    "name": "Varicella",
+                    "dateTaken": new Date("2022-01-15")
+                }
+            ]],
+            [25, [
+                {
+                    "clientID": 25,
+                    "name": "Influenza",
+                    "dateTaken": new Date("2023-11-05")
+                }
+            ]]
+        ])("Valid clientID returns vaccination list", async (clientID, expected) => {
+            const actual = await qp.getVaccinationList(clientID);
+            for (let i = 0; i < expected.length; i++) {
+                for (const key of Object.keys(expected[i])) {
+                    compareJSON(key, expected[i], actual[i]);
+                }
+            }
+        })
+    })
 
 })
