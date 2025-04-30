@@ -93,10 +93,26 @@ app.get('/client', (req, res) => {
     res.render("clientDetails", {theClient: testClientArray[0]});
 });
 
-// Probably use sanitize here
 app.post('/client', sanitize, (req, res) => {
     let cliID = req.body.clientID;
-    console.log("Client ID received: ", cliID);
+    res.json({redirect: `/client/${cliID}`});
+});
+
+// Redirection from POST request 
+app.get('/client/:id', async (req, res) => {
+    const cliID = Number(req.params.id);
+    // DB Queries
+    let qp = await new QueryParserBuilder().build()
+    let clientDemographics = await qp.getClientDemographics(cliID);
+    let insuranceAndMedicalPreferences = await qp.getInsuranceAndMedicalPreferences(cliID);
+    let medicationList = await qp.getMedicationList(cliID);
+    console.log("Demographics: ", clientDemographics);
+    console.log("Insurance: ", insuranceAndMedicalPreferences);
+    console.log("Medication: ", medicationList);
+
+    // Build client
+    
+
     res.render("clientDetails", {theClient: testClientArray[0]});
 });
 
