@@ -222,8 +222,6 @@ select{
     display: flex;
     justify-content: center;
     align-items: center;
-
-    min-width: 40em;
 }
 
 .header > h1
@@ -760,8 +758,8 @@ div#supportTeam.tabcontent {
 
 .caseNoteContent {
     display: grid;
-    grid-template-areas: "program date_of_case date_of_case ."
-                         "contact_type contact_type goal_worked_on goal_worked_on"
+    grid-template-areas: "subject program . date_of_case"
+                         "contact_type goal_worked_on goal_worked_on ."
                          "narrative progress_on_goal progress_on_goal next_steps"
                          "empl_signoff date_of_signoff . .";
     padding: 0.625em 1em;
@@ -773,9 +771,13 @@ div#supportTeam.tabcontent {
     min-width: 90%;
 }
 
+.cn_subject { grid-area: subject; }
 .cn_program { grid-area: program; }
 .cn_date_of_case { grid-area: date_of_case; }
-.cn_contact_type { grid-area: contact_type; }
+.cn_contact_type {
+    grid-area: contact_type;
+
+}
 .cn_goal_worked_on { grid-area: goal_worked_on; }
 .cn_narrative { grid-area: narrative; }
 .cn_progress_on_goal { grid-area: progress_on_goal; }
