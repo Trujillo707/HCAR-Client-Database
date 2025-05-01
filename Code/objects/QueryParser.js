@@ -1,4 +1,5 @@
 import mysql from 'mysql2/promise';
+import bcrypt from "bcryptjs";
 // If using CloudSQL, they suggest using their connect for better security, I suppose
 import {Connector} from '@google-cloud/cloud-sql-connector';
 
@@ -279,26 +280,175 @@ export default class QueryParser {
         }
     }
 
-    /**
-     * Queries the database for the client's medication list.
-     * @param {number} clientID
-     * @returns {Promise<*|{Error: string}>}
-     */
-    async getMedicationList(clientID){
+    #validateInput(username, password){
+      if(!username || !password){
+        return {"status": false, "message": {"Error":"Empty username or password"}};
+      }
+      else if(username.length > 32 || password.length > 32){
+        return {"status": false, "message": {"Error":"Input length exceeded"}};
+      }
+      else if (!/^[a-zA-Z0-9_.]+$/.test(username)) {
+        return {"status": false, "message": {"Error":"Username contains invalid characters"}};
+      }
+      else{
+        return {"status": true, "message": {"Error":"Valid username/password input entered"}};
+      }
+    }
+
+    async auth(req){
+      try{
+        let validation = this.#validateInput(req.body.username, req.body.password)
+        if(!validation.status) return validation.message;
+        
+        let query = "SELECT * FROM Account WHERE username = ?"; 
+        const [rows] = await this.#pool.execute(query, [req.body.username]);
+    
+        if(rows.length === 0) return {"Error":"Incorrect username or password"}; //No user found
+        else if(rows.length > 1){ //Should not happen
+          return {"Error":"Incorrect username or password"};
+        }
+        else if(await bcrypt.compare(req.body.password, rows[0].hash)){
+          if(rows[0].disabled === 1){
+            return {"Error":"Account has been disabled"};
+          }
+          req.session.accountID = rows[0].accountID;
+          return "Successful Login";
+        }
+        else{
+          return {"Error":"Incorrect username or password"};
+        }
+      }
+      catch(err){
+        console.log(err);
+        return {"Error":"Error authenticating"};
+      }
+    };
+
+    async createCaseNote(req){
+      const connection = await this.#pool.getConnection();
+      try {
+        const accountID = req.session.accountID;
+        if(!accountID){
+          return {"Error":"Invalid authentication"};
+        }
+    
+        let query = "SELECT staffID, disabled, admin FROM Account WHERE accountID = ?"; 
+        const [Account] = await connection.execute(query, [accountID]);
+    
+        if(Account[0].disabled === 1){
+          return {"Error":"Account has been disabled"};
+        }
+        const clientID = parseInt(req.body.clientID);
+        if(!Number.isInteger(clientID)){
+          return {"Error":"Invalid Request"};
+        }
+
+        const staffID = Account[0].staffID;
+        await connection.beginTransaction();
+        if(Account[0].admin != 1){
+          const staffClientQuery = "SELECT COUNT(*) FROM StaffClient WHERE staffID = ? AND clientID = ?"; 
+          var [staffClient] = await connection.execute(staffClientQuery, [staffID, clientID]);
+        }
+        if(Account[0].admin === 1 || staffClient[0]['COUNT(*)'] === 1){
+          await connection.execute("CALL CreateCaseNote(?, ?, ?, ?, ?, ?, ?)", [
+            staffID,
+            req.body.clientID,
+            req.body.contactType,
+            req.body.goal,
+            req.body.goalProgress,
+            req.body.narrative,
+            req.body.nextSteps
+          ]);
+          await connection.commit();
+          return "Case note successfully created"; 
+        }
+        else{
+          await connection.rollback();
+          return {"Error":"Invalid authentication"};
+        }
+      }
+      catch(err){
+        await connection.rollback();
+        console.log(err);
+        return {"Error":"Error creating casenote"};
+      }
+    };
+      
+    async deleteCaseNote(req){
+      const connection = await this.#pool.getConnection();
+      try {
+        const accountID = req.session.accountID;
+        if(!accountID){
+          return {"Error":"Invalid authentication"};
+        }
+        let query = "SELECT staffID, disabled, admin FROM Account WHERE accountID = ?"; 
+        const [Account] = await connection.execute(query, [accountID]);
+        if(Account[0].disabled === 1){
+          return {"Error":"Account has been disabled"};
+        }
+        const noteID = parseInt(req.body.noteID);
+        const clientID = parseInt(req.body.clientID);
+  
+        if(!Number.isInteger(clientID) || !Number.isInteger(noteID)){
+          return {"Error":"Invalid Request"};
+        }
+  
+        const staffID = Account[0].staffID;
+        await connection.beginTransaction();
+        if(Account[0].admin != 1){
+          const staffClientQuery = "SELECT COUNT(*) FROM StaffClient sc JOIN NoteClient nc ON sc.clientID=nc.clientID WHERE sc.staffID = ? AND nc.noteID = ? AND sc.clientID = ?;";
+          var [staffClientNote] = await connection.execute(staffClientQuery, [staffID, noteID, clientID]);
+        }
+        console.log(staffClientNote[0]['COUNT(*)']);
+        if(Account[0].admin === 1 || staffClientNote[0]['COUNT(*)'] === 1){
+          var [deleteResults] = await connection.execute("CALL DeleteCaseNote(?, ?)", [
+            clientID,
+            noteID
+          ]);
+          await connection.commit();
+          if(deleteResults.affectedRows === 0){
+            await connection.rollback();
+            return {"Error":"Case note already deleted/does not exist"};
+          }
+          else{
+            return "Case note successfully deleted";
+          }
+        }
+        else{
+          await connection.rollback();
+          return {"Error":"Invalid deletion query"};
+        }
+        
+      }
+      catch(err){
+        await connection.rollback();
+        return {"Error":"Error deleting casenote"};
+      }
+      finally{
+        await connection.release();
+      }
+    };
+
+      /**
+   * Queries the database for the client's medication list.
+   * @param {number} clientID
+   * @returns {Promise<*|{Error: string}>}
+   */
+      async getMedicationList(clientID){
         if (clientID == null || (typeof clientID != "number")) {
             return {"Error": "Invalid ClientID"};
-        }
+          }
 
-        let medicationStmt = "SELECT medicationID, name, prn, dosage, frequency, purpose, sideEffects, prescriber FROM Medication WHERE clientID = ? ORDER BY name";
-
-        try {
-            const [rows] = await this.#pool.execute(medicationStmt, [clientID]);
-            return rows;
-        } catch (e) {
-            console.log("Error: Failure getting Client's medication list" + e);
-            return {"Error": "Failure getting Client's medication list"};
-        }
-    }
+          let medicationStmt = "SELECT medicationID, name, prn, dosage, frequency, purpose, sideEffects, prescriber FROM Medication WHERE clientID = ? ORDER BY name";
+  
+          try {
+              const [rows] = await this.#pool.execute(medicationStmt, [clientID]);
+              return rows;
+          } catch (e) {
+              console.log("Error: Failure getting Client's medication list" + e);
+              return {"Error": "Failure getting Client's medication list"};
+          }
+      }  
 
     /**
      * Queries the database for the client's vaccination list (newest dates first).
