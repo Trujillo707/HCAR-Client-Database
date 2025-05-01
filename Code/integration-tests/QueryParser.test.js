@@ -79,6 +79,17 @@ describe("QueryParser Class Tests", () => {
                     "gender": "Female"
                 },
                 {
+                    "clientID": 4,
+                    "profilePictureFilename": "client4_file.png",
+                    "fName": "Robert",
+                    "lName": "Brown",
+                    "phoneNumber": "555-0000",
+                    "email": null,
+                    "dateOfBirth": new Date("1985-07-07"),
+                    "pronouns": "he/him",
+                    "gender": "Male"
+                },
+                {
                     "clientID": 5,
                     "profilePictureFilename": "client5_file.png",
                     "fName": "Emily",
@@ -99,6 +110,17 @@ describe("QueryParser Class Tests", () => {
                     "dateOfBirth": new Date("1981-06-06"),
                     "pronouns": "he/him",
                     "gender": "Male"
+                },
+                {
+                    "clientID": 20,
+                    "profilePictureFilename": "client20_file.png",
+                    "fName": "Mason",
+                    "lName": "Wright",
+                    "phoneNumber": "555-8989",
+                    "email": null,
+                    "dateOfBirth": new Date("1986-09-09"),
+                    "pronouns": "they/them",
+                    "gender": "Agender"
                 },
                 {
                     "clientID": 21,
@@ -136,12 +158,20 @@ describe("QueryParser Class Tests", () => {
                         "name": "Bay Center Day Services"
                     },
                     {
+                        "clientID": 4,
+                        "name": "Comprehensive Career Services"
+                    },
+                    {
                         "clientID": 5,
                         "name": "Respite Services"
                     },
                     {
                         "clientID": 18,
                         "name": "Comprehensive Career Services"
+                    },
+                    {
+                        "clientID": 20,
+                        "name": "Clinical Services"
                     },
                     {
                         "clientID": 21,
@@ -280,6 +310,14 @@ describe("QueryParser Class Tests", () => {
                 compareJSON(key, expected, actual);
             }
         });
+
+        test.each([
+            2
+        ])("Accounts with more than 10 clients only return 10 rows", async (acctID) => {
+            let results = await qp.getAllFilteredClients(acctID);
+
+            await expect(results[0].length).toBe(10);
+        })
     });
 
     describe("getMedicationList() method",  () => {
@@ -412,7 +450,45 @@ describe("QueryParser Class Tests", () => {
             await expect(qp.getCaseNoteList(99999)).resolves.toStrictEqual([]);
         });
 
-        test.each()("Valid clientID returns Case Note list", async (clientID, expected) => {
+        test.each([
+            [1, [
+                {
+                    "noteID": 13,
+                    "subject": "Job Interview Skills Practice",
+                    "dateCreated": new Date("2024-02-29 15:00:00"),
+                    "creator": "Jake Mayer",
+                    "programName": "Canvas + Clay Studio"
+                },
+                {
+                    "noteID": 12,
+                    "subject": "Quarterly IPP Progress Report Submission",
+                    "dateCreated": new Date("2024-02-22 10:00:00"),
+                    "creator": "Alba Heller",
+                    "programName": "Summit Support Services"
+                },
+                {
+                    "noteID": 11,
+                    "subject": "Community Involvement Options Discussion",
+                    "dateCreated": new Date("2024-02-15 14:00:00"),
+                    "creator": "Lonzo Volkman",
+                    "programName": "Bay Center Day Services"
+                },
+                {
+                    "noteID": 10,
+                    "subject": "ISP Goal Progress Check-in Call",
+                    "dateCreated": new Date("2024-02-08 11:30:00"),
+                    "creator": "Alba Heller",
+                    "programName": "Summit Support Services"
+                },
+                {
+                    "noteID": 9,
+                    "subject": "ISP Goal Review: Budgeting",
+                    "dateCreated": new Date("2024-02-01 09:00:00"),
+                    "creator": "Alba Heller",
+                    "programName": "Summit Support Services"
+                }
+            ]]
+        ])("Valid clientID returns Case Note list", async (clientID, expected) => {
             const actual = await qp.getCaseNoteList(clientID);
             for (let i = 0; i < expected.length; i++) {
                 for (const key of Object.keys(expected[i])) {
@@ -420,7 +496,109 @@ describe("QueryParser Class Tests", () => {
                 }
             }
         })
+    })
 
+    describe("getCaseNote() method", () => {
+        test("Reject calls with no noteID provided", async () => {
+            await expect(qp.getCaseNote()).resolves.toStrictEqual({"Error": "Invalid NoteID"});
+        });
+
+        test("Non-existent noteID returns error string", async () => {
+            await expect(qp.getCaseNote(99999)).resolves.toStrictEqual({"Error": "Note not found"});
+        });
+
+        test.each([
+            [4, {
+                    "noteID": 4,
+                    "subject": "Budget Planning Discussion",
+                    "dateCreated": new Date("2024-01-10 09:30:00"),
+                    "staffID": 1,
+                    "programName": "Summit Support Services",
+                    "dateModified": null,
+                    "contactType": "In-Person",
+                    "goal": "ISP Goal",
+                    "narrative": "Discussed weekly budget planning. Client was engaged.",
+                    "goalProgress": "Client made progress towards understanding budgeting.",
+                    "nextSteps": "Review budget next week."
+                }],
+            [5, {
+                    "noteID": 5,
+                    "subject": "Social Skills Check-in Call",
+                    "dateCreated": new Date("2024-01-15 14:00:00"),
+                    "staffID": 2,
+                    "programName": "Bay Center Day Services",
+                    "dateModified": new Date("2024-01-15 15:30:00"),
+                    "contactType": "Over the Phone",
+                    "goal": "Personal Goal",
+                    "narrative": "Phone call check-in. Discussed potential social activities.",
+                    "goalProgress": "Client expressed desire to improve social skills.",
+                    "nextSteps": "Provide list of local community groups."
+                }]
+        ])("Valid noteID returns Case Note", async (noteID, expected) => {
+            const actual = await qp.getCaseNote(noteID);
+            for (const key of Object.keys(expected)) {
+                compareJSON(key, expected, actual);
+            }
+        });
+    });
+
+    describe("getSupportStaffList() method", () => {
+        test("Reject calls with no clientID provided", async () => {
+            await expect(qp.getSupportStaffList()).resolves.toStrictEqual({"Error": "Invalid ClientID"});
+        });
+
+        test("Non-existent clientID returns empty array", async () => {
+            await expect(qp.getSupportStaffList(99999)).resolves.toStrictEqual([]);
+        });
+
+        test.each([
+            [1, [
+                {
+                    "staffID": 3,
+                    "staffName": "Jake Mayer",
+                    "title": "Counselor 1",
+                    "dateAssigned": new Date("2024-01-10"),
+                    "dateRemoved": null
+                },
+                {
+                    "staffID": 2,
+                    "staffName": "Lonzo Volkman",
+                    "title": "Support Staff 2",
+                    "dateAssigned": new Date("2023-09-15"),
+                    "dateRemoved": null
+                },
+                {
+                    "staffID": 1,
+                    "staffName": "Alba Heller",
+                    "title": "Case Manager 1",
+                    "dateAssigned": new Date("2023-01-15"),
+                    "dateRemoved": null
+                }
+            ]],
+            [20, [
+                {
+                    "staffID": 1,
+                    "staffName": "Alba Heller",
+                    "title": "Case Manager 1",
+                    "dateAssigned": new Date("2023-11-20"),
+                    "dateRemoved": new Date("2024-03-01")
+                },
+                {
+                    "staffID": 3,
+                    "staffName": "Jake Mayer",
+                    "title": "Counselor 1",
+                    "dateAssigned": new Date("2023-08-15"),
+                    "dateRemoved": null
+                }
+            ]]
+        ])("Valid clientID returns support staff list", async (clientID, expected) => {
+            const actual = await qp.getSupportStaffList(clientID);
+            for (let i = 0; i < expected.length; i++) {
+                for (const key of Object.keys(expected[i])) {
+                    compareJSON(key, expected[i], actual[i]);
+                }
+            }
+        })
     })
 
 })

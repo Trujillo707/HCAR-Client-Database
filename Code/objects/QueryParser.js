@@ -68,10 +68,10 @@ export default class QueryParser {
         let results = [];
         let clientIDs;
 
-        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID ORDER BY Client.clientID LIMIT 10 OFFSET " + offset;
+        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID ORDER BY Client.clientID LIMIT ?,10"; /*OFFSET " + offset; */
 
         try {
-            const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID]);
+            const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID, offset.toString()]);
             if (rows.length > 0) {
                 results.push(rows);
                 clientIDs = rows.map(client => client.clientID);
@@ -133,7 +133,7 @@ export default class QueryParser {
             offset = offset * 10;
         }
 
-        // TODO: consider changing schema to make sure what cols can be null and which cannot
+        //  consider changing schema to make sure what cols can be null and which cannot
         //       filtering must nullcheck any searchable cols that may be null in the DB
         // const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
         // const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
@@ -174,6 +174,9 @@ export default class QueryParser {
                 }
             }
         }
+
+        basicDetailsStmt += " LIMIT ?, 10";
+        values.push(offset.toString());
 
         console.log(values)
         console.log("Query: ", basicDetailsStmt);
@@ -282,7 +285,7 @@ export default class QueryParser {
     /**
      * Queries the database for the client's medication list.
      * @param {number} clientID
-     * @returns {Promise<*|{Error: string}>}
+     * @returns {Promise<Object[]|{Error: string}>}
      */
     async getMedicationList(clientID){
         if (clientID == null || (typeof clientID != "number")) {
@@ -303,7 +306,7 @@ export default class QueryParser {
     /**
      * Queries the database for the client's vaccination list (newest dates first).
      * @param clientID
-     * @returns {Promise<*|{Error: string}>}
+     * @returns {Promise<Object[]|{Error: string}>}
      */
     async getVaccinationList(clientID){
         if (clientID == null || (typeof clientID != "number")) {
@@ -321,12 +324,17 @@ export default class QueryParser {
         }
     }
 
+    /**
+     * Queries the database for the Client's Case Note list (newest dates first).
+     * @param clientID
+     * @returns {Promise<Object[]|{Error: string}>}
+     */
     async getCaseNoteList(clientID){
         if (clientID == null || (typeof clientID != "number")) {
             return {"Error": "Invalid ClientID"};
         }
 
-        let caseNoteStmt = "SELECT Note.noteID, dateCreated, fname || ' ' || lname as creator, name as programName FROM Note JOIN Staff ON Staff.staffID = Note.staffID JOIN Program ON Program.programID = Note.programID JOIN HCAR.NoteClient NC on Note.noteID = NC.noteID WHERE clientID = ? ORDER BY dateCreated DESC";
+        let caseNoteStmt = "SELECT Note.noteID, subject, dateCreated, CONCAT(fname, ' ', lname) as creator, name as programName FROM Note JOIN Staff ON Staff.staffID = Note.staffID JOIN Program ON Program.programID = Note.programID JOIN HCAR.NoteClient NC on Note.noteID = NC.noteID WHERE clientID = ? ORDER BY dateCreated DESC";
 
         try {
             const [rows] = await this.#pool.execute(caseNoteStmt, [clientID]);
@@ -336,6 +344,53 @@ export default class QueryParser {
             return {"Error": "Failure getting Client's case note list"};
         }
     }
+
+    /**
+     * Queries the database for a specific case note.
+     * @param noteID
+     * @returns {Promise<Object|{Error: string}>}
+     */
+    async getCaseNote(noteID){
+        if (noteID == null || (typeof noteID != "number")) {
+            return {"Error": "Invalid NoteID"};
+        }
+
+        let caseNoteStmt = "SELECT Note.noteID, subject, dateCreated, staffID, name as programName, dateModified, contactType, goal, narrative, goalProgress, nextSteps FROM Note JOIN HCAR.Program P on Note.programID = P.programID WHERE Note.noteID = ?";
+
+        try {
+            const [rows] = await this.#pool.execute(caseNoteStmt, [noteID]);
+            if (rows.length > 0) {
+                return rows[0];
+            } else {
+                return {"Error": "Note not found"};
+            }
+        } catch (e) {
+            console.log("Error: Failure getting Client's case note:" + e);
+            return {"Error": "Failure getting Client's case note"};
+        }
+    }
+
+    /**
+     * Queries the database for the Client's Support Staff list (newest dates first).
+     * @param clientID
+     * @returns {Promise<Object[]|{Error: string}>}
+     */
+    async getSupportStaffList(clientID){
+        if (clientID == null || (typeof clientID != "number")) {
+            return {"Error": "Invalid ClientID"};
+        }
+
+        let supportStaffStmt = "SELECT StaffClient.staffID, CONCAT(fname, ' ', lname) as staffName, title, dateAssigned, dateRemoved FROM StaffClient JOIN Staff ON Staff.staffID = StaffClient.staffID WHERE clientID = ? ORDER BY dateAssigned DESC";
+
+        try {
+            const [rows] = await this.#pool.execute(supportStaffStmt, [clientID]);
+            return rows;
+        } catch (e) {
+            console.log("Error: Failure getting Client's support staff list:" + e);
+            return {"Error": "Failure getting Client's support staff list"};
+        }
+    }
+
     // Methods below are more related to the Instance's properties and should be used sparingly
 
     /**

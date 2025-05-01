@@ -1,0 +1,10 @@
+INSERT INTO HCAR.NoteClient (noteID, clientID) VALUES (9, 1);
+INSERT INTO HCAR.NoteClient (noteID, clientID) VALUES (10, 1);
+INSERT INTO HCAR.NoteClient (noteID, clientID) VALUES (11, 1);
+INSERT INTO HCAR.NoteClient (noteID, clientID) VALUES (12, 1);
+INSERT INTO HCAR.NoteClient (noteID, clientID) VALUES (13, 1);
+INSERT INTO HCAR.NoteClient (noteID, clientID) VALUES (4, 4);
+INSERT INTO HCAR.NoteClient (noteID, clientID) VALUES (6, 4);
+INSERT INTO HCAR.NoteClient (noteID, clientID) VALUES (5, 8);
+INSERT INTO HCAR.NoteClient (noteID, clientID) VALUES (7, 8);
+INSERT INTO HCAR.NoteClient (noteID, clientID) VALUES (8, 12);
