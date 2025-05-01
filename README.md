@@ -8,6 +8,8 @@ worked on by developers can be found on their own branch, such as `orlando_dev` 
 
 View the latest deployment via [this link.](https://hcar.trujillo-ortiz.com)
 
+-# Note: The Cal Poly Humboldt DNS does not resolve the custome domain used. If on campus, use [this alternative link.](https://hcar-client-database-166569971807.us-west1.run.app)
+
 # Table of Contents
 1. [Build Instructions](#build-instructions)
 2. [Unit Testing](#unit-testing)
