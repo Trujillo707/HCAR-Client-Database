@@ -12,6 +12,8 @@ import Address from "./Address.js";
 export class ClientBuilder {
     // Public fields for building
 
+    /** @type {number} */
+    clientID = -1;
     /** @type {string} */
     firstName = "";
     /** @type {string} */
@@ -68,6 +70,15 @@ export class ClientBuilder {
     programs = [];
 
     // Builder methods
+
+    /**
+     * @param {number} clientID
+     * @returns {ClientBuilder} Returns this current ClientBuilder to allow method chaining.
+     */
+    setClientID(clientID) {
+        this.clientID = clientID;
+        return this;
+    }
 
     /**
      *

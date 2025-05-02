@@ -69,6 +69,12 @@ tr {
     position: relative;
 
 }
+#clientRow:hover {
+    cursor: pointer;
+}
+#clientRow.selected {
+    background-color: #989898;
+}
 td,th {
     border: 1px solid black;
 }
@@ -222,6 +228,8 @@ select{
     display: flex;
     justify-content: center;
     align-items: center;
+
+    /*min-width: 40em;*/
 }
 
 .header > h1
@@ -233,8 +241,8 @@ select{
 {
     background-color: white;
     border-radius: 5px;
-    width: 320px;
-    height: 276px;
+    width: 20em;
+    height: 75%;
     padding: 24px;
     display: flex;
     flex-direction: column;
@@ -283,6 +291,9 @@ select{
 
 .header-link
 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-decoration: none;
     padding: 8px;
     border-radius: 8px;
@@ -312,7 +323,9 @@ select{
     justify-content: center;
     align-items: center;
     gap: 8px;
-    margin: 5%;
+    margin: 5% auto;
+    width: 25%;
+    height: 50%;
 }
 
 .home-button
@@ -320,11 +333,16 @@ select{
     background-color: black;
     color: white;
     padding: 12px;
-    width: 281.25px;
-    height: 150px;
+    width: 70%;
+    height: 33%;
     border-radius: 8px;
     font-size: 2em;
     cursor: pointer;
+}
+
+.home-button:hover 
+{
+    background-color: #323232
 }
 
 /* Style for search.ejs */
@@ -550,9 +568,9 @@ select{
     max-width: 16em;
 }
 
-#DoB {
+/* #DoB {
     width: 9em;
-}
+} */
 
 .cli_regionalCenterID {
 
@@ -758,8 +776,8 @@ div#supportTeam.tabcontent {
 
 .caseNoteContent {
     display: grid;
-    grid-template-areas: "subject program . date_of_case"
-                         "contact_type goal_worked_on goal_worked_on ."
+    grid-template-areas: "program date_of_case date_of_case ."
+                         "contact_type contact_type goal_worked_on goal_worked_on"
                          "narrative progress_on_goal progress_on_goal next_steps"
                          "empl_signoff date_of_signoff . .";
     padding: 0.625em 1em;
@@ -771,13 +789,9 @@ div#supportTeam.tabcontent {
     min-width: 90%;
 }
 
-.cn_subject { grid-area: subject; }
 .cn_program { grid-area: program; }
 .cn_date_of_case { grid-area: date_of_case; }
-.cn_contact_type {
-    grid-area: contact_type;
-
-}
+.cn_contact_type { grid-area: contact_type; }
 .cn_goal_worked_on { grid-area: goal_worked_on; }
 .cn_narrative { grid-area: narrative; }
 .cn_progress_on_goal { grid-area: progress_on_goal; }
