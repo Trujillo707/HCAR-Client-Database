@@ -411,7 +411,7 @@ select{
     padding: 12px 16px;
     border-radius: 8px;
     border-color: transparent;
-    width: 240px;
+    width: 240px;   /* FIX ME */
 }
 
 .hidden
