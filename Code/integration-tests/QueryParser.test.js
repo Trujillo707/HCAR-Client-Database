@@ -187,18 +187,184 @@ describe("QueryParser Class Tests", () => {
             const actual = await qp.getAllClients(acctID);
             console.log(actual)
             compareClientsPrograms(expected, actual);
-        })
+        });
 
         /**
          * This one is a simple 2-val BVA for the max num of rows returned
          */
         test.each([
-            2
+            2, /* has over 10 */
+            3 /* has exactly 10 */
         ])("Accounts with more than 10 clients only return 10 rows", async (acctID) => {
             let results = await qp.getAllClients(acctID);
 
             await expect(results[0].length).toBe(10);
-        })
+        });
+
+        test.each([
+            [5, [[
+                {
+                    "clientID": 1,
+                    "profilePictureFilename": "client1_file.png",
+                    "fName": "John",
+                    "lName": "Doe",
+                    "phoneNumber": "555-1234",
+                    "email": null,
+                    "dateOfBirth": new Date("1980-01-01"),
+                    "pronouns": "he/him",
+                    "gender": "Male"
+                },
+                {
+                    "clientID": 2,
+                    "profilePictureFilename": "client2_file.png",
+                    "fName": "Jane",
+                    "lName": "Smith",
+                    "phoneNumber": "555-5678",
+                    "email": null,
+                    "dateOfBirth": new Date("1990-05-15"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
+                },
+                {
+                    "clientID": 3,
+                    "profilePictureFilename": "client3_file.png",
+                    "fName": "Alice",
+                    "lName": "Johnson",
+                    "phoneNumber": "555-9012",
+                    "email": null,
+                    "dateOfBirth": new Date("1975-03-20"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
+                },
+                {
+                    "clientID": 4,
+                    "profilePictureFilename": "client4_file.png",
+                    "fName": "Robert",
+                    "lName": "Brown",
+                    "phoneNumber": "555-0000",
+                    "email": null,
+                    "dateOfBirth": new Date("1985-07-07"),
+                    "pronouns": "he/him",
+                    "gender": "Male"
+                },
+                {
+                    "clientID": 5,
+                    "profilePictureFilename": "client5_file.png",
+                    "fName": "Emily",
+                    "lName": "Davis",
+                    "phoneNumber": "555-1111",
+                    "email": null,
+                    "dateOfBirth": new Date("1992-11-22"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
+                },
+                {
+                    "clientID": 6,
+                    "profilePictureFilename": "client6_file.png",
+                    "fName": "Mark",
+                    "lName": "Wilson",
+                    "phoneNumber": "555-2222",
+                    "email": null,
+                    "dateOfBirth": new Date("1988-04-04"),
+                    "pronouns": "he/him",
+                    "gender": "Male"
+                },
+                {
+                    "clientID": 7,
+                    "profilePictureFilename": "client7_file.png",
+                    "fName": "Laura",
+                    "lName": "Lee",
+                    "phoneNumber": "555-3333",
+                    "email": null,
+                    "dateOfBirth": new Date("1979-09-09"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
+                },
+                {
+                    "clientID": 8,
+                    "profilePictureFilename": "client8_file.png",
+                    "fName": "Chris",
+                    "lName": "Martinez",
+                    "phoneNumber": "555-4444",
+                    "email": null,
+                    "dateOfBirth": new Date("1995-12-12"),
+                    "pronouns": "they/them",
+                    "gender": "Non-binary"
+                },
+                {
+                    "clientID": 9,
+                    "profilePictureFilename": "client9_file.png",
+                    "fName": "Sara",
+                    "lName": "Nguyen",
+                    "phoneNumber": "555-5555",
+                    "email": null,
+                    "dateOfBirth": new Date("1993-02-02"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
+                },
+                {
+                    "clientID": 10,
+                    "profilePictureFilename": "client10_file.png",
+                    "fName": "David",
+                    "lName": "Kim",
+                    "phoneNumber": "555-6666",
+                    "email": null,
+                    "dateOfBirth": new Date("1987-06-06"),
+                    "pronouns": "he/him",
+                    "gender": "Male"
+                }
+            ],
+                [
+                    {
+                        "clientID": 1,
+                        "name": "Summit Support Services"
+                    },
+                    {
+                        "clientID": 1,
+                        "name": "Bay Center Day Services"
+                    },
+                    {
+                        "clientID": 2,
+                        "name": "Bay Center Day Services"
+                    },
+                    {
+                        "clientID": 3,
+                        "name": "Canvas + Clay Studio"
+                    },
+                    {
+                        "clientID": 4,
+                        "name": "Comprehensive Career Services"
+                    },
+                    {
+                        "clientID": 5,
+                        "name": "Respite Services"
+                    },
+                    {
+                        "clientID": 6,
+                        "name": "Clinical Services"
+                    },
+                    {
+                        "clientID": 7,
+                        "name": "Self-Determination Program"
+                    },
+                    {
+                        "clientID": 8,
+                        "name": "Summit Support Services"
+                    },
+                    {
+                        "clientID": 9,
+                        "name": "Bay Center Day Services"
+                    },
+                    {
+                        "clientID": 10,
+                        "name": "Canvas + Clay Studio"
+                    }
+                ]]]
+        ])("Admin Account returns all clients (with limit of 10 of course)", async (acctID, expected) => {
+            const actual = await qp.getAllClients(acctID);
+            compareClientsPrograms(expected, actual);
+        });
+
     });
 
     describe("getAllFilteredClients() method", () => {
@@ -256,6 +422,48 @@ describe("QueryParser Class Tests", () => {
                     }
                 ]]]
         ])("Gender Filter", async (acctID, filters, expected) => {
+            const actual = await qp.getAllFilteredClients(acctID, filters);
+
+            compareClientsPrograms(expected, actual);
+        });
+
+        test.each([
+            [5, {firstName: "ll"}, [[
+                {
+                    "clientID": 19,
+                    "profilePictureFilename": "client19_file.png",
+                    "fName": "Isabella",
+                    "lName": "Turner",
+                    "phoneNumber": "555-7878",
+                    "email": null,
+                    "dateOfBirth": new Date("1994-04-04"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
+                },
+                {
+                    "clientID": 25,
+                    "profilePictureFilename": "client25_file.png",
+                    "fName": "Ella",
+                    "lName": "Allen",
+                    "phoneNumber": "555-1314",
+                    "email": null,
+                    "dateOfBirth": new Date("1998-07-07"),
+                    "pronouns": "she/her",
+                    "gender": "Female"
+                }
+            ],[
+                {
+                    "clientID": 19,
+                    "name": "Respite Services"
+                },
+                {
+                    "clientID": 25,
+                    "name": "Comprehensive Career Services"
+                }
+            ]
+
+            ]]
+        ])("Admin account returns all clients with filters", async  (acctID, filters, expected) => {
             const actual = await qp.getAllFilteredClients(acctID, filters);
 
             compareClientsPrograms(expected, actual);

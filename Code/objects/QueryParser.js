@@ -68,7 +68,31 @@ export default class QueryParser {
         let results = [];
         let clientIDs;
 
-        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID ORDER BY Client.clientID LIMIT ?,10"; /*OFFSET " + offset; */
+        /*const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID ORDER BY Client.clientID LIMIT ?,10"; */
+
+        /**
+         * This is an interesting approach to getting the client list based on being an admin or not.
+         * 1. First, the query starts by just getting all accounts.
+         * 2. Then, it will attempt a LEFT JOIN on StaffClient ***if*** the account has an entry in StaffClient
+         *   AND is not an admin. Since it is a LEFT JOIN, we never discard rows from Account if the LEFT JOIN
+         *   conditions are not met. So, if the Account is an admin, the cartesian product simply has null values for
+         *   the StaffClient columns.
+         *   If the Account is not an admin, then it's a JOIN as expected for those non-admin accounts.
+         * 3. Next, we do a regular JOIN on Client with the condition that we get all Clients if admin (since [a.admin=1]=1)
+         *    OR we join if the StaffClient.clientID matches the Client.clientID. Since we did a LEFT JOIN previously
+         *    there should be no way for an admin to have a StaffClient.clientID that matches a Client.clientID since
+         *    all StaffClient columns should be null.
+         * 4. The rest of the query is self-explanatory. Observe the neat LIMIT shorthand, I kinda vibe with it.
+         * @type {string}
+         */
+        const basicDetailsStmt = "SELECT c.clientID, f.filename AS profilePictureFilename, c.fName, c.lName, c.phoneNumber, c.email, DATE(c.dateOfBirth) AS 'dateOfBirth', c.pronouns, c.gender " +
+                                        "FROM Account a " +
+                                        "LEFT JOIN StaffClient sc ON a.staffID = sc.staffID AND a.admin = 0 " +
+                                        "INNER JOIN Client c ON (a.admin = 1 OR sc.clientID = c.clientID) " +
+                                        "INNER JOIN File f ON c.profilePicture = f.fileID " +
+                                        "WHERE a.accountID = ? " +
+                                        "ORDER BY c.clientID " +
+                                        "LIMIT ?, 10"
 
         try {
             const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID, offset.toString()]);
@@ -153,7 +177,18 @@ export default class QueryParser {
         // values.push(filters.conservator !== "" ? filters.conservator : "%");
 
         // Build query with chosen filters
-        let basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID";
+        /*let basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID";*/
+
+        /**
+         * See getAllClients() for a description of this query.
+         */
+        let basicDetailsStmt = "SELECT c.clientID, f.filename AS profilePictureFilename, c.fName, c.lName, c.phoneNumber, c.email, DATE(c.dateOfBirth) AS 'dateOfBirth', c.pronouns, c.gender " +
+                                      "FROM Account a " +
+                                      "LEFT JOIN StaffClient sc ON a.staffID = sc.staffID AND a.admin = 0 " +
+                                      "INNER JOIN Client c ON (a.admin = 1 OR sc.clientID = c.clientID) " +
+                                      "INNER JOIN File f ON c.profilePicture = f.fileID " +
+                                      "WHERE a.accountID = ? ";
+
         for (const key of Object.keys(filters)) {
             if (filters[key] !== "" && filters[key] !== "%") {
                 // Handling date conversion from js to mysql FIX ME
@@ -175,6 +210,7 @@ export default class QueryParser {
             }
         }
 
+        basicDetailsStmt += " ORDER BY c.clientID";
         basicDetailsStmt += " LIMIT ?, 10";
         values.push(offset.toString());
 

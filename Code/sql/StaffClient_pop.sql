@@ -44,3 +44,9 @@ INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemove
 
 -- Add Staff 3 association for Client 1 (who already has Staff 1 and Staff 2)
 INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 1, 'Counselor 1', '2024-01-10', NULL);
+
+-- More Staff 3
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 2, 'Counselor 1', '2025-02-01', null);
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 3, 'Counselor 1', '2023-05-15', '2024-10-17');
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 5, 'Counselor 1', '2025-03-12', null);
+
