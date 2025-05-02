@@ -295,6 +295,27 @@ export default class QueryParser {
       }
     }
 
+    async isAuthenticated(req, requiresAdmin = false){
+      try{
+        const accountID = req.session.accountID;
+        if(!accountID){
+          return {"Error":"Invalid authentication"};
+        }
+        let query = "SELECT username, staffID, disabled, admin FROM Account WHERE accountID = ?"; 
+        const [Account] = await this.#pool.execute(query, [accountID]);
+        if(Account[0].disabled === 1){
+          return {"Error":"Account has been disabled"};
+        }
+        if(requiresAdmin && Account[0].admin === 1){
+          return {"Error":"Invalid permissions"};
+        }
+        return Account[0];
+      }
+      catch(err){
+        return {"Error":"Error authenticating"};
+      }
+    }
+
     async auth(req){
       try{
         let validation = this.#validateInput(req.body.username, req.body.password)
