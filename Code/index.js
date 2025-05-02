@@ -1,4 +1,5 @@
 import express from "express"
+import session from 'express-session';
 const app = express()
 import {reportTypes} from "./reportsLogic.js";
 import {ClientBuilder} from "./objects/ClientBuilder.js";
@@ -21,6 +22,20 @@ app.use(express.urlencoded({extended: true}));
 
 // Handling JSON payloads
 app.use(express.json());
+
+app.use(
+    session({
+      secret: process.env.SESSION_SECRET,
+      saveUninitialized: false, //Doesn't save every session, only modified ones.
+      resave: false, //Avoids resaving of the session if it hasn't changed
+      cookie: {
+        maxAge: 86400000, //One day(miliseconds)
+        secure: process.env.SECURE_SESSION, //Set to true in prod(Requires HTTPS for cookies to be set)
+        httpOnly: true, //Disallows browser js from accessing cookie
+        sameSite: 'strict', //CSRF Protection
+      },
+    })
+  );
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + "/views");
@@ -86,6 +101,47 @@ app.get("/reports", getPath, (req, res) => {
 app.get("/caseNote", (req, res) => {
     res.render("caseNote", {theClient: testClientArray[0]});
 })
+
+app.post('/api/auth', async (req, res) => {
+  
+  let qp = await new QueryParserBuilder().build()
+  const results = await qp.auth(req);
+  return res.send(results);
+});
+/**
+ * Body: {
+ *   clientID:    number,
+ *   contactType: string,
+ *   goal:        string,
+ *   goalProgress:string,
+ *   narrative:   string,
+ *   nextSteps:   string
+ * }
+ * Response on error: { "Error": "…message…" }
+ * Response on success: "Case note successfully created"
+ */
+app.post('/api/createCaseNote', async (req, res) => {
+  
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.createCaseNote(req);
+    return res.send(results);
+  });
+  
+  
+  /**
+   * Body: {
+   *   clientID: number,
+   *   noteID:   number
+   * }
+   * Response on error: { "Error": "…message…" }
+   * Response on success: "Case note successfully deleted"
+   */
+  app.post('/api/deleteCaseNote', async (req, res) => {
+  
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.deleteCaseNote(req);
+    return res.send(results);
+  });
 
 // TODO: MAKE THIS POST OBVIOUSLY 
 app.get('/client', (req, res) => {
