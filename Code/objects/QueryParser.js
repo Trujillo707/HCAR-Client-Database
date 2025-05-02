@@ -245,7 +245,8 @@ export default class QueryParser {
     /**
      * Queries the database for the client's insurance and medical preferences.
      * @param {number} clientID
-     * @returns {Promise<{primaryInsurance: null, secondaryInsurance: null, pcp: null, primaryPhysician: null}|{Error: string}>}
+     * @returns {Promise<{primaryInsurance: Object, secondaryInsurance: Object, pcp: Object, primaryPhysician: Object}|{Error: string}>}
+     * If data is found, each relevant key will contain an object with the relevant data. Otherwise, the key is undefined.
      */
     async getInsuranceAndMedicalPreferences(clientID) {
         if (clientID == null || (typeof clientID != "number")) {
@@ -257,23 +258,23 @@ export default class QueryParser {
             pcp: null, primaryPhysician: null
         };
 
-        let primaryInsuranceStmt = "SELECT name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.primaryInsurance FROM Client WHERE clientID = ?)";
-        let secondaryInsuranceStmt = "SELECT name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.secondaryInsurance FROM Client WHERE clientID = ?)";
-        let pcpStmt = "SELECT name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryCareProvider FROM Client WHERE clientID = ?)";
-        let primaryPhysicianStmt = "SELECT name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryPhysician FROM Client WHERE clientID = ?)";
+        let primaryInsuranceStmt = "SELECT insuranceID, name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.primaryInsurance FROM Client WHERE clientID = ?)";
+        let secondaryInsuranceStmt = "SELECT insuranceID, name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.secondaryInsurance FROM Client WHERE clientID = ?)";
+        let pcpStmt = "SELECT contactID, name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryCareProvider FROM Client WHERE clientID = ?)";
+        let primaryPhysicianStmt = "SELECT contactID, name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryPhysician FROM Client WHERE clientID = ?)";
 
         try {
-            const [primaryInsuranceRows, secondaryInsuranceRows, pcpRows, primaryPhysicianRows] = await Promise.all([
+            const [[primaryInsuranceRows], [secondaryInsuranceRows], [pcpRows], [primaryPhysicianRows]] = await Promise.all([
                 this.#pool.execute(primaryInsuranceStmt, [clientID]),
                 this.#pool.execute(secondaryInsuranceStmt, [clientID]),
                 this.#pool.execute(pcpStmt, [clientID]),
                 this.#pool.execute(primaryPhysicianStmt, [clientID])
             ]);
 
-            results.primaryInsurance = primaryInsuranceRows;
-            results.secondaryInsurance = secondaryInsuranceRows;
-            results.pcp = pcpRows;
-            results.primaryPhysician = primaryPhysicianRows;
+            results.primaryInsurance = primaryInsuranceRows[0];
+            results.secondaryInsurance = secondaryInsuranceRows[0];
+            results.pcp = pcpRows[0];
+            results.primaryPhysician = primaryPhysicianRows[0];
 
             return results;
         } catch (e) {

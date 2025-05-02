@@ -255,7 +255,7 @@ describe("QueryParser Class Tests", () => {
                         "name": "Self-Determination Program"
                     }
                 ]]]
-        ])("Gender Filter", async (acctID, filters, expected)=>{
+        ])("Gender Filter", async (acctID, filters, expected) => {
             const actual = await qp.getAllFilteredClients(acctID, filters);
 
             compareClientsPrograms(expected, actual);
@@ -264,9 +264,9 @@ describe("QueryParser Class Tests", () => {
 
     describe("getClientDemographics() method", () => {
         test("Reject calls with no clientID provided", async () => {
-            await expect(qp.getClientDemographics()).resolves.toStrictEqual({"Error" : "Invalid ClientID"})
+            await expect(qp.getClientDemographics()).resolves.toStrictEqual({"Error": "Invalid ClientID"})
         });
-        test("Non existent clientID returns error string", async ()=>{
+        test("Non existent clientID returns error string", async () => {
             await expect(qp.getClientDemographics(99999)).resolves.toStrictEqual({"Error": "Client not found"});
         });
 
@@ -320,7 +320,7 @@ describe("QueryParser Class Tests", () => {
         })
     });
 
-    describe("getMedicationList() method",  () => {
+    describe("getMedicationList() method", () => {
         test("Reject calls with no clientID provided", async () => {
             await expect(qp.getMedicationList()).resolves.toStrictEqual({"Error": "Invalid ClientID"});
         })
@@ -439,7 +439,7 @@ describe("QueryParser Class Tests", () => {
                 }
             }
         })
-    })
+    });
 
     describe("getCaseNoteList() method", () => {
         test("Reject calls with no clientID provided", async () => {
@@ -496,7 +496,7 @@ describe("QueryParser Class Tests", () => {
                 }
             }
         })
-    })
+    });
 
     describe("getCaseNote() method", () => {
         test("Reject calls with no noteID provided", async () => {
@@ -509,31 +509,31 @@ describe("QueryParser Class Tests", () => {
 
         test.each([
             [4, {
-                    "noteID": 4,
-                    "subject": "Budget Planning Discussion",
-                    "dateCreated": new Date("2024-01-10 09:30:00"),
-                    "staffID": 1,
-                    "programName": "Summit Support Services",
-                    "dateModified": null,
-                    "contactType": "In-Person",
-                    "goal": "ISP Goal",
-                    "narrative": "Discussed weekly budget planning. Client was engaged.",
-                    "goalProgress": "Client made progress towards understanding budgeting.",
-                    "nextSteps": "Review budget next week."
-                }],
+                "noteID": 4,
+                "subject": "Budget Planning Discussion",
+                "dateCreated": new Date("2024-01-10 09:30:00"),
+                "staffID": 1,
+                "programName": "Summit Support Services",
+                "dateModified": null,
+                "contactType": "In-Person",
+                "goal": "ISP Goal",
+                "narrative": "Discussed weekly budget planning. Client was engaged.",
+                "goalProgress": "Client made progress towards understanding budgeting.",
+                "nextSteps": "Review budget next week."
+            }],
             [5, {
-                    "noteID": 5,
-                    "subject": "Social Skills Check-in Call",
-                    "dateCreated": new Date("2024-01-15 14:00:00"),
-                    "staffID": 2,
-                    "programName": "Bay Center Day Services",
-                    "dateModified": new Date("2024-01-15 15:30:00"),
-                    "contactType": "Over the Phone",
-                    "goal": "Personal Goal",
-                    "narrative": "Phone call check-in. Discussed potential social activities.",
-                    "goalProgress": "Client expressed desire to improve social skills.",
-                    "nextSteps": "Provide list of local community groups."
-                }]
+                "noteID": 5,
+                "subject": "Social Skills Check-in Call",
+                "dateCreated": new Date("2024-01-15 14:00:00"),
+                "staffID": 2,
+                "programName": "Bay Center Day Services",
+                "dateModified": new Date("2024-01-15 15:30:00"),
+                "contactType": "Over the Phone",
+                "goal": "Personal Goal",
+                "narrative": "Phone call check-in. Discussed potential social activities.",
+                "goalProgress": "Client expressed desire to improve social skills.",
+                "nextSteps": "Provide list of local community groups."
+            }]
         ])("Valid noteID returns Case Note", async (noteID, expected) => {
             const actual = await qp.getCaseNote(noteID);
             for (const key of Object.keys(expected)) {
@@ -599,6 +599,54 @@ describe("QueryParser Class Tests", () => {
                 }
             }
         })
-    })
+    });
 
+    describe("getInsuranceAndMedicalPreferences() method", () => {
+        test("Reject calls with no clientID provided", async () => {
+            await expect(qp.getInsuranceAndMedicalPreferences()).resolves.toStrictEqual({"Error": "Invalid ClientID"});
+        });
+
+        test.each([
+            99999
+        ])("Non-existent clientID returns object with undefined key value", async (clientID) => {
+            await expect(qp.getInsuranceAndMedicalPreferences(clientID)).resolves.toStrictEqual(
+                {
+                    primaryInsurance: undefined,
+                    secondaryInsurance: undefined,
+                    pcp: undefined,
+                    primaryPhysician: undefined
+                }
+            );
+        });
+
+        test.each([
+            [2, {
+                primaryInsurance: {
+                        "insuranceID": 2,
+                        "name": "Blue Cross Blue Shield PPO",
+                        "policyNumber": 222222222
+                },
+                secondaryInsurance: {
+                        "insuranceID": 6,
+                        "name": "Medicare Part A - Primary",
+                        "policyNumber": 666666666
+                },
+                pcp: {
+                        "contactID": 3,
+                        "name": "CareFirst Clinic",
+                        "phoneNumber": "555-2001",
+                        "address": "789 Care Blvd, Healthton"
+                    },
+                primaryPhysician: {
+                        "contactID": 2,
+                        "name": "Dr. Bob Johnson",
+                        "phoneNumber": "555-1002",
+                        "address": "456 Wellness Ave, Medville"
+                }
+            }],
+        ])("Valid clientID returns insurance and medical preferences", async (clientID, expected) => {
+                await expect(qp.getInsuranceAndMedicalPreferences(clientID)).resolves.toStrictEqual(expected);
+        });
+
+    })
 })
