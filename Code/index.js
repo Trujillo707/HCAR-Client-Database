@@ -126,6 +126,25 @@ app.post('/api/createCaseNote', async (req, res) => {
     const results = await qp.createCaseNote(req);
     return res.send(results);
   });
+
+/*
+* Body: {
+ *   clientID:    string
+ *   contactType: string,
+ *   goal:        string,
+ *   goalProgress:string,
+ *   narrative:   string,
+ *   nextSteps:   string
+ *   noteID:      string
+ * }
+ * Response on error: { "Error": "…message…" }
+ * Response on success: "Case note successfully updated"
+ */
+app.post('/api/updateCaseNote', async (req, res) => {
+  let qp = await new QueryParserBuilder().build()
+  const results = await qp.updateCaseNote(req);
+  return res.send(results);
+});
   
   
   /**
