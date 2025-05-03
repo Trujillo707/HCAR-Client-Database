@@ -21,8 +21,10 @@
   "homepage": "https://github.com/Trujillo707/HCAR-Client-Database#readme",
   "dependencies": {
     "@google-cloud/cloud-sql-connector": "^1.7.0",
+    "bcryptjs": "^3.0.2",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
+    "express-session": "^1.18.1",
     "jspdf": "^3.0.1",
     "mysql2": "^3.14.0"
   },
