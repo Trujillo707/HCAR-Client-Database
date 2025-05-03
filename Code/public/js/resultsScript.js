@@ -57,6 +57,9 @@ selectButton.addEventListener("click", () => {
             throw new Error(`Error: ${response.status}`);
         return response.json();
     })
-    .then(data => console.log(data))  
+    .then(data => {
+        if (data.redirect)
+            window.location.href = data.redirect;
+    })  
     .catch(error => console.log("Error: ", error))
 });
