@@ -346,16 +346,16 @@ export default class QueryParser {
         if(Account[0].disabled === 1){
           return {"Error":"Account has been disabled"};
         }
-        if(requiresAdmin && Account[0].admin === 1){
+        if(requiresAdmin && Account[0].admin !== 1){
           return {"Error":"Invalid permissions"};
         }
         return Account[0];
       }
       catch(err){
+        console.log(err);
         return {"Error":"Error authenticating"};
       }
     }
-
 
     async auth(req){
       try{
@@ -389,29 +389,22 @@ export default class QueryParser {
     async createCaseNote(req){
       const connection = await this.#pool.getConnection();
       try {
-        const accountID = req.session.accountID;
-        if(!accountID){
-          return {"Error":"Invalid authentication"};
-        }
-    
-        let query = "SELECT staffID, disabled, admin FROM Account WHERE accountID = ?"; 
-        const [Account] = await connection.execute(query, [accountID]);
-    
-        if(Account[0].disabled === 1){
-          return {"Error":"Account has been disabled"};
+        const account = await this.isAuthenticated(req);
+        if(account["Error"]){
+          return account["Error"];
         }
         const clientID = parseInt(req.body.clientID);
         if(!Number.isInteger(clientID)){
           return {"Error":"Invalid Request"};
         }
 
-        const staffID = Account[0].staffID;
+        const staffID = account.staffID;
         await connection.beginTransaction();
-        if(Account[0].admin != 1){
+        if(account.admin != 1){
           const staffClientQuery = "SELECT COUNT(*) FROM StaffClient WHERE staffID = ? AND clientID = ?"; 
           var [staffClient] = await connection.execute(staffClientQuery, [staffID, clientID]);
         }
-        if(Account[0].admin === 1 || staffClient[0]['COUNT(*)'] === 1){
+        if(account.admin === 1 || staffClient[0]['COUNT(*)'] === 1){
           await connection.execute("CALL CreateCaseNote(?, ?, ?, ?, ?, ?, ?)", [
             staffID,
             req.body.clientID,
@@ -439,14 +432,9 @@ export default class QueryParser {
     async deleteCaseNote(req){
       const connection = await this.#pool.getConnection();
       try {
-        const accountID = req.session.accountID;
-        if(!accountID){
-          return {"Error":"Invalid authentication"};
-        }
-        let query = "SELECT staffID, disabled, admin FROM Account WHERE accountID = ?"; 
-        const [Account] = await connection.execute(query, [accountID]);
-        if(Account[0].disabled === 1){
-          return {"Error":"Account has been disabled"};
+        const account = await this.isAuthenticated(req);
+        if(account["Error"]){
+          return account["Error"];
         }
         const noteID = parseInt(req.body.noteID);
         const clientID = parseInt(req.body.clientID);
@@ -455,14 +443,14 @@ export default class QueryParser {
           return {"Error":"Invalid Request"};
         }
   
-        const staffID = Account[0].staffID;
+        const staffID = account.staffID;
         await connection.beginTransaction();
-        if(Account[0].admin != 1){
+        if(account.admin !== 1){
           const staffClientQuery = "SELECT COUNT(*) FROM StaffClient sc JOIN NoteClient nc ON sc.clientID=nc.clientID WHERE sc.staffID = ? AND nc.noteID = ? AND sc.clientID = ?;";
           var [staffClientNote] = await connection.execute(staffClientQuery, [staffID, noteID, clientID]);
         }
         console.log(staffClientNote[0]['COUNT(*)']);
-        if(Account[0].admin === 1 || staffClientNote[0]['COUNT(*)'] === 1){
+        if(account.admin === 1 || staffClientNote[0]['COUNT(*)'] === 1){
           var [deleteResults] = await connection.execute("CALL DeleteCaseNote(?, ?)", [
             clientID,
             noteID
