@@ -400,7 +400,7 @@ export default class QueryParser {
 
         const staffID = account.staffID;
         await connection.beginTransaction();
-        if(account.admin != 1){
+        if(account.admin !== 1){
           const staffClientQuery = "SELECT COUNT(*) FROM StaffClient WHERE staffID = ? AND clientID = ?"; 
           var [staffClient] = await connection.execute(staffClientQuery, [staffID, clientID]);
         }
@@ -426,6 +426,49 @@ export default class QueryParser {
         await connection.rollback();
         console.log(err);
         return {"Error":"Error creating casenote"};
+      }
+    };
+
+    async updateCaseNote(req){
+      const connection = await this.#pool.getConnection();
+      try {
+        const account = await this.isAuthenticated(req);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        const noteID = parseInt(req.body.noteID);
+        const clientID = parseInt(req.body.clientID);
+        if(!Number.isInteger(noteID) || !Number.isInteger(clientID)){
+          return {"Error":"Invalid Request"};
+        }
+
+        const staffID = account.staffID;
+        await connection.beginTransaction();
+        if(account.admin !== 1){
+          const staffClientQuery = "SELECT COUNT(*) FROM StaffClient WHERE staffID = ? AND clientID = ?"; 
+          var [staffClient] = await connection.execute(staffClientQuery, [staffID, clientID]);
+        }
+        if(account.admin === 1 || staffClient[0]['COUNT(*)'] === 1){
+          await connection.execute("UPDATE Note SET contactType = ?, goal = ?, goalProgress = ?, narrative = ?, nextSteps = ? WHERE noteID = ?", [
+            req.body.contactType,
+            req.body.goal,
+            req.body.goalProgress,
+            req.body.narrative,
+            req.body.nextSteps,
+            noteID
+          ]);
+          await connection.commit();
+          return "Case note successfully updated"; 
+        }
+        else{
+          await connection.rollback();
+          return {"Error":"Invalid authentication"};
+        }
+      }
+      catch(err){
+        await connection.rollback();
+        console.log(err);
+        return {"Error":"Error updating casenote"};
       }
     };
       
