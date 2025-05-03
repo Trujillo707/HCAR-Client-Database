@@ -162,7 +162,6 @@ app.post('/api/updateCaseNote', async (req, res) => {
     return res.send(results);
   });
 
-// TODO: MAKE THIS POST OBVIOUSLY 
 app.get('/client', (req, res) => {
     let rawData = req.body.clientID;
     res.render("clientDetails", {theClient: testClientArray[0]});
