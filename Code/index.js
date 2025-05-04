@@ -44,62 +44,114 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, "public/html/index.html"))
 });
 
-app.post('/home', getPath, (req, res) => {
-    // After verification of credentials
-    res.render("home");
+app.post('/home', getPath, async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.auth(req);
+    if (results !== "Successful Login"){
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login failures
+        res.redirect("/");
+    }else{
+        // After verification of credentials
+        res.render("home");
+    }
 });
 
 // Clicking home from home will re-render the page
-app.get('/home', getPath, (req, res) => {
-    res.render("home");
+app.get('/home', getPath, async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        res.render("home");
+    }
 });
 
-app.get("/search", getPath, (req, res) => {
-    res.render("search");
+app.get("/search", getPath, async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        res.render("search");
+    }
 })
 
 // TODO: MAKE THIS POST OBVIOUSLY
-app.get('/results', (req, res) => {
+/*app.get('/results', (req, res) => {
     res.render("results", {clientList: testClientArray});
-});
+});*/
 
 // Sanitize data sent to results
 app.post('/results', sanitize, async (req, res) => {
-    // Get client list from fetched results (Uncomment later)
-    /* const resClients = req.clients; */
-    const searchData = req.body;
     let qp = await new QueryParserBuilder().build()
-    let results = await qp.getAllFilteredClients(1, searchData);    // Later replace with accID
-    // Build Clients for each returned row
-    let clients = [];
-    if (results[0] !== undefined)
-    {
-        console.log("Results: ", results[0]);   // Uncomment for debugging
-        console.log("Programs: ", results[1]);   // Uncomment for debugging
-        for (const client of results[0])
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        // Get client list from fetched results (Uncomment later)
+        /* const resClients = req.clients; */
+        const searchData = req.body;
+        let results = await qp.getAllFilteredClients(1, searchData);    // Later replace with accID
+        // Build Clients for each returned row
+        let clients = [];
+        if (results[0] !== undefined)
         {
-            clients.push(new ClientBuilder()
-            .setClientID(client.clientID !== null ? client.clientID : "Empty")
-            .setFirstName(client.fName !== null ? client.fName : "Empty")
-            .setLastName(client.lName !== null ? client.lName : "Empty")
-            .setPhoneNumber(client.phoneNumber !== null ? client.phoneNumber : "Empty")
-            .setEmail(client.email !== null ? client.email : "Empty")
-            .setDOB(client.dateOfBirth !== null ? new Date(client.dateOfBirth) : "Empty")
-            .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
-            .setSex(client.gender !== null ? client.gender : "Empty")
-            .setPrograms(new Programs(results[1].filter(program => program.clientID === client.clientID)))
-            .build());
+            console.log("Results: ", results[0]);   // Uncomment for debugging
+            console.log("Programs: ", results[1]);   // Uncomment for debugging
+            for (const client of results[0])
+            {
+                clients.push(new ClientBuilder()
+                    .setClientID(client.clientID !== null ? client.clientID : "Empty")
+                    .setFirstName(client.fName !== null ? client.fName : "Empty")
+                    .setLastName(client.lName !== null ? client.lName : "Empty")
+                    .setPhoneNumber(client.phoneNumber !== null ? client.phoneNumber : "Empty")
+                    .setEmail(client.email !== null ? client.email : "Empty")
+                    .setDOB(client.dateOfBirth !== null ? new Date(client.dateOfBirth) : "Empty")
+                    .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
+                    .setSex(client.gender !== null ? client.gender : "Empty")
+                    .setPrograms(new Programs(results[1].filter(program => program.clientID === client.clientID)))
+                    .build());
+            }
         }
+        res.render("results", {clientList: clients});
     }
-    res.render("results", {clientList: clients});
 });
 
-app.get("/reports", getPath, (req, res) => {
-    res.render("reports", {availableReportsMap: reportTypes});
+app.get("/reports", getPath, async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        res.render("reports", {availableReportsMap: reportTypes});
+    }
 });
 
-app.get("/caseNote", (req, res) => {
-    res.render("caseNote", {theClient: testClientArray[0]});
+app.get("/caseNote", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        res.render("caseNote", {theClient: testClientArray[0]});
+    }
 })
 
 app.post('/api/auth', async (req, res) => {
@@ -164,7 +216,7 @@ app.post('/api/updateCaseNote', async (req, res) => {
 
 app.get('/client', (req, res) => {
     let rawData = req.body.clientID;
-    res.render("clientDetails", {theClient: testClientArray[0]});
+    res.render("clientDetails", {theAccount: false, theClient: testClientArray[0]});
 });
 
 app.post('/client', sanitize, (req, res) => {
@@ -174,20 +226,28 @@ app.post('/client', sanitize, (req, res) => {
 
 // Redirection from POST request 
 app.get('/client/:id', async (req, res) => {
-    const cliID = Number(req.params.id);
-    // DB Queries
     let qp = await new QueryParserBuilder().build()
-    let clientDemographics = await qp.getClientDemographics(cliID);
-    let insuranceAndMedicalPreferences = await qp.getInsuranceAndMedicalPreferences(cliID);
-    let medicationList = await qp.getMedicationList(cliID);
-    console.log("Demographics: ", clientDemographics);
-    console.log("Insurance: ", insuranceAndMedicalPreferences);
-    console.log("Medication: ", medicationList);
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        const cliID = Number(req.params.id);
+        // DB Queries
+        let clientDemographics = await qp.getClientDemographics(cliID);
+        let insuranceAndMedicalPreferences = await qp.getInsuranceAndMedicalPreferences(cliID);
+        let medicationList = await qp.getMedicationList(cliID);
+        console.log("Demographics: ", clientDemographics);
+        console.log("Insurance: ", insuranceAndMedicalPreferences);
+        console.log("Medication: ", medicationList);
 
-    // Build client
-    
+        // Build client
 
-    res.render("clientDetails", {theClient: testClientArray[0]});
+
+        res.render("clientDetails", {theAccount: account, theClient: testClientArray[0]});
+    }
 });
 
 app.get("/test", async (req, res) => {
