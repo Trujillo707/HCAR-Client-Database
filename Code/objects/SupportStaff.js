@@ -27,7 +27,7 @@ export class SupportStaff {
      * @param {Date} dateAssigned
      * @param {Date} [dateRemoved = null]
      */
-    constructor(name, title, idNumber, dateAssigned, dateRemoved = null ) {
+    constructor({name, title, idNumber, dateAssigned, dateRemoved} ) {
         this.#name = name;
         this.#title = title;
         this.#idNumber = idNumber;

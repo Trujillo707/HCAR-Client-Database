@@ -1,6 +1,7 @@
 import {Client} from "./Client.js"
 import Programs from "./Programs.js";
 import Address from "./Address.js";
+import Medication from "./Medication.js";
 
 /**
  * @author Orlando Trujillo-Ortiz

@@ -38,8 +38,8 @@ export default class CaseNote {
      * @param {string} employeeSign
      * @param {Date} signDate
      */
-    constructor(subject, program, date, contactType, goalWorkedOn, narrative,
-                progressOnGoal, nextSteps, employeeSign, signDate) {
+    constructor({subject, program, date, contactType, goalWorkedOn, narrative,
+                progressOnGoal, nextSteps, employeeSign, signDate}) {
         this.#subject = subject;
         this.#program = program;
         this.#date = date;
