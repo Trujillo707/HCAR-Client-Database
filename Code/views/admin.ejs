@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>Admin Page</title>
+    <%- include("fontLinks") -%>
+    <link href="../css/style.css" rel="stylesheet" type="text/css" />
+    <meta charset="utf-8" />
+</head>
+<body>
+<%-include("header")-%>
+<div class="bodyContent">
+    <div class="adminContainer">
+        <div class="employee_actions">
+            <p>Employee Actions: </p>
+            <button id="assignClientsButton">Assign/Remove a Client</button>
+            <button id="addEmployeeButton">Add a New Employee</button>
+            <button id="removeEmployeeButton">Remove an Employee</button>
+        </div>
+        <div class="client_actions">
+            <p>Client Actions: </p>
+            <button id="addNewClientButton">Add a New Client</button>
+            <button id="removeClientButton">Remove a Client</button>
+            <button id="editClientDetails">Remove an Employee</button>
+        </div>
+        <div class="assignClients" hidden="hidden">
+            <!-- employee name selected from a select, client name searched for in mini table? -->
+        </div>
+        <div class="addEmployee" hidden="hidden">
+            <!-- employee username, email, password, program(s), submit -->
+        </div>
+        <div class="removeEmployee" hidden="hidden">
+            <!-- employee username, name, search with table and selector, submit -->
+        </div>
+        <div class="addNewClient" hidden="hidden">
+            <!-- sends you to empty client page to put in info -->
+        </div>
+        <div class="removeClient" hidden="hidden">
+            <!-- search by name, program, id?, phone, email, display info in mini table -->
+        </div>
+        <div class="editClient" hidden="hidden">
+            <!-- dont need this since we are doing the check in clientDetails.ejs, removing it l8r -->
+        </div>
+    </div>
+</div>
+<footer class="caseNoteFooter">
+    <button id="goBackButton" class="dimHover footerButton">Go Back</button>
+    <button id="saveButton" class="dimHover footerButton">Apply</button>
+</footer>
+</body>
