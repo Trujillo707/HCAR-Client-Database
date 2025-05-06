@@ -10,7 +10,7 @@ export default class Programs {
     /**
      * @param {string} name
      */
-    constructor(name) {
+    constructor({name}) {
         this.#name = name;
     }
 

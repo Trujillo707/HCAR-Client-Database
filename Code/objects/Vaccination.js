@@ -13,7 +13,7 @@ export default class Vaccination {
      * @param {string} shotType
      * @param {Date} dateTaken
      */
-    constructor(shotType, dateTaken) {
+    constructor({shotType, dateTaken}) {
         this.#shotType = shotType;
         this.#dateTaken = dateTaken;
     }

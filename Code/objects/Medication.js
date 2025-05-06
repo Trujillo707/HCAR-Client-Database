@@ -22,7 +22,7 @@ export default class Medication {
      * @param {string} sideEffects
      * @param {string} prescriber
      */
-    constructor(name, prn, dosage, timesOfDay, purpose, sideEffects, prescriber) {
+    constructor({name, prn, dosage, timesOfDay, purpose, sideEffects, prescriber}) {
         this.#name = name;
         this.#prn = prn;
         this.#dosage = dosage;
