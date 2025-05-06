@@ -191,11 +191,10 @@ app.get('/client/:id', async (req, res) => {
     res.render("clientDetails", {theClient: testClientArray[0]});
 });
 
-app.get("/test", async (req, res) => {
-    let qp = await new QueryParserBuilder().build()
-    let results = await qp.getAllClients(1)
-    res.send(results);
-})
+app.get('/admin', (req, res) => {
+    let rawData = req.body.clientID;
+    res.render("admin", {theClient: testClientArray[0]});
+});
 
 /* Port Number should be an environment variable fyi */
 app.listen(port, () => {
