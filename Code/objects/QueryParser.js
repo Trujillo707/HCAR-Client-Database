@@ -284,6 +284,31 @@ export default class QueryParser {
      * @param {number} clientID
      * @returns {Promise<{primaryInsurance: Object, secondaryInsurance: Object, pcp: Object, primaryPhysician: Object}|{Error: string}>}
      * If data is found, each relevant key will contain an object with the relevant data. Otherwise, the key is undefined.
+     * @example Return Value
+     * {
+     *     primaryInsurance: {
+     *         "insuranceID": 2,
+     *         "name": "Blue Cross Blue Shield PPO",
+     *         "policyNumber": 222222222
+     *     },
+     *     secondaryInsurance: {
+     *         "insuranceID": 6,
+     *         "name": "Medicare Part A - Primary",
+     *         "policyNumber": 666666666
+     *     },
+     *     pcp: {
+     *         "contactID": 3,
+     *         "name": "CareFirst Clinic",
+     *         "phoneNumber": "555-2001",
+     *         "address": "789 Care Blvd, Healthton"
+     *     },
+     *     primaryPhysician: {
+     *         "contactID": 2,
+     *         "name": "Dr. Bob Johnson",
+     *         "phoneNumber": "555-1002",
+     *         "address": "456 Wellness Ave, Medville"
+     *     }
+     * }
      */
     async getInsuranceAndMedicalPreferences(clientID) {
         if (clientID == null || (typeof clientID != "number")) {
@@ -359,17 +384,20 @@ export default class QueryParser {
 
     async auth(req){
       try{
-        let validation = this.#validateInput(req.body.username, req.body.password)
-        if(!validation.status) return validation.message;
+        let validation = this.#validateInput(req.body.user, req.body.pass)
+        if(!validation.status){
+            return validation.message;
+        }
         
         let query = "SELECT * FROM Account WHERE username = ?"; 
-        const [rows] = await this.#pool.execute(query, [req.body.username]);
-    
-        if(rows.length === 0) return {"Error":"Incorrect username or password"}; //No user found
+        const [rows] = await this.#pool.execute(query, [req.body.user]);
+        if(rows.length === 0){
+            return {"Error":"Incorrect username or password"};
+        } //No user found
         else if(rows.length > 1){ //Should not happen
           return {"Error":"Incorrect username or password"};
         }
-        else if(await bcrypt.compare(req.body.password, rows[0].hash)){
+        else if(await bcrypt.compare(req.body.pass, rows[0].hash)){
           if(rows[0].disabled === 1){
             return {"Error":"Account has been disabled"};
           }
@@ -381,7 +409,6 @@ export default class QueryParser {
         }
       }
       catch(err){
-        console.log(err);
         return {"Error":"Error authenticating"};
       }
     };
