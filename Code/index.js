@@ -30,7 +30,7 @@ app.use(express.urlencoded({extended: true}));
 
 // Handling JSON payloads
 app.use(express.json());
-
+app.set('trust proxy', 1) // trust first proxy
 app.use(
     session({
         name: '__session',
