@@ -89,7 +89,7 @@
                     sexTypes = sexTypes.filter(e => e !== locals.theClient.getSex())
                     %>
                     <label for="sex">Sex: </label>
-                    <select name="sex" id="sex" disabled="disabled">
+                    <select name="sex" id="sex" <% if (!isAdmin){%>disabled="disabled"<%}%>>
                         <option value="<%=locals.theClient.getSex()%>" id="current"> <%=locals.theClient.getSex()%> </option>
                         <option value="<%=sexTypes[0]%>" id="option2"> <%=sexTypes[0]%> </option>
                         <option value="<%=sexTypes[1]%>" id="option3"> <%=sexTypes[1]%> </option>
@@ -100,7 +100,7 @@
                     maritalStatusTypes = maritalStatusTypes.filter(e => e !== locals.theClient.getMaritalStatus())
                     %>
                     <label for="maritalStatus">Marital Status: </label>
-                    <select name="maritalStatus" id="maritalStatus" disabled="disabled">
+                    <select name="maritalStatus" id="maritalStatus" <% if (!isAdmin){%>disabled="disabled"<%}%>>
                         <option value="<%=locals.theClient.getMaritalStatus()%>" id="current"> <%=locals.theClient.getMaritalStatus()%> </option>
                         <option value="<%=maritalStatusTypes[0]%>" id="option1"><%=maritalStatusTypes[0]%></option>
                         <option value="<%=maritalStatusTypes[1]%>" id="option2"><%=maritalStatusTypes[1]%></option>

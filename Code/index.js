@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/home', getPath, async (req, res) => {
-    let qp = await new QueryParserBuilder().build()
+    let qp = await new QueryParserBuilder().build();
     const results = await qp.auth(req);
     if (results !== "Successful Login"){
         // Not verified
@@ -53,6 +53,8 @@ app.post('/home', getPath, async (req, res) => {
         res.redirect("/");
     }else{
         // After verification of credentials
+        console.log(req.session)
+        console.log(req.session.id)
         res.render("home");
     }
 });
@@ -64,14 +66,19 @@ app.get('/home', getPath, async (req, res) => {
     if (!account.username) {
         // Not verified
         // TODO: Change index.html to an EJS file so we can render login and auth failures
+        console.log(req.session)
+        console.log(req.session.id)
         res.redirect("/");
     } else {
         // After verification of credentials
+        console.log(req.session)
+        console.log(req.session.id)
         res.render("home");
     }
 });
 
 app.get("/search", getPath, async (req, res) => {
+    console.log(req.session)
     let qp = await new QueryParserBuilder().build()
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
