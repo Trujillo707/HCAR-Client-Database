@@ -98,10 +98,6 @@ app.get("/search", getPath, async (req, res) => {
     }
 })
 
-// TODO: MAKE THIS POST OBVIOUSLY
-/*app.get('/results', (req, res) => {
-    res.render("results", {clientList: testClientArray});
-});*/
 
 // Sanitize data sent to results
 app.post('/results', sanitize, async (req, res) => {
@@ -116,7 +112,45 @@ app.post('/results', sanitize, async (req, res) => {
         // Get client list from fetched results (Uncomment later)
         /* const resClients = req.clients; */
         const searchData = req.body;
-        let results = await qp.getAllFilteredClients(1, searchData);    // Later replace with accID
+        let results = await qp.getAllFilteredClients(req.session.accountID, searchData);    // Later replace with accID
+        // Build Clients for each returned row
+        let clients = [];
+        if (results[0] !== undefined)
+        {
+            console.log("Results: ", results[0]);   // Uncomment for debugging
+            console.log("Programs: ", results[1]);   // Uncomment for debugging
+            for (const client of results[0])
+            {
+                clients.push(new ClientBuilder()
+                    .setClientID(client.clientID !== null ? client.clientID : "Empty")
+                    .setFirstName(client.fName !== null ? client.fName : "Empty")
+                    .setLastName(client.lName !== null ? client.lName : "Empty")
+                    .setPhoneNumber(client.phoneNumber !== null ? client.phoneNumber : "Empty")
+                    .setEmail(client.email !== null ? client.email : "Empty")
+                    .setDOB(client.dateOfBirth !== null ? new Date(client.dateOfBirth) : "Empty")
+                    .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
+                    .setSex(client.gender !== null ? client.gender : "Empty")
+                    .setPrograms(new Programs(results[1].filter(program => program.clientID === client.clientID)))
+                    .build());
+            }
+        }
+        res.render("results", {clientList: clients});
+    }
+});
+
+app.get("/results/all", async(req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        // Get client list from fetched results (Uncomment later)
+        /* const resClients = req.clients; */
+        const searchData = req.body;
+        let results = await qp.getAllClients(req.session.accountID)
         // Build Clients for each returned row
         let clients = [];
         if (results[0] !== undefined)
