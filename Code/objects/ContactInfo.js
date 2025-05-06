@@ -13,7 +13,7 @@ export default class ContactInfo {
      * @param {string} phoneNumber
      * @param {string} address
      */
-    constructor(name, phoneNumber, address) {
+    constructor({name, phoneNumber, address}) {
         this.#name = name;
         this.#phoneNumber = phoneNumber;
         this.#address = address;
