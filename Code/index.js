@@ -219,10 +219,10 @@ app.post('/api/updateCaseNote', async (req, res) => {
     return res.send(results);
   });
 
-app.get('/client', (req, res) => {
+/*app.get('/client', (req, res) => {
     let rawData = req.body.clientID;
     res.render("clientDetails", {theAccount: false, theClient: testClientArray[0]});
-});
+});*/
 
 app.post('/client', sanitize, (req, res) => {
     let cliID = req.body.clientID;
