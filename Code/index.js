@@ -30,7 +30,7 @@ app.use(
       resave: false, //Avoids resaving of the session if it hasn't changed
       cookie: {
         maxAge: 86400000, //One day(miliseconds)
-        secure: process.env.SECURE_SESSION, //Set to true in prod(Requires HTTPS for cookies to be set)
+        secure: process.env.SECURE_SESSION === "true", //Set to true in prod(Requires HTTPS for cookies to be set)
         httpOnly: true, //Disallows browser js from accessing cookie
         sameSite: 'strict', //CSRF Protection
       },
@@ -41,7 +41,11 @@ app.set('view engine', 'ejs');
 app.set('views', __dirname + "/views");
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, "public/html/index.html"))
+    if (req.session.accountID){
+        res.redirect("/home");
+    } else{
+        res.sendFile(path.join(__dirname, "public/html/index.html"))
+    }
 });
 
 app.post('/home', getPath, async (req, res) => {
@@ -53,8 +57,6 @@ app.post('/home', getPath, async (req, res) => {
         res.redirect("/");
     }else{
         // After verification of credentials
-        console.log(req.session)
-        console.log(req.session.id)
         res.render("home");
     }
 });
@@ -66,13 +68,9 @@ app.get('/home', getPath, async (req, res) => {
     if (!account.username) {
         // Not verified
         // TODO: Change index.html to an EJS file so we can render login and auth failures
-        console.log(req.session)
-        console.log(req.session.id)
         res.redirect("/");
     } else {
         // After verification of credentials
-        console.log(req.session)
-        console.log(req.session.id)
         res.render("home");
     }
 });

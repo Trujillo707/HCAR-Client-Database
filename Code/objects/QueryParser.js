@@ -398,7 +398,6 @@ export default class QueryParser {
           return {"Error":"Incorrect username or password"};
         }
         else if(await bcrypt.compare(req.body.pass, rows[0].hash)){
-            console.log("password checking")
           if(rows[0].disabled === 1){
             return {"Error":"Account has been disabled"};
           }
