@@ -1,8 +1,17 @@
 import express from "express"
+import session from 'express-session';
 const app = express()
 import {reportTypes} from "./reportsLogic.js";
 import {ClientBuilder} from "./objects/ClientBuilder.js";
 import Programs from "./objects/Programs.js";
+import Medication from "./objects/Medication.js";
+import Insurance from "./objects/Insurance.js";
+import ContactInfo from "./objects/ContactInfo.js";
+import Address from "./objects/Address.js";
+import Vaccination from "./objects/Vaccination.js";
+import {SupportStaff} from "./objects/SupportStaff.js";
+import CaseNote from "./objects/CaseNote.js";
+
 const port = process.env.PORT || 8080;
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -21,6 +30,20 @@ app.use(express.urlencoded({extended: true}));
 
 // Handling JSON payloads
 app.use(express.json());
+
+app.use(
+    session({
+      secret: process.env.SESSION_SECRET,
+      saveUninitialized: false, //Doesn't save every session, only modified ones.
+      resave: false, //Avoids resaving of the session if it hasn't changed
+      cookie: {
+        maxAge: 86400000, //One day(miliseconds)
+        secure: process.env.SECURE_SESSION, //Set to true in prod(Requires HTTPS for cookies to be set)
+        httpOnly: true, //Disallows browser js from accessing cookie
+        sameSite: 'strict', //CSRF Protection
+      },
+    })
+  );
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + "/views");
@@ -87,7 +110,66 @@ app.get("/caseNote", (req, res) => {
     res.render("caseNote", {theClient: testClientArray[0]});
 })
 
-// TODO: MAKE THIS POST OBVIOUSLY 
+app.post('/api/auth', async (req, res) => {
+  
+  let qp = await new QueryParserBuilder().build()
+  const results = await qp.auth(req);
+  return res.send(results);
+});
+/**
+ * Body: {
+ *   clientID:    number,
+ *   contactType: string,
+ *   goal:        string,
+ *   goalProgress:string,
+ *   narrative:   string,
+ *   nextSteps:   string
+ * }
+ * Response on error: { "Error": "…message…" }
+ * Response on success: "Case note successfully created"
+ */
+app.post('/api/createCaseNote', async (req, res) => {
+  
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.createCaseNote(req);
+    return res.send(results);
+  });
+
+/*
+* Body: {
+ *   clientID:    string
+ *   contactType: string,
+ *   goal:        string,
+ *   goalProgress:string,
+ *   narrative:   string,
+ *   nextSteps:   string
+ *   noteID:      string
+ * }
+ * Response on error: { "Error": "…message…" }
+ * Response on success: "Case note successfully updated"
+ */
+app.post('/api/updateCaseNote', async (req, res) => {
+  let qp = await new QueryParserBuilder().build()
+  const results = await qp.updateCaseNote(req);
+  return res.send(results);
+});
+  
+  
+  /**
+   * Body: {
+   *   clientID: number,
+   *   noteID:   number
+   * }
+   * Response on error: { "Error": "…message…" }
+   * Response on success: "Case note successfully deleted"
+   */
+  app.post('/api/deleteCaseNote', async (req, res) => {
+  
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.deleteCaseNote(req);
+    return res.send(results);
+  });
+
 app.get('/client', (req, res) => {
     let rawData = req.body.clientID;
     res.render("clientDetails", {theClient: testClientArray[0]});
@@ -103,17 +185,130 @@ app.get('/client/:id', async (req, res) => {
     const cliID = Number(req.params.id);
     // DB Queries
     let qp = await new QueryParserBuilder().build()
-    let clientDemographics = await qp.getClientDemographics(cliID);
-    let insuranceAndMedicalPreferences = await qp.getInsuranceAndMedicalPreferences(cliID);
+    let cliDem = await qp.getClientDemographics(cliID);
+    let insurAndMed = await qp.getInsuranceAndMedicalPreferences(cliID);
     let medicationList = await qp.getMedicationList(cliID);
-    console.log("Demographics: ", clientDemographics);
-    console.log("Insurance: ", insuranceAndMedicalPreferences);
+    let vaccinationList = await qp.getVaccinationList(cliID);
+    let caseNotesList = await qp.getCaseNoteList(cliID);
+    let supportStaffList = await qp.getSupportStaffList(cliID);
+
+    let meds = [];
+    let vaccines = [];
+    let caseNotes = [];
+    let supportStaff = [];
+
+    console.log("Demographics: ", cliDem);
+    console.log("Insurance: ", insurAndMed);
     console.log("Medication: ", medicationList);
+    console.log("Vaccination: ", vaccinationList);
+    console.log("Case Notes: ", caseNotesList);
+    console.log("Support Staff: ", supportStaffList)
+
+    // Comprehension for med list
+    for (const med of medicationList)
+    {
+        let m = new Medication({
+            name: med.name !== null ? med.name : "Empty",
+            prn: med.prn !== null ? med.prn : 0,
+            dosage: med.dosage !== null ? med.dosage : "Empty",
+            timesOfDay: med.frequency !== null ? med.frequency : "Empty",
+            purpose: med.purpose !== null ? med.purpose : "Empty",
+            sideEffects: med.sideEffects !== null ? med.sideEffects : "Empty",
+            prescriber: med.prescriber !== null ? med.prescriber : "Empty"
+        });
+        meds.push(m);
+    }
+
+    // Comprehension for Vaccinations
+    for (const vac of vaccinationList)
+    {
+        let v = new Vaccination({
+            shotType: vac.name !== null ? vac.name : "Empty",
+            dateTaken: vac.dateTaken !== null ? new Date(vac.dateTaken) : "Empty"
+        })
+        vaccines.push(v);
+    }
+
+    // Comprehension for Case Notes
+    for (const note of caseNotesList)
+    {
+        // Setting only values needed for display, retrieve other columns when necessary
+        let n = new CaseNote({
+            subject: note.subject !== null ? note.subject : "Empty",
+            program: note.programName !== null ? note.programName : "Empty",
+            date: note.date !== null ? new Date(note.date) : "Empty",
+            employeeSign: note.creator !== null ? note.creator : "Empty"
+        })
+        caseNotes.push(n);
+    }
+
+    // Comprehension for Support Staff
+    for (const staff of supportStaffList)
+    {
+        let s = new SupportStaff({
+            name: staff.staffName !== null ? staff.staffName : "Empty",
+            title: staff.title !== null ? staff.title : "Empty",
+            idNumber: staff.staffID !== null ? staff.staffID : 0,
+            dateAssigned: staff.dateAssigned !== null ? new Date(staff.dateAssigned) : "Empty",
+            dateRemoved: staff.dateRemoved !== null ? new Date(staff.dateRemoved) : "Empty"
+        })
+        supportStaff.push(s);
+    }
 
     // Build client
+    const client = new ClientBuilder()
+    .setClientID(cliDem.clientId !== null ? cliDem.clientID : "Empty")
+    .setFirstName(cliDem.fName !== null ? cliDem.fName : "Empty")
+    .setLastName(cliDem.lName !== null ? cliDem.lName : "Empty")
+    .setEmail(cliDem.email !== null ? cliDem.email : "Empty")
+    .setAddress(new Address({
+        streetAddress: cliDem.address !== null ? cliDem.address : "Empty",
+        city: cliDem.city !== null ? cliDem.city : "Empty",
+        state: cliDem.state !== null ? cliDem.state : "Empty",
+        zip: cliDem.zip !== null ? cliDem.zip : "Empty" 
+    }))
+    .setDOB(cliDem.dateOfBirth !== null ? new Date(cliDem.dateOfBirth) : "Empty")
+    .setPhoneNumber(cliDem.phoneNumber !== null ? cliDem.phoneNumber : "Empty")
+    .setSex(cliDem.gender !== null ? cliDem.gender : "Empty")
+    .setPronouns(cliDem.pronouns !== null ? cliDem.pronouns : "Empty")
+    .setMaritalStatus(cliDem.maritalStatus === 0 ? "Single" : "Divorced")   // Change later?
+    .setPreferredHospital(cliDem.preferredHospital !== null ? cliDem.preferredHospital : "Empty")
+    .setLikes(cliDem.likes !== null ? cliDem.likes : "Empty")
+    .setDislikes(cliDem.dislikes !== null ? cliDem.dislikes : "Empty")
+    .setGoals(cliDem.goals !== null ? cliDem.goals : "Empty")
+    .setHobbies(cliDem.hobbies !== null ? cliDem.hobbies : "Empty")
+    .setAchievements(cliDem.achievements !== null ? cliDem.achievements : "Empty")
+    .setPictureURL(cliDem.profilePicture !== null ? cliDem.profilePicture : "")
+    // Setting insurance
+    .setPrimaryInsurance(new Insurance({
+        name: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.name !== null) ? insurAndMed.primaryInsurance.name : "Empty",
+        policyNumber: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.policyNumber !== null) ? insurAndMed.primaryInsurance.policyNumber : "Empty"
+    }))
+    .setSecondaryInsurance(new Insurance({
+        name: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.name !== null) ? insurAndMed.secondaryInsurance.name : "Empty",
+        policyNumber: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.policyNumber !== null) ? insurAndMed.secondaryInsurance.policyNumber : "Empty"
+    }))
+    .setPcp(new ContactInfo({
+        name: (insurAndMed.pcp && insurAndMed.pcp.name !== null) ? insurAndMed.pcp.name : "Empty",
+        phoneNumber: (insurAndMed.pcp && insurAndMed.pcp.phoneNumber !== null) ? insurAndMed.pcp.phoneNumber : "Empty",
+        address: (insurAndMed.pcp && insurAndMed.pcp.address !== null) ? insurAndMed.pcp.address : "Empty"
+    }))
+    .setPrimaryPhysician(new ContactInfo({
+        name: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.name !== null) ? insurAndMed.primaryPhysician.name : "Empty",
+        phoneNumber: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.phoneNumber !== null) ? insurAndMed.primaryPhysician.phoneNumber : "Empty",
+        address: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.address !== null) ? insurAndMed.primaryPhysician.address : "Empty"
+    }))
+    // Setting medication
+    .setMedicationList(meds)
+    // Setting vaccinations
+    .setVaccinationList(vaccines)
+    // Setting support staff
+    .setSupportTeam(supportStaff)
+    // Setting case notes
+    .setCaseNoteList(caseNotes)
+    .build();
     
-
-    res.render("clientDetails", {theClient: testClientArray[0]});
+    res.render("clientDetails", {theClient: client});
 });
 
 app.get("/test", async (req, res) => {

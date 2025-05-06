@@ -11,7 +11,7 @@ export default class Address {
      * @param {string} state
      * @param {string} zip
      */
-    constructor(streetAddress, city, state, zip) {
+    constructor({streetAddress, city, state, zip}) {
         this.#streetAddress = streetAddress;
         this.#city = city;
         this.#state = state;

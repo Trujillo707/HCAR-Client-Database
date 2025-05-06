@@ -1,4 +1,5 @@
 import mysql from 'mysql2/promise';
+import bcrypt from "bcryptjs";
 // If using CloudSQL, they suggest using their connect for better security, I suppose
 import {Connector} from '@google-cloud/cloud-sql-connector';
 
@@ -68,10 +69,34 @@ export default class QueryParser {
         let results = [];
         let clientIDs;
 
-        const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID ORDER BY Client.clientID LIMIT 10 OFFSET " + offset;
+        /*const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID ORDER BY Client.clientID LIMIT ?,10"; */
+
+        /**
+         * This is an interesting approach to getting the client list based on being an admin or not.
+         * 1. First, the query starts by just getting all accounts.
+         * 2. Then, it will attempt a LEFT JOIN on StaffClient ***if*** the account has an entry in StaffClient
+         *   AND is not an admin. Since it is a LEFT JOIN, we never discard rows from Account if the LEFT JOIN
+         *   conditions are not met. So, if the Account is an admin, the cartesian product simply has null values for
+         *   the StaffClient columns.
+         *   If the Account is not an admin, then it's a JOIN as expected for those non-admin accounts.
+         * 3. Next, we do a regular JOIN on Client with the condition that we get all Clients if admin (since [a.admin=1]=1)
+         *    OR we join if the StaffClient.clientID matches the Client.clientID. Since we did a LEFT JOIN previously
+         *    there should be no way for an admin to have a StaffClient.clientID that matches a Client.clientID since
+         *    all StaffClient columns should be null.
+         * 4. The rest of the query is self-explanatory. Observe the neat LIMIT shorthand, I kinda vibe with it.
+         * @type {string}
+         */
+        const basicDetailsStmt = "SELECT c.clientID, f.filename AS profilePictureFilename, c.fName, c.lName, c.phoneNumber, c.email, DATE(c.dateOfBirth) AS 'dateOfBirth', c.pronouns, c.gender " +
+                                        "FROM Account a " +
+                                        "LEFT JOIN StaffClient sc ON a.staffID = sc.staffID AND a.admin = 0 " +
+                                        "INNER JOIN Client c ON (a.admin = 1 OR sc.clientID = c.clientID) " +
+                                        "INNER JOIN File f ON c.profilePicture = f.fileID " +
+                                        "WHERE a.accountID = ? " +
+                                        "ORDER BY c.clientID " +
+                                        "LIMIT ?, 10"
 
         try {
-            const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID]);
+            const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID, offset.toString()]);
             if (rows.length > 0) {
                 results.push(rows);
                 clientIDs = rows.map(client => client.clientID);
@@ -133,7 +158,7 @@ export default class QueryParser {
             offset = offset * 10;
         }
 
-        // TODO: consider changing schema to make sure what cols can be null and which cannot
+        //  consider changing schema to make sure what cols can be null and which cannot
         //       filtering must nullcheck any searchable cols that may be null in the DB
         // const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
         // const basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND staffID = ? AND fName LIKE ? AND lName LIKE ? AND phoneNumber LIKE ? AND dateOfBirth LIKE ? AND gender LIKE ? AND maritalStatus LIKE ? AND ifnull(email, '') LIKE ? AND payee LIKE ? AND conservator LIKE ? LIMIT 10 OFFSET " + offset;
@@ -153,7 +178,18 @@ export default class QueryParser {
         // values.push(filters.conservator !== "" ? filters.conservator : "%");
 
         // Build query with chosen filters
-        let basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID";
+        /*let basicDetailsStmt = "SELECT Client.clientID, filename as profilePictureFilename, fName, lName, phoneNumber, email, DATE(dateOfBirth) as 'dateOfBirth', pronouns, gender FROM Account, Client, StaffClient, File WHERE Client.clientID = StaffClient.clientID AND Client.profilePicture = File.fileID AND Account.accountID = ? AND StaffClient.staffID = Account.staffID";*/
+
+        /**
+         * See getAllClients() for a description of this query.
+         */
+        let basicDetailsStmt = "SELECT c.clientID, f.filename AS profilePictureFilename, c.fName, c.lName, c.phoneNumber, c.email, DATE(c.dateOfBirth) AS 'dateOfBirth', c.pronouns, c.gender " +
+                                      "FROM Account a " +
+                                      "LEFT JOIN StaffClient sc ON a.staffID = sc.staffID AND a.admin = 0 " +
+                                      "INNER JOIN Client c ON (a.admin = 1 OR sc.clientID = c.clientID) " +
+                                      "INNER JOIN File f ON c.profilePicture = f.fileID " +
+                                      "WHERE a.accountID = ? ";
+
         for (const key of Object.keys(filters)) {
             if (filters[key] !== "" && filters[key] !== "%") {
                 // Handling date conversion from js to mysql FIX ME
@@ -174,6 +210,10 @@ export default class QueryParser {
                 }
             }
         }
+
+        basicDetailsStmt += " ORDER BY c.clientID";
+        basicDetailsStmt += " LIMIT ?, 10";
+        values.push(offset.toString());
 
         console.log(values)
         console.log("Query: ", basicDetailsStmt);
@@ -242,7 +282,8 @@ export default class QueryParser {
     /**
      * Queries the database for the client's insurance and medical preferences.
      * @param {number} clientID
-     * @returns {Promise<{primaryInsurance: null, secondaryInsurance: null, pcp: null, primaryPhysician: null}|{Error: string}>}
+     * @returns {Promise<{primaryInsurance: Object, secondaryInsurance: Object, pcp: Object, primaryPhysician: Object}|{Error: string}>}
+     * If data is found, each relevant key will contain an object with the relevant data. Otherwise, the key is undefined.
      */
     async getInsuranceAndMedicalPreferences(clientID) {
         if (clientID == null || (typeof clientID != "number")) {
@@ -254,23 +295,23 @@ export default class QueryParser {
             pcp: null, primaryPhysician: null
         };
 
-        let primaryInsuranceStmt = "SELECT name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.primaryInsurance FROM Client WHERE clientID = ?)";
-        let secondaryInsuranceStmt = "SELECT name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.secondaryInsurance FROM Client WHERE clientID = ?)";
-        let pcpStmt = "SELECT name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryCareProvider FROM Client WHERE clientID = ?)";
-        let primaryPhysicianStmt = "SELECT name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryPhysician FROM Client WHERE clientID = ?)";
+        let primaryInsuranceStmt = "SELECT insuranceID, name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.primaryInsurance FROM Client WHERE clientID = ?)";
+        let secondaryInsuranceStmt = "SELECT insuranceID, name, policyNumber FROM Insurance WHERE insuranceID = (SELECT Client.secondaryInsurance FROM Client WHERE clientID = ?)";
+        let pcpStmt = "SELECT contactID, name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryCareProvider FROM Client WHERE clientID = ?)";
+        let primaryPhysicianStmt = "SELECT contactID, name, phoneNumber, address FROM ContactInfo WHERE contactID = (SELECT Client.primaryPhysician FROM Client WHERE clientID = ?)";
 
         try {
-            const [primaryInsuranceRows, secondaryInsuranceRows, pcpRows, primaryPhysicianRows] = await Promise.all([
+            const [[primaryInsuranceRows], [secondaryInsuranceRows], [pcpRows], [primaryPhysicianRows]] = await Promise.all([
                 this.#pool.execute(primaryInsuranceStmt, [clientID]),
                 this.#pool.execute(secondaryInsuranceStmt, [clientID]),
                 this.#pool.execute(pcpStmt, [clientID]),
                 this.#pool.execute(primaryPhysicianStmt, [clientID])
             ]);
 
-            results.primaryInsurance = primaryInsuranceRows;
-            results.secondaryInsurance = secondaryInsuranceRows;
-            results.pcp = pcpRows;
-            results.primaryPhysician = primaryPhysicianRows;
+            results.primaryInsurance = primaryInsuranceRows[0];
+            results.secondaryInsurance = secondaryInsuranceRows[0];
+            results.pcp = pcpRows[0];
+            results.primaryPhysician = primaryPhysicianRows[0];
 
             return results;
         } catch (e) {
@@ -279,31 +320,233 @@ export default class QueryParser {
         }
     }
 
-    /**
-     * Queries the database for the client's medication list.
-     * @param {number} clientID
-     * @returns {Promise<*|{Error: string}>}
-     */
-    async getMedicationList(clientID){
+    #validateInput(username, password){
+      if(!username || !password){
+        return {"status": false, "message": {"Error":"Empty username or password"}};
+      }
+      else if(username.length > 32 || password.length > 32){
+        return {"status": false, "message": {"Error":"Input length exceeded"}};
+      }
+      else if (!/^[a-zA-Z0-9_.]+$/.test(username)) {
+        return {"status": false, "message": {"Error":"Username contains invalid characters"}};
+      }
+      else{
+        return {"status": true, "message": {"Error":"Valid username/password input entered"}};
+      }
+    }
+
+    async isAuthenticated(req, requiresAdmin = false){
+      try{
+        const accountID = req.session.accountID;
+        if(!accountID){
+          return {"Error":"Invalid authentication"};
+        }
+        let query = "SELECT username, staffID, disabled, admin FROM Account WHERE accountID = ?"; 
+        const [Account] = await this.#pool.execute(query, [accountID]);
+        if(Account[0].disabled === 1){
+          return {"Error":"Account has been disabled"};
+        }
+        if(requiresAdmin && Account[0].admin !== 1){
+          return {"Error":"Invalid permissions"};
+        }
+        return Account[0];
+      }
+      catch(err){
+        console.log(err);
+        return {"Error":"Error authenticating"};
+      }
+    }
+
+    async auth(req){
+      try{
+        let validation = this.#validateInput(req.body.username, req.body.password)
+        if(!validation.status) return validation.message;
+        
+        let query = "SELECT * FROM Account WHERE username = ?"; 
+        const [rows] = await this.#pool.execute(query, [req.body.username]);
+    
+        if(rows.length === 0) return {"Error":"Incorrect username or password"}; //No user found
+        else if(rows.length > 1){ //Should not happen
+          return {"Error":"Incorrect username or password"};
+        }
+        else if(await bcrypt.compare(req.body.password, rows[0].hash)){
+          if(rows[0].disabled === 1){
+            return {"Error":"Account has been disabled"};
+          }
+          req.session.accountID = rows[0].accountID;
+          return "Successful Login";
+        }
+        else{
+          return {"Error":"Incorrect username or password"};
+        }
+      }
+      catch(err){
+        console.log(err);
+        return {"Error":"Error authenticating"};
+      }
+    };
+
+    async createCaseNote(req){
+      const connection = await this.#pool.getConnection();
+      try {
+        const account = await this.isAuthenticated(req);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        const clientID = parseInt(req.body.clientID);
+        if(!Number.isInteger(clientID)){
+          return {"Error":"Invalid Request"};
+        }
+
+        const staffID = account.staffID;
+        await connection.beginTransaction();
+        if(account.admin !== 1){
+          const staffClientQuery = "SELECT COUNT(*) FROM StaffClient WHERE staffID = ? AND clientID = ?"; 
+          var [staffClient] = await connection.execute(staffClientQuery, [staffID, clientID]);
+        }
+        if(account.admin === 1 || staffClient[0]['COUNT(*)'] === 1){
+          await connection.execute("CALL CreateCaseNote(?, ?, ?, ?, ?, ?, ?)", [
+            staffID,
+            req.body.clientID,
+            req.body.contactType,
+            req.body.goal,
+            req.body.goalProgress,
+            req.body.narrative,
+            req.body.nextSteps
+          ]);
+          await connection.commit();
+          return "Case note successfully created"; 
+        }
+        else{
+          await connection.rollback();
+          return {"Error":"Invalid authentication"};
+        }
+      }
+      catch(err){
+        await connection.rollback();
+        console.log(err);
+        return {"Error":"Error creating casenote"};
+      }
+    };
+
+    async updateCaseNote(req){
+      const connection = await this.#pool.getConnection();
+      try {
+        const account = await this.isAuthenticated(req);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        const noteID = parseInt(req.body.noteID);
+        const clientID = parseInt(req.body.clientID);
+        if(!Number.isInteger(noteID) || !Number.isInteger(clientID)){
+          return {"Error":"Invalid Request"};
+        }
+
+        const staffID = account.staffID;
+        await connection.beginTransaction();
+        if(account.admin !== 1){
+          const staffClientQuery = "SELECT COUNT(*) FROM StaffClient WHERE staffID = ? AND clientID = ?"; 
+          var [staffClient] = await connection.execute(staffClientQuery, [staffID, clientID]);
+        }
+        if(account.admin === 1 || staffClient[0]['COUNT(*)'] === 1){
+          await connection.execute("UPDATE Note SET contactType = ?, goal = ?, goalProgress = ?, narrative = ?, nextSteps = ? WHERE noteID = ?", [
+            req.body.contactType,
+            req.body.goal,
+            req.body.goalProgress,
+            req.body.narrative,
+            req.body.nextSteps,
+            noteID
+          ]);
+          await connection.commit();
+          return "Case note successfully updated"; 
+        }
+        else{
+          await connection.rollback();
+          return {"Error":"Invalid authentication"};
+        }
+      }
+      catch(err){
+        await connection.rollback();
+        console.log(err);
+        return {"Error":"Error updating casenote"};
+      }
+    };
+      
+    async deleteCaseNote(req){
+      const connection = await this.#pool.getConnection();
+      try {
+        const account = await this.isAuthenticated(req);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        const noteID = parseInt(req.body.noteID);
+        const clientID = parseInt(req.body.clientID);
+  
+        if(!Number.isInteger(clientID) || !Number.isInteger(noteID)){
+          return {"Error":"Invalid Request"};
+        }
+  
+        const staffID = account.staffID;
+        await connection.beginTransaction();
+        if(account.admin !== 1){
+          const staffClientQuery = "SELECT COUNT(*) FROM StaffClient sc JOIN NoteClient nc ON sc.clientID=nc.clientID WHERE sc.staffID = ? AND nc.noteID = ? AND sc.clientID = ?;";
+          var [staffClientNote] = await connection.execute(staffClientQuery, [staffID, noteID, clientID]);
+        }
+        console.log(staffClientNote[0]['COUNT(*)']);
+        if(account.admin === 1 || staffClientNote[0]['COUNT(*)'] === 1){
+          var [deleteResults] = await connection.execute("CALL DeleteCaseNote(?, ?)", [
+            clientID,
+            noteID
+          ]);
+          await connection.commit();
+          if(deleteResults.affectedRows === 0){
+            await connection.rollback();
+            return {"Error":"Case note already deleted/does not exist"};
+          }
+          else{
+            return "Case note successfully deleted";
+          }
+        }
+        else{
+          await connection.rollback();
+          return {"Error":"Invalid deletion query"};
+        }
+        
+      }
+      catch(err){
+        await connection.rollback();
+        return {"Error":"Error deleting casenote"};
+      }
+      finally{
+        await connection.release();
+      }
+    };
+
+      /**
+   * Queries the database for the client's medication list.
+   * @param {number} clientID
+   * @returns {Promise<*|{Error: string}>}
+   */
+      async getMedicationList(clientID){
         if (clientID == null || (typeof clientID != "number")) {
             return {"Error": "Invalid ClientID"};
-        }
+          }
 
-        let medicationStmt = "SELECT medicationID, name, prn, dosage, frequency, purpose, sideEffects, prescriber FROM Medication WHERE clientID = ? ORDER BY name";
-
-        try {
-            const [rows] = await this.#pool.execute(medicationStmt, [clientID]);
-            return rows;
-        } catch (e) {
-            console.log("Error: Failure getting Client's medication list" + e);
-            return {"Error": "Failure getting Client's medication list"};
-        }
-    }
+          let medicationStmt = "SELECT medicationID, name, prn, dosage, frequency, purpose, sideEffects, prescriber FROM Medication WHERE clientID = ? ORDER BY name";
+  
+          try {
+              const [rows] = await this.#pool.execute(medicationStmt, [clientID]);
+              return rows;
+          } catch (e) {
+              console.log("Error: Failure getting Client's medication list" + e);
+              return {"Error": "Failure getting Client's medication list"};
+          }
+      }  
 
     /**
      * Queries the database for the client's vaccination list (newest dates first).
      * @param clientID
-     * @returns {Promise<*|{Error: string}>}
+     * @returns {Promise<Object[]|{Error: string}>}
      */
     async getVaccinationList(clientID){
         if (clientID == null || (typeof clientID != "number")) {
@@ -320,15 +563,74 @@ export default class QueryParser {
             return {"Error": "Failure getting Client's vaccination list"};
         }
     }
-/*
+
+    /**
+     * Queries the database for the Client's Case Note list (newest dates first).
+     * @param clientID
+     * @returns {Promise<Object[]|{Error: string}>}
+     */
     async getCaseNoteList(clientID){
         if (clientID == null || (typeof clientID != "number")) {
             return {"Error": "Invalid ClientID"};
         }
 
-        let caseNoteStmt = "SELECT Note.noteID, dateCreated, fname || ' ' || lname as creator, name as programName FROM Note JOIN Staff ON Staff.staffID = Note.staffID JOIN Program ON Program.programID = Note.programID JOIN HCAR.NoteClient NC on Note.noteID = NC.noteID WHERE clientID = ? ORDER BY dateCreated DESC";
+        let caseNoteStmt = "SELECT Note.noteID, subject, dateCreated, CONCAT(fname, ' ', lname) as creator, name as programName FROM Note JOIN Staff ON Staff.staffID = Note.staffID JOIN Program ON Program.programID = Note.programID JOIN HCAR.NoteClient NC on Note.noteID = NC.noteID WHERE clientID = ? ORDER BY dateCreated DESC";
+
+        try {
+            const [rows] = await this.#pool.execute(caseNoteStmt, [clientID]);
+            return rows;
+        } catch (e) {
+            console.log("Error: Failure getting Client's case note list:" + e);
+            return {"Error": "Failure getting Client's case note list"};
+        }
     }
-*/
+
+    /**
+     * Queries the database for a specific case note.
+     * @param noteID
+     * @returns {Promise<Object|{Error: string}>}
+     */
+    async getCaseNote(noteID){
+        if (noteID == null || (typeof noteID != "number")) {
+            return {"Error": "Invalid NoteID"};
+        }
+
+        let caseNoteStmt = "SELECT Note.noteID, subject, dateCreated, staffID, name as programName, dateModified, contactType, goal, narrative, goalProgress, nextSteps FROM Note JOIN HCAR.Program P on Note.programID = P.programID WHERE Note.noteID = ?";
+
+        try {
+            const [rows] = await this.#pool.execute(caseNoteStmt, [noteID]);
+            if (rows.length > 0) {
+                return rows[0];
+            } else {
+                return {"Error": "Note not found"};
+            }
+        } catch (e) {
+            console.log("Error: Failure getting Client's case note:" + e);
+            return {"Error": "Failure getting Client's case note"};
+        }
+    }
+
+    /**
+     * Queries the database for the Client's Support Staff list (newest dates first).
+     * @param clientID
+     * @returns {Promise<Object[]|{Error: string}>}
+     */
+    async getSupportStaffList(clientID){
+        if (clientID == null || (typeof clientID != "number")) {
+            return {"Error": "Invalid ClientID"};
+        }
+
+        let supportStaffStmt = "SELECT StaffClient.staffID, CONCAT(fname, ' ', lname) as staffName, title, dateAssigned, dateRemoved FROM StaffClient JOIN Staff ON Staff.staffID = StaffClient.staffID WHERE clientID = ? ORDER BY dateAssigned DESC";
+
+        try {
+            const [rows] = await this.#pool.execute(supportStaffStmt, [clientID]);
+            return rows;
+        } catch (e) {
+            console.log("Error: Failure getting Client's support staff list:" + e);
+            return {"Error": "Failure getting Client's support staff list"};
+        }
+    }
+
     // Methods below are more related to the Instance's properties and should be used sparingly
 
     /**
