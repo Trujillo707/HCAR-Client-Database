@@ -853,7 +853,10 @@ describe("QueryParser Class Tests", () => {
                 }
             }],
         ])("Valid clientID returns insurance and medical preferences", async (clientID, expected) => {
-                await expect(qp.getInsuranceAndMedicalPreferences(clientID)).resolves.toStrictEqual(expected);
+                //await expect(qp.getInsuranceAndMedicalPreferences(clientID)).resolves.toStrictEqual(expected);
+            const actual = await qp.getInsuranceAndMedicalPreferences(clientID);
+            console.log(actual);
+            expect(actual).toStrictEqual(expected);
         });
 
     })
