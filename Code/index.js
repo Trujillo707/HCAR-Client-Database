@@ -33,15 +33,16 @@ app.use(express.json());
 
 app.use(
     session({
-      secret: process.env.SESSION_SECRET,
-      saveUninitialized: false, //Doesn't save every session, only modified ones.
-      resave: false, //Avoids resaving of the session if it hasn't changed
-      cookie: {
-        maxAge: 86400000, //One day(miliseconds)
-        secure: process.env.SECURE_SESSION === "true", //Set to true in prod(Requires HTTPS for cookies to be set)
-        httpOnly: true, //Disallows browser js from accessing cookie
-        sameSite: 'strict', //CSRF Protection
-      },
+        name: '__session',
+        secret: process.env.SESSION_SECRET,
+        saveUninitialized: false, //Doesn't save every session, only modified ones.
+        resave: false, //Avoids resaving of the session if it hasn't changed
+        cookie: {
+          maxAge: 86400000, //One day(miliseconds)
+          secure: process.env.SECURE_SESSION === "true", //Set to true in prod(Requires HTTPS for cookies to be set)
+          httpOnly: true, //Disallows browser js from accessing cookie
+          sameSite: 'strict', //CSRF Protection
+        },
     })
   );
 
