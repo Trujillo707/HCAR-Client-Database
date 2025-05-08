@@ -7,6 +7,7 @@ const nextButton = document.getElementById("nextButton");
 const oldURL = new URL(window.location.href);
 const searchString = new URLSearchParams(oldURL.search);
 let currentPage = parseInt(searchString.get("page")) || 1;
+currentPage = currentPage < 1 ? 1 : currentPage;
 
 
 if (clientRows.length < 15){
