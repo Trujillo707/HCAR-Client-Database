@@ -1,6 +1,8 @@
 import express from "express"
 import session from 'express-session';
-const app = express()
+const app = express();
+import MySQLSession from 'express-mysql-session';
+const MySQLStore = MySQLSession(session);
 import {reportTypes} from "./reportsLogic.js";
 import {ClientBuilder} from "./objects/ClientBuilder.js";
 import Programs from "./objects/Programs.js";
@@ -31,12 +33,15 @@ app.use(express.urlencoded({extended: true}));
 // Handling JSON payloads
 app.use(express.json());
 app.set('trust proxy', 1) // trust first proxy
+let topQP = await new QueryParserBuilder().build();
+const sessionStore = new MySQLStore({}, topQP.getPool());
 app.use(
     session({
         name: '__session',
         secret: process.env.SESSION_SECRET,
         saveUninitialized: false, //Doesn't save every session, only modified ones.
         resave: false, //Avoids resaving of the session if it hasn't changed
+        store: sessionStore, //  Make express-sesssion use the MySQL session store
         cookie: {
           maxAge: 86400000, //One day(miliseconds)
           secure: process.env.SECURE_SESSION === "true", //Set to true in prod(Requires HTTPS for cookies to be set)
@@ -45,6 +50,7 @@ app.use(
         },
     })
   );
+
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + "/views");
@@ -423,6 +429,12 @@ app.listen(port, () => {
 })
 
 process.on('SIGTERM',async () => {
+    try{
+        await sessionStore.close();
+    } catch (e) {
+        console.log("Error: Failed to cleanly close the session store => " + e);
+    }
+    
     try {
         if (QueryParser.hasInstance()) {
             const queryParser = new QueryParserBuilder().build();
@@ -431,6 +443,7 @@ process.on('SIGTERM',async () => {
     } catch (error) {
         console.error('Error while closing the database connection:', error);
     } finally {
+        console.log("Server shutting down...");
         process.exit(0);
     }
 });
