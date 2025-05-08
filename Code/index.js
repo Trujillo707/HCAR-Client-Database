@@ -106,7 +106,7 @@ app.get("/search", getPath, async (req, res) => {
 
 
 // Sanitize data sent to results
-app.post('/results', sanitize, async (req, res) => {
+app.get('/results', sanitize, async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
@@ -116,9 +116,9 @@ app.post('/results', sanitize, async (req, res) => {
     } else {
         // After verification of credentials
         // Get client list from fetched results (Uncomment later)
-        /* const resClients = req.clients; */
-        const searchData = req.body;
-        let results = await qp.getAllFilteredClients(req.session.accountID, searchData);    // Later replace with accID
+        const offset = parseInt(req.query.page) ? (parseInt(req.query.page) -1) : 0;
+        const searchData = req.query;
+        let results = await qp.getAllFilteredClients(req.session.accountID, searchData, offset);    // Later replace with accID
         // Build Clients for each returned row
         let clients = [];
         if (results[0] !== undefined)
@@ -154,15 +154,14 @@ app.get("/results/all", async(req, res) => {
     } else {
         // After verification of credentials
         // Get client list from fetched results (Uncomment later)
-        /* const resClients = req.clients; */
-        const searchData = req.body;
-        let results = await qp.getAllClients(req.session.accountID)
+        const offset = parseInt(req.query.page) ? (parseInt(req.query.page) -1) : 0;
+        let results = await qp.getAllClients(req.session.accountID, offset);
         // Build Clients for each returned row
         let clients = [];
         if (results[0] !== undefined)
         {
-            console.log("Results: ", results[0]);   // Uncomment for debugging
-            console.log("Programs: ", results[1]);   // Uncomment for debugging
+            //console.log("Results: ", results[0]);   // Uncomment for debugging
+            //console.log("Programs: ", results[1]);   // Uncomment for debugging
             for (const client of results[0])
             {
                 clients.push(new ClientBuilder()
@@ -450,18 +449,34 @@ process.on('SIGTERM',async () => {
 
 function sanitize(req, res, next)
 {
-    for (const key in req.body)
-    {
-        // If non-null field
-        if (req.body[key] !== "")
+    if (req.method === "POST"){
+        for (const key in req.body)
         {
-            // Sanitize data
-            if (key === "email")
-                req.body[key] = req.body[key].replace(/[^\w@\.]/g, "");
-            else
-                req.body[key] = req.body[key].replace(/[\W]/g, "");
+            // If non-null field
+            if (req.body[key] !== "")
+            {
+                // Sanitize data
+                if (key === "email")
+                    req.body[key] = req.body[key].replace(/[^\w@\.]/g, "");
+                else
+                    req.body[key] = req.body[key].replace(/[\W]/g, "");
+            }
+        }
+    } else{
+        for (const key in req.query)
+        {
+            // If non-null field
+            if (req.query[key] !== "")
+            {
+                // Sanitize data
+                if (key === "email")
+                    req.query[key] = req.query[key].replace(/[^\w@\.]/g, "");
+                else
+                    req.query[key] = req.query[key].replace(/[\W]/g, "");
+            }
         }
     }
+
     next();
 }
 
