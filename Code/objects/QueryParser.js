@@ -59,11 +59,15 @@ export default class QueryParser {
             return {"Error": "Invalid Authentication"};
         }
 
+        // NOTE: If changing the limit, make sure to change the limit in getAllFilteredClients() as well
+        //       and change the limit math in resultsScript.js
+        const limit = 15;
+
         // NOTE: If HCAR ever expands to hold more than 1000 clients in the database, just increase the offset limit!
-        if (typeof offset !== "number" || offset >= 100) {
+        if (typeof offset !== "number" || offset >= 100 || offset < 0) {
             offset = 0;
         } else {
-            offset = offset * 10;
+            offset = offset * limit;
         }
 
         let results = [];
@@ -93,10 +97,10 @@ export default class QueryParser {
                                         "INNER JOIN File f ON c.profilePicture = f.fileID " +
                                         "WHERE a.accountID = ? " +
                                         "ORDER BY c.clientID " +
-                                        "LIMIT ?, 10"
+                                        "LIMIT ?, ?"
 
         try {
-            const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID, offset.toString()]);
+            const [rows] = await this.#pool.execute(basicDetailsStmt, [acctID, offset.toString(), limit.toString()]);
             if (rows.length > 0) {
                 results.push(rows);
                 clientIDs = rows.map(client => client.clientID);
@@ -147,15 +151,19 @@ export default class QueryParser {
                                 },
                                 offset = 0) {
 
+        const allowedFilters = ["firstName", "lastName", "phoneNumber", "dob", "gender",
+            "maritalStatus", "email", "payee", "conservator"];
+
         if (acctID == null) {
             return {"Error": "Invalid Authentication"};
         }
 
+        const limit = 15;
         // NOTE: If HCAR ever expands to hold more than 1000 clients in the database, just increase the offset limit!
         if (typeof offset !== "number" || offset >= 100) {
             offset = 0;
         } else {
-            offset = offset * 10;
+            offset = offset * limit;
         }
 
         //  consider changing schema to make sure what cols can be null and which cannot
@@ -191,7 +199,7 @@ export default class QueryParser {
                                       "WHERE a.accountID = ? ";
 
         for (const key of Object.keys(filters)) {
-            if (filters[key] !== "" && filters[key] !== "%") {
+            if (filters[key] !== "" && filters[key] !== "%" && allowedFilters.includes(key)) {
                 // Handling date conversion from js to mysql FIX ME
                 if (key === "dob") {
                     values.push(filters[key].toISOString().slice(0, 10));
@@ -212,9 +220,9 @@ export default class QueryParser {
         }
 
         basicDetailsStmt += " ORDER BY c.clientID";
-        basicDetailsStmt += " LIMIT ?, 10";
+        basicDetailsStmt += " LIMIT ?, ?";
         values.push(offset.toString());
-
+        values.push(limit.toString());
         console.log(values)
         console.log("Query: ", basicDetailsStmt);
 

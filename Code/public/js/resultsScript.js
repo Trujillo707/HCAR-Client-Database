@@ -2,6 +2,21 @@ const backButton = document.getElementById("goBackButton");
 const selectButton = document.getElementById("selectButton");
 const clientRows = document.querySelectorAll("#clientRow");
 const clientTableBody = document.getElementById("clientTableBody");
+const prevButton = document.getElementById("prevButton");
+const nextButton = document.getElementById("nextButton");
+const oldURL = new URL(window.location.href);
+const searchString = new URLSearchParams(oldURL.search);
+let currentPage = parseInt(searchString.get("page")) || 1;
+
+
+if (clientRows.length < 15){
+    nextButton.disabled = true;
+    nextButton.style.cursor = "not-allowed";
+}
+if (currentPage <= 1){
+    prevButton.disabled = true;
+    prevButton.style.cursor = "not-allowed";
+}
 
 // Event Listener for Back Button
 backButton.addEventListener("click", () => history.back());
@@ -63,3 +78,25 @@ selectButton.addEventListener("click", () => {
     })  
     .catch(error => console.log("Error: ", error))
 });
+
+/**
+ * Event Listener for Previous Button
+ */
+prevButton.addEventListener("click", () => {
+    if (currentPage > 1){
+        currentPage--;
+        searchString.set("page", currentPage.toString());
+        oldURL.search = searchString.toString();
+        window.location.replace(oldURL);
+    }
+});
+
+nextButton.addEventListener("click", ()=>{
+    if (clientRows.length === 15){
+        currentPage++;
+        searchString.set("page", currentPage.toString());
+        oldURL.search = searchString.toString();
+        window.location.replace(oldURL);
+    }
+})
+

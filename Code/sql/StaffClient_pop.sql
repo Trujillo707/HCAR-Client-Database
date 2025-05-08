@@ -49,4 +49,15 @@ INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemove
 INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 2, 'Counselor 1', '2025-02-01', null);
 INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 3, 'Counselor 1', '2023-05-15', '2024-10-17');
 INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 5, 'Counselor 1', '2025-03-12', null);
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 9, 'Counselor 1', '2023-12-10', null);
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 10, 'Counselor 1', '2023-12-10', null);
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 11, 'Counselor 1', '2023-12-10', null);
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 12, 'Counselor 1', '2023-12-10', null);
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 13, 'Counselor 1', '2023-12-10', null);
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 14, 'Counselor 1', '2023-12-10', null);
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (3, 15, 'Counselor 1', '2023-12-10', null);
 
+
+-- Extra for Staff 2
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (2, 5, 'Support Staff 2', '2024-05-13', null);
+INSERT INTO HCAR.StaffClient (staffID, clientID, title, dateAssigned, dateRemoved) VALUES (2, 17, 'Support Staff 2', '2023-11-24', null);
