@@ -1,6 +1,6 @@
 const backButton = document.getElementById("goBackButton");
 const selectButton = document.getElementById("selectButton");
-const clientRows = document.querySelectorAll("#clientRow");
+const clientRows = document.querySelectorAll(".clickableRow");
 const clientTableBody = document.getElementById("clientTableBody");
 
 // Event Listener for Back Button
@@ -36,7 +36,6 @@ clientRows.forEach(row => {
 
 
 // Event Listener for Select Button
-// FIX ME
 selectButton.addEventListener("click", () => {
     const selectedClient = clientTableBody.querySelector(".selected");
     if (!selectedClient) 

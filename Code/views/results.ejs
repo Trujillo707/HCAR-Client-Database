@@ -29,7 +29,7 @@
     <% if (locals.clientList && Array.isArray(clientList) && clientList.length > 0){ %>
         <tbody id="clientTableBody">
             <% clientList.forEach((current) => { %>
-                <tr id="clientRow" class="lightHover" data-id="<%= current.getClientID() %>">
+                <tr id="clientRow" class="lightHover clickableRow" data-id="<%= current.getClientID() %>">
                     <td><img width="256" alt="Picture of <%= current.getFirstName() %>"
                              src="<%= current.getPictureURL() %>">
                     </td>

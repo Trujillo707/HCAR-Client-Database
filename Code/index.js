@@ -189,9 +189,11 @@ app.get("/reports", getPath, async (req, res) => {
     }
 });
 
-app.get("/caseNote", async (req, res) => {
+// Complete this to accomodate for new, and edit/view/delete
+app.post("/caseNote", async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const account = await qp.isAuthenticated(req);
+    const noteID = req.body.caseNoteID;
     if (!account.username) {
         // Not verified
         // TODO: Change index.html to an EJS file so we can render login and auth failures
@@ -202,7 +204,7 @@ app.get("/caseNote", async (req, res) => {
     }
 })
 
-app.post('/api/auth', async (req, res) => {
+app.post('/api/auth', sanitize, async (req, res) => {
   
   let qp = await new QueryParserBuilder().build()
   const results = await qp.auth(req);
@@ -220,7 +222,7 @@ app.post('/api/auth', async (req, res) => {
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully created"
  */
-app.post('/api/createCaseNote', async (req, res) => {
+app.post('/api/createCaseNote', sanitize, async (req, res) => {
   
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createCaseNote(req);
@@ -240,7 +242,7 @@ app.post('/api/createCaseNote', async (req, res) => {
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully updated"
  */
-app.post('/api/updateCaseNote', async (req, res) => {
+app.post('/api/updateCaseNote', sanitize, async (req, res) => {
   let qp = await new QueryParserBuilder().build()
   const results = await qp.updateCaseNote(req);
   return res.send(results);

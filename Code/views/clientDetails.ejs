@@ -279,7 +279,7 @@
                         <th>Program</th>
                     </tr>
                     <% caseNotes.forEach((caseNote) => { %>
-                    <tr>
+                    <tr id="caseNoteRow" class="lightHover clickableRow">
                         <td><%=caseNote.getSubject()%></td>
                         <td><%=caseNote.getDate()%></td>
                         <td><%=caseNote.getEmployeeSign()%></td>
@@ -292,9 +292,9 @@
                 <div class="caseNoteButtons">
                     <!-- Buttons for CaseNote Navigation, handled with caseNoteHandling.js -->
                     <input type="button" value="new" name="newCaseNote" id="newCaseNote"/>
-                    <input type="button" value="edit" name="editCaseNote" id="editCaseNote" />
-                    <input type="button" value="view" name="viewCaseNote" id="viewCaseNote" />
-                    <input type="button" value="download" name="downloadCaseNote" id="downloadCaseNote" />
+                    <input type="button" value="edit" name="editCaseNote" id="editCaseNote" disabled="disabled"/>
+                    <input type="button" value="view" name="viewCaseNote" id="viewCaseNote" disabled="disabled"/>
+                    <input type="button" value="download" name="downloadCaseNote" id="downloadCaseNote" disabled="disabled"/>
                 </div>
 
                 <script src="../js/caseNoteHandling.js" async="async"></script>
