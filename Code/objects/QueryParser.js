@@ -522,6 +522,172 @@ export default class QueryParser {
       }
     };
 
+    async createClient(req){
+      const connection = await this.#pool.getConnection();
+      try{
+        const account = await this.isAuthenticated(req, true);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        await connection.beginTransaction();
+
+        const createClientQuery = "INSERT INTO Client(fName, mName, lName, email, address, addressType, city, state, zip, dateOfBirth, phoneNumber, phoneType, sex, gender, pronouns, greeting, nickname, maritalStatus, religPref, payee, preferredHospital, likes, dislikes, goals, hobbies, achievements, conservator) VALUES(:fName, :mName, :lName, :email, :address, :addressType, :city, :state, :zip, :dateOfBirth, :phoneNumber, :phoneType, :sex, :gender, :pronouns, :greeting, :nickname, :maritalStatus, :religPref, :payee, :preferredHospital, :likes, :dislikes, :goals, :hobbies, :achievements, :conservator)";
+        let [createClientResult] = await connection.execute(createClientQuery, 
+          {
+            fName: req.body.fName,
+            mName: req.body.mName,
+            lName: req.body.lName,
+            email: req.body.email,
+            address: req.body.address,
+            addressType: req.body.addressType,
+            city: req.body.city,
+            state: req.body.state,
+            zip: req.body.zip,
+            dateOfBirth: req.body.dateOfBirth,
+            phoneNumber: req.body.phoneNumber,
+            phoneType: req.body.phoneType,
+            sex: req.body.sex,
+            gender: req.body.gender,
+            pronouns: req.body.pronouns,
+            greeting: req.body.greeting,
+            nickname: req.body.nickname,
+            maritalStatus: req.body.maritalStatus,
+            religPref: req.body.religPref,
+            payee: req.body.payee,
+            preferredHospital: req.body.preferredHospital,
+            //likes: req.body.likes,
+            //dislikes: req.body.dislikes,
+            //goals: req.body.goals,
+            //hobbies: req.body.hobbies,
+            //achievements: req.body.achievements,
+            conservator: req.body.conservator
+        });
+        await connection.commit();
+        return "Client successfully created";
+      }
+      catch(err){
+        await connection.rollback();
+        return {"Error":"Error creating client"};
+      }
+      finally{
+        await connection.release();
+      }
+    }
+
+    async updateClient(req){
+      const connection = await this.#pool.getConnection();
+      try{
+        const account = await this.isAuthenticated(req, true);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        const clientID = parseInt(req.body.clientID);
+        if(!Number.isInteger(clientID)){
+          return {"Error":"Invalid Request"};
+        }
+        await connection.beginTransaction();
+
+        const updateClientQuery = `
+        UPDATE Client
+        SET fName             = :fName,
+         mName             = :mName,
+         lName             = :lName,
+         email             = :email,
+         address           = :address,
+         addressType       = :addressType,
+         city              = :city,
+         state             = :state,
+         zip               = :zip,
+         dateOfBirth       = :dateOfBirth,
+         phoneNumber       = :phoneNumber,
+         phoneType         = :phoneType,
+         sex               = :sex,
+         gender            = :gender,
+         pronouns          = :pronouns,
+         greeting          = :greeting,
+         nickname          = :nickname,
+         maritalStatus     = :maritalStatus,
+         religPref         = :religPref,
+         payee             = :payee,
+         preferredHospital = :preferredHospital,
+         likes             = :likes,
+         dislikes          = :dislikes,
+         goals             = :goals,
+         hobbies           = :hobbies,
+         achievements      = :achievements,
+         conservator       = :conservator
+        WHERE clientID         = :clientID
+        `;
+        let [updateClientResult] = await connection.execute(updateClientQuery, 
+          {
+            clientID:         clientID,
+            fName:            req.body.fName,
+            mName:            req.body.mName,
+            lName:            req.body.lName,
+            email:            req.body.email,
+            address:          req.body.address,
+            addressType:      req.body.addressType,
+            city:             req.body.city,
+            state:            req.body.state,
+            zip:              req.body.zip,
+            dateOfBirth:      req.body.dateOfBirth,
+            phoneNumber:      req.body.phoneNumber,
+            phoneType:        req.body.phoneType,
+            sex:              req.body.sex,
+            gender:           req.body.gender,
+            pronouns:         req.body.pronouns,
+            greeting:         req.body.greeting,
+            nickname:         req.body.nickname,
+            maritalStatus:    req.body.maritalStatus,
+            religPref:        req.body.religPref,
+            payee:            req.body.payee,
+            preferredHospital:req.body.preferredHospital,
+            likes:            req.body.likes,
+            dislikes:         req.body.dislikes,
+            goals:            req.body.goals,
+            hobbies:          req.body.hobbies,
+            achievements:     req.body.achievements,
+            conservator:      req.body.conservator
+        });
+        await connection.commit();
+        return "Client successfully updated";
+      }
+      catch(err){
+        console.log(err);
+        await connection.rollback();
+        return {"Error":"Error updating client"};
+      }
+      finally{
+        await connection.release();
+      }
+    }
+    
+    async deleteClient(req){
+      const connection = await this.#pool.getConnection();
+      try{
+        const account = await this.isAuthenticated(req, true);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        const clientID = parseInt(req.body.clientID);
+        if(!Number.isInteger(clientID)){
+          return {"Error":"Invalid Request"};
+        }
+        await connection.beginTransaction();
+        let [deleteResults] = await connection.execute("CALL DeleteClient(?)", [clientID]);
+        await connection.commit();
+        return "Client successfully deleted";
+      }
+      catch(err){
+        console.log(err);
+        await connection.rollback();
+        return {"Error":"Error deleting client"};
+      }
+      finally{
+        await connection.release();
+      }
+    }
+
       /**
    * Queries the database for the client's medication list.
    * @param {number} clientID

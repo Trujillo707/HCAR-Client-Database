@@ -103,9 +103,9 @@ app.get("/caseNote", (req, res) => {
 })
 
 app.post('/api/auth', async (req, res) => {
-  
   let qp = await new QueryParserBuilder().build()
   const results = await qp.auth(req);
+  console.log(req.session.id);
   return res.send(results);
 });
 /**
@@ -121,9 +121,9 @@ app.post('/api/auth', async (req, res) => {
  * Response on success: "Case note successfully created"
  */
 app.post('/api/createCaseNote', async (req, res) => {
-  
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createCaseNote(req);
+    console.log(req.session.id);
     return res.send(results);
   });
 
@@ -159,6 +159,24 @@ app.post('/api/updateCaseNote', async (req, res) => {
   
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteCaseNote(req);
+    return res.send(results);
+  });
+
+  app.post('/api/createClient', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.createClient(req);
+    return res.send(results);
+  });
+
+  app.post('/api/updateClient', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.updateClient(req);
+    return res.send(results);
+  });
+
+  app.post('/api/deleteClient', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.deleteClient(req);
     return res.send(results);
   });
 
