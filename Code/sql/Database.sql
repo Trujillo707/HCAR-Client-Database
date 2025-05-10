@@ -319,27 +319,3 @@ BEGIN
 END $$
 
 DELIMITER ;
-
-
-DELIMITER $$
-
-CREATE PROCEDURE DeleteClient_Two(
-  IN in_clientID INT
-)
-BEGIN
-  -- on any SQL error, rollback and re‑raise
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    ROLLBACK;
-    RESIGNAL;
-  END;
-
-  START TRANSACTION;
-
-  DELETE FROM Client
-   WHERE clientID = in_clientID;
-  
-  COMMIT;
-END $$
-
-DELIMITER ;
