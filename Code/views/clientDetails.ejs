@@ -107,6 +107,11 @@
                         <option value="<%=maritalStatusTypes[2]%>" id="option3"><%=maritalStatusTypes[2]%></option>
                     </select>
                 </div>
+                <div class="cli_pos">
+                    <label for="pos">Next PoS Expiration: </label>
+                    <input type="date" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                        value="<%= locals.theClient.getPOS() instanceof Date ? locals.theClient.getPOS().toISOString().slice(0, 10) : "" %>" id="pos" />
+                </div>
 <!--                <div class="cli_regionalCenterID">-->
 <!--                    <p>Regional Center ID: <br /> </p>-->
 <!--                </div>-->
