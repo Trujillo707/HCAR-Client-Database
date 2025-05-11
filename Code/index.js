@@ -1,6 +1,8 @@
 import express from "express"
 import session from 'express-session';
-const app = express()
+const app = express();
+import MySQLSession from 'express-mysql-session';
+const MySQLStore = MySQLSession(session);
 import {reportTypes} from "./reportsLogic.js";
 import {ClientBuilder} from "./objects/ClientBuilder.js";
 import Programs from "./objects/Programs.js";
@@ -31,12 +33,15 @@ app.use(express.urlencoded({extended: true}));
 // Handling JSON payloads
 app.use(express.json());
 app.set('trust proxy', 1) // trust first proxy
+let topQP = await new QueryParserBuilder().build();
+const sessionStore = new MySQLStore({}, topQP.getPool());
 app.use(
     session({
         name: '__session',
         secret: process.env.SESSION_SECRET,
         saveUninitialized: false, //Doesn't save every session, only modified ones.
         resave: false, //Avoids resaving of the session if it hasn't changed
+        store: sessionStore, //  Make express-sesssion use the MySQL session store
         cookie: {
           maxAge: 86400000, //One day(miliseconds)
           secure: process.env.SECURE_SESSION === "true", //Set to true in prod(Requires HTTPS for cookies to be set)
@@ -45,6 +50,7 @@ app.use(
         },
     })
   );
+
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + "/views");
@@ -100,7 +106,7 @@ app.get("/search", getPath, async (req, res) => {
 
 
 // Sanitize data sent to results
-app.post('/results', sanitize, async (req, res) => {
+app.get('/results', sanitize, async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
@@ -110,9 +116,9 @@ app.post('/results', sanitize, async (req, res) => {
     } else {
         // After verification of credentials
         // Get client list from fetched results (Uncomment later)
-        /* const resClients = req.clients; */
-        const searchData = req.body;
-        let results = await qp.getAllFilteredClients(req.session.accountID, searchData);    // Later replace with accID
+        const offset = parseInt(req.query.page) ? (parseInt(req.query.page) -1) : 0;
+        const searchData = req.query;
+        let results = await qp.getAllFilteredClients(req.session.accountID, searchData, offset);    // Later replace with accID
         // Build Clients for each returned row
         let clients = [];
         if (results[0] !== undefined)
@@ -148,15 +154,14 @@ app.get("/results/all", async(req, res) => {
     } else {
         // After verification of credentials
         // Get client list from fetched results (Uncomment later)
-        /* const resClients = req.clients; */
-        const searchData = req.body;
-        let results = await qp.getAllClients(req.session.accountID)
+        const offset = parseInt(req.query.page) ? (parseInt(req.query.page) -1) : 0;
+        let results = await qp.getAllClients(req.session.accountID, offset);
         // Build Clients for each returned row
         let clients = [];
         if (results[0] !== undefined)
         {
-            console.log("Results: ", results[0]);   // Uncomment for debugging
-            console.log("Programs: ", results[1]);   // Uncomment for debugging
+            //console.log("Results: ", results[0]);   // Uncomment for debugging
+            //console.log("Programs: ", results[1]);   // Uncomment for debugging
             for (const client of results[0])
             {
                 clients.push(new ClientBuilder()
@@ -425,6 +430,12 @@ app.listen(port, () => {
 })
 
 process.on('SIGTERM',async () => {
+    try{
+        await sessionStore.close();
+    } catch (e) {
+        console.log("Error: Failed to cleanly close the session store => " + e);
+    }
+    
     try {
         if (QueryParser.hasInstance()) {
             const queryParser = new QueryParserBuilder().build();
@@ -433,24 +444,41 @@ process.on('SIGTERM',async () => {
     } catch (error) {
         console.error('Error while closing the database connection:', error);
     } finally {
+        console.log("Server shutting down...");
         process.exit(0);
     }
 });
 
 function sanitize(req, res, next)
 {
-    for (const key in req.body)
-    {
-        // If non-null field
-        if (req.body[key] !== "")
+    if (req.method === "POST"){
+        for (const key in req.body)
         {
-            // Sanitize data
-            if (key === "email")
-                req.body[key] = req.body[key].replace(/[^\w@\.]/g, "");
-            else
-                req.body[key] = req.body[key].replace(/[\W]/g, "");
+            // If non-null field
+            if (req.body[key] !== "")
+            {
+                // Sanitize data
+                if (key === "email")
+                    req.body[key] = req.body[key].replace(/[^\w@\.]/g, "");
+                else
+                    req.body[key] = req.body[key].replace(/[\W]/g, "");
+            }
+        }
+    } else{
+        for (const key in req.query)
+        {
+            // If non-null field
+            if (req.query[key] !== "")
+            {
+                // Sanitize data
+                if (key === "email")
+                    req.query[key] = req.query[key].replace(/[^\w@\.]/g, "");
+                else
+                    req.query[key] = req.query[key].replace(/[\W]/g, "");
+            }
         }
     }
+
     next();
 }
 
