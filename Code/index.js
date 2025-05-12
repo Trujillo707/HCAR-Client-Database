@@ -136,7 +136,7 @@ app.get('/results', sanitize, async (req, res) => {
         let clients = [];
         if (results[0] !== undefined)
         {
-            console.log("Results: ", results[0]);   // Uncomment for debugging
+            // console.log("Results: ", results[0]);   // Uncomment for debugging
             console.log("Programs: ", results[1]);   // Uncomment for debugging
             for (const client of results[0])
             {
@@ -150,7 +150,7 @@ app.get('/results', sanitize, async (req, res) => {
                     .setDOB(client.dateOfBirth !== null ? new Date(client.dateOfBirth) : "Empty")
                     .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
                     .setSex(client.gender !== null ? client.gender : "Empty")
-                    .setPrograms(new Programs(results[1].filter(program => program.clientID === client.clientID)))
+                    .setPrograms(new Programs({names: results[1].filter(program => program.clientID === client.clientID).map(program => program.name)}))
                     .setPOS(client.pos !== null ? new Date(client.pos) : "")
                     .build());
             }
@@ -189,8 +189,8 @@ app.get("/results/all", async(req, res) => {
                     .setDOB(client.dateOfBirth !== null ? new Date(client.dateOfBirth) : "Empty")
                     .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
                     .setSex(client.gender !== null ? client.gender : "Empty")
+                    .setPrograms(new Programs({names: results[1].filter(program => program.clientID === client.clientID).map(program => program.name)}))
                     .setPOS(client.pos !== null ? new Date(client.pos) : "")
-                    .setPrograms(new Programs(results[1].filter(program => program.clientID === client.clientID)))
                     .build());
             }
         }
@@ -230,6 +230,7 @@ app.get("/admin", async (req, res) => {
     res.render("admin");
 })
 
+// Complete this to accomodate for new, and edit/view/delete
 app.get("/caseNote", async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const account = await qp.isAuthenticated(req);
@@ -239,11 +240,71 @@ app.get("/caseNote", async (req, res) => {
         res.redirect("/");
     } else {
         // After verification of credentials
-        res.render("caseNote", {theClient: testClientArray[0]});
+        const client = req.body.clientID;     // Client Object
+        const note = req.body.noteID;     // Case Note 
+        const type = req.body.button;       // Button pressed
+
+        // Session Data Transfer
+        req.session.caseNoteInfo = {
+            client: client,
+            note: note
+        };
+
+        // res.render("caseNote", {theClient: client, note: noteID, method: type});
+        res.json({redirect: `/caseNote/${type}`});
     }
 })
 
-app.post('/api/auth', async (req, res) => {
+// Creating a new case note
+app.get("/caseNote/new", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        const clientID = Number(req.session.caseNoteInfo.client);
+        const noteID = req.session.caseNoteInfo.note;
+        // Rebuild class objects
+        let clientDem = await qp.getClientDemographics(clientID);
+        let progs = await qp.getClientPrograms(clientID);
+        // Build client
+        let client = rebuildClient(clientDem, progs);
+        res.render("caseNote", {theClient: client, method: "new"});
+    }
+})
+
+// Viewing/editing existing case note USE GETCASENOTE
+app.get("/caseNote/viewedit", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        const clientID = Number(req.session.caseNoteInfo.client);
+        const noteID = req.session.caseNoteInfo.note;
+        // Rebuild class objects
+        let clientDem = await qp.getClientDemographics(clientID);
+        let progs = await qp.getClientPrograms(clientID);
+        let noteDetails = await qp.getCaseNote(noteID);
+        // Build Case Note
+        console.log("Note Details: ", noteDetails);
+        let note = rebuild(CaseNote, noteDetails);
+        // Build Client
+        let client = rebuildClient(clientDem, progs);
+        res.render("caseNote", {theClient: client, note: note, method: "viewedit"});
+    }
+})
+
+// Download a case note
+app.get("/caseNote/download", async (req, res) => {
+
+})
+
+app.post('/api/auth', sanitize, async (req, res) => {
   let qp = await new QueryParserBuilder().build()
   const results = await qp.auth(req);
   console.log(req.session.id);
@@ -261,7 +322,7 @@ app.post('/api/auth', async (req, res) => {
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully created"
  */
-app.post('/api/createCaseNote', async (req, res) => {
+app.post('/api/createCaseNote', sanitize, async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createCaseNote(req);
     console.log(req.session.id);
@@ -281,7 +342,7 @@ app.post('/api/createCaseNote', async (req, res) => {
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully updated"
  */
-app.post('/api/updateCaseNote', async (req, res) => {
+app.post('/api/updateCaseNote', sanitize, async (req, res) => {
   let qp = await new QueryParserBuilder().build()
   const results = await qp.updateCaseNote(req);
   return res.send(results);
@@ -436,9 +497,10 @@ app.get('/client/:id', async (req, res) => {
         {
             // Setting only values needed for display, retrieve other columns when necessary
             let n = new CaseNote({
+                noteID: note.noteID !== null ? note.noteID : -1,
                 subject: note.subject !== null ? note.subject : "Empty",
-                program: note.programName !== null ? note.programName : "Empty",
-                date: note.date !== null ? new Date(note.date) : "Empty",
+                programName: note.programName !== null ? note.programName : "Empty",
+                dateCreated: note.dateCreated !== null ? new Date(note.dateCreated) : "Empty",
                 employeeSign: note.creator !== null ? note.creator : "Empty"
             })
             caseNotes.push(n);
@@ -459,7 +521,7 @@ app.get('/client/:id', async (req, res) => {
 
         // Build client
         const client = new ClientBuilder()
-        .setClientID(cliDem.clientId !== null ? cliDem.clientID : "Empty")
+        .setClientID(cliDem.clientID !== null ? cliDem.clientID : "Empty")
         .setFirstName(cliDem.fName !== null ? cliDem.fName : "Empty")
             .setMiddleName(cliDem.mName !== null ? cliDem.mName : "")
             .setLastName(cliDem.lName !== null ? cliDem.lName : "Empty")
@@ -628,6 +690,43 @@ function getPath(req, res, next)
 {
     res.locals.currentPath = req.path;
     next();
+}
+
+// Helper function to rebuild class objects
+function rebuild(ClassConstructor, obj)
+{
+    return new ClassConstructor(obj);
+}
+
+// Helper function to rebuild client objects with demographics and programs
+// using builder pattern
+function rebuildClient(client, programs)
+{
+    return new ClientBuilder()
+        .setClientID(client.clientID !== null ? client.clientID : "Empty")
+        .setFirstName(client.fName !== null ? client.fName : "Empty")
+        .setLastName(client.lName !== null ? client.lName : "Empty")
+        .setEmail(client.email !== null ? client.email : "Empty")
+        .setAddress(new Address({
+            streetAddress: client.address !== null ? client.address : "Empty",
+            city: client.city !== null ? client.city : "Empty",
+            state: client.state !== null ? client.state : "Empty",
+            zip: client.zip !== null ? client.zip : "Empty" 
+        }))
+        .setDOB(client.dateOfBirth !== null ? new Date(client.dateOfBirth) : "Empty")
+        .setPhoneNumber(client.phoneNumber !== null ? client.phoneNumber : "Empty")
+        .setSex(client.gender !== null ? client.gender : "Empty")
+        .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
+        .setMaritalStatus(client.maritalStatus === 0 ? "Single" : "Divorced")   // Change later?
+        .setPreferredHospital(client.preferredHospital !== null ? client.preferredHospital : "Empty")
+        .setLikes(client.likes !== null ? client.likes : "Empty")
+        .setDislikes(client.dislikes !== null ? client.dislikes : "Empty")
+        .setGoals(client.goals !== null ? client.goals : "Empty")
+        .setHobbies(client.hobbies !== null ? client.hobbies : "Empty")
+        .setAchievements(client.achievements !== null ? client.achievements : "Empty")
+        .setPictureURL(client.profilePicture !== null ? client.profilePicture : "")
+        .setPrograms(programs !== null ? new Programs({names: programs.map(program => program.name)}) : new Programs({names: []}))
+        .build();
 }
 
 async function authCheck(req, res, next) {

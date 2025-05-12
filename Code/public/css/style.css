@@ -75,12 +75,20 @@ tr {
 
 }
 
-#clientRow:hover {
+.clickableRow:hover {
     cursor: pointer;
 }
-#clientRow.selected {
+
+.clickableRow.selected {
     background-color: #989898 !important;
 }
+
+input[type="button"]:disabled, button:disabled
+{
+    cursor: default;
+    background-color: #999999;
+}
+
 td,th {
     border: 0.0625em solid black; /* 1px to em */
 }
