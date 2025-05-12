@@ -199,6 +199,21 @@ app.post('/api/updateCaseNote', async (req, res) => {
     const results = await qp.deleteAccount(req);
     return res.send(results);
   });
+  app.post('/api/updateAccount', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.updateAccount(req);
+    return res.send(results);
+  });
+  app.post('/api/createStaffClient', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.createStaffClient(req);
+    return res.send(results);
+  });
+  app.post("/api/deleteStaffClient", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.deleteStaffClient(req);
+    return res.send(results);
+  })
   app.post("/api/searchStaff", async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.searchStaff(req);

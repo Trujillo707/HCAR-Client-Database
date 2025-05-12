@@ -834,6 +834,76 @@ export default class QueryParser {
       }
     }
 
+    async createStaffClient(req){
+      const connection = await this.#pool.getConnection();
+      try{
+        const account = await this.isAuthenticated(req, true);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        const clientID = parseInt(req.body.clientID);
+        const staffID = parseInt(req.body.staffID);
+        
+        if(!Number.isInteger(clientID) || !Number.isInteger(staffID)){
+          return {"Error":"Invalid Request"};
+        }
+        
+        await connection.beginTransaction();
+
+        const countQuery = "SELECT * FROM StaffClient WHERE staffID = ? AND clientID = ?;";
+        const [countResult] = await connection.execute(countQuery, [staffID, clientID]);
+        if(countResult.length > 0){
+          await connection.rollback();
+          return {"Error":"Staff-client link already exists"};
+        }
+
+        const staffClientQuery = "INSERT INTO StaffClient(clientID, staffID, title, dateAssigned) VALUES(?, ?, ?, CURRENT_TIMESTAMP())";
+        const [staffClientResponse] = await connection.execute(staffClientQuery, [clientID, staffID, req.body.title]);
+        
+        await connection.commit();
+        return "Staff linked to client successfully";
+      }
+      catch(err){
+        console.log(err);
+        await connection.rollback();
+        return {"Error":"Error creating staff-client link"};
+      }
+      finally{
+        await connection.release();
+      }
+    }
+
+    async deleteStaffClient(req){
+      const connection = await this.#pool.getConnection();
+      try{
+        const account = await this.isAuthenticated(req, true);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        const clientID = parseInt(req.body.clientID);
+        const staffID = parseInt(req.body.staffID);
+        
+        if(!Number.isInteger(clientID) || !Number.isInteger(staffID)){
+          return {"Error":"Invalid Request"};
+        }
+        
+        await connection.beginTransaction();
+
+        const staffClientQuery = "DELETE FROM StaffClient WHERE clientID = ? AND staffID = ?";
+        const [staffClientResponse] = await connection.execute(staffClientQuery, [clientID, staffID]);
+        
+        await connection.commit();
+        return "Staff-client link successfully created";
+      }
+      catch(err){
+        await connection.rollback();
+        return {"Error":"Error deleting staff-client link"};
+      }
+      finally{
+        await connection.release();
+      }
+    }
+
       /**
    * Queries the database for the client's medication list.
    * @param {number} clientID
