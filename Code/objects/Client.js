@@ -46,8 +46,10 @@ export class Client {
     /** @type {CaseNote[]} */
     #caseNoteList = [];
     #pictureURL = "";
-    /** @type {Programs[]} */
+    /** @type {String[]} */
     #programs = [];
+    /** @type {Date} */
+    #POS = null;
 
     /**
      * Client instances are to be created via a ClientBuilder object only.
@@ -83,6 +85,7 @@ export class Client {
         this.#caseNoteList = builder.caseNoteList;
         this.#pictureURL = builder.pictureURL;
         this.#programs = builder.programs;
+        this.#POS = builder.POS;
     }
 
     /** @returns {number} */
@@ -223,5 +226,10 @@ export class Client {
     /** @returns {Programs[]} */
     getPrograms(){
         return this.#programs;
+    }
+
+    /** @returns {Date} */
+    getPOS() {
+        return this.#POS;
     }
 }

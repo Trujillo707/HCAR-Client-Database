@@ -15,6 +15,7 @@
         <tr>
             <th scope="col">Photo</th>
             <th scope="col">First Name</th>
+            <th scope="col">M.I.</th>
             <th scope="col">Last Name</th>
             <th scope="col">Pronouns</th>
             <th scope="col">Gender</th>
@@ -34,6 +35,7 @@
                              src="<%= current.getPictureURL() %>">
                     </td>
                     <td><%= current.getFirstName() %></td>
+                    <td><%= current.getMiddleName().length > 0 ? current.getMiddleName().charAt(0) + "." : "" %></td>
                     <td><%= current.getLastName() %></td>
                     <td><%= current.getPronouns() %></td>
                     <td><%= current.getSex() %></td>
@@ -51,8 +53,16 @@
                             <%=currProgram.getName()%><br/>
                         <% }) %>
                     </td>
-                    <!--TODO: make this work! -->
-                    <td>Good</td>
+                    <%  const daysDiff = current.getPOS() instanceof Date ? Math.ceil((current.getPOS().getTime() - Date.now()) / (1000 * 3600 * 24)) : "";
+                        if (current.getPOS() === ""){ %>
+                        <td class="expired">Not on File</td>
+                    <% } else if ( daysDiff === 0 ) { %>
+                        <td class="expired">Today</td>
+                    <% } else if (daysDiff < 31) { %>
+                        <td class="expired"><%= current.getPOS().toLocaleDateString("en-US") %></td>
+                    <% } else { %>
+                        <td><%= current.getPOS().toLocaleDateString("en-US") %></td>
+                    <% } %>
                 </tr>
             <% }) %>
         </tbody>

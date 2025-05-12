@@ -5,6 +5,8 @@
     <%- include("fontLinks") -%>
     <link href="../css/style.css" rel="stylesheet" type="text/css" />
     <meta charset="utf-8" />
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js" defer="defer" ></script>
+    <script src="https://unpkg.com/jspdf-autotable" defer="defer"></script>
 
 <!-- Global variables for objects in Client to display -->
     <%
@@ -22,7 +24,7 @@
 </head>
 <body>
 <%-include("header")-%>
-<div class="bodyContent">
+<div class="bodyContent" >
     <p class="clientNameHeader">Showing information for
         <% if(locals.theClient){
         %><%= locals.theClient.getFirstName() + " " + locals.theClient.getMiddleName() +
@@ -31,7 +33,7 @@
         else{
         %> Unknown Client <%
         } %></p>
-    <div id="tabContainer" class="tabContainer">
+    <div id="tabContainer" class="tabContainer" data-user="<%= locals.theAccount.username %>">
         <div class="tab">
             <button class="tablinks" data-tabName="clientID" id="defaultOpen" >Client ID</button>
             <button class="tablinks" data-tabName="medInfo"> Medical Information</button>
@@ -55,7 +57,7 @@
                            value="<%= locals.theClient.getFirstName() %>" id="firstName" />
                 </div>
                 <div class="cli_midName">
-                    <label for="middleName">M.I.: </label>
+                    <label for="middleName">Middle Name: </label>
                     <input type="text" placeholder="Middle" <% if (!isAdmin){%>readonly="readonly"<%}%>
                            value="<%=locals.theClient.getMiddleName()%>" id="middleName" />
                 </div>
@@ -106,6 +108,11 @@
                         <option value="<%=maritalStatusTypes[1]%>" id="option2"><%=maritalStatusTypes[1]%></option>
                         <option value="<%=maritalStatusTypes[2]%>" id="option3"><%=maritalStatusTypes[2]%></option>
                     </select>
+                </div>
+                <div class="cli_pos">
+                    <label for="pos">Next PoS Expiration: </label>
+                    <input type="date" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                        value="<%= locals.theClient.getPOS() instanceof Date ? locals.theClient.getPOS().toISOString().slice(0, 10) : "" %>" id="pos" />
                 </div>
 <!--                <div class="cli_regionalCenterID">-->
 <!--                    <p>Regional Center ID: <br /> </p>-->
@@ -271,7 +278,7 @@
 
         <div id="caseNotes" class="tabcontent">
             <div class="caseNotes">
-                <table class="caseNoteTable">
+                <table id="caseNoteTable" class="caseNoteTable" data-clientid="<%= locals.theClient.getClientID() %>">
                     <tr>
                         <th>Subject</th>
                         <th>Date</th>
@@ -301,10 +308,14 @@
             </div>
         </div>
         <script src="../js/tab.js" defer="defer"></script>
+        <script src="../js/medReport.js" defer="defer" ></script>
     </div>
 </div>
 <footer class="caseNoteFooter">
     <button id="goBackButton" class="dimHover footerButton">Go Back</button>
+    <!--div id="medReportButtonContainer"-->
+        <button type="button" id="medReportButton" class="dimHover footerButton">Download Medical Report</button>
+    <!--/div-->
     <button id="saveButton" class="dimHover footerButton">Save</button>
 </footer>
 </body>
