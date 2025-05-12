@@ -214,7 +214,7 @@ theButton.addEventListener("click", () => {
                 {header: "Date Taken", dataKey: "dateTaken"},
             ];
 
-            if (data.vaccinations == null) {
+            if (data.vaccinations.length === 0) {
                 data.vaccinations = [{name: "No Vaccinations on File", dateTaken: "N/A"}];
             }
 
@@ -243,7 +243,7 @@ theButton.addEventListener("click", () => {
                 {header: "Prescribed By", dataKey: "prescriber"}
             ];
 
-            if (data.medications == null) {
+            if (data.medications.length === 0) {
                 data.medications = [{name: "No Medications on File", prn: "N/A", dosage: "N/A", frequency: "N/A", purpose: "N/A", sideEffects: "N/A", prescriber: "N/A"}];
             }
 

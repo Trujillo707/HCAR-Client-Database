@@ -183,8 +183,11 @@ select{
 }
 
 /* Some slight color for expired pos */
-#clientRow[class="lightHover"] td.expired {
+td.expired {
     background-color: #ffcccc;
+}
+.selected td.expired {
+    background-color: #989898;
 }
 
 .lightHover {
