@@ -1,6 +1,7 @@
 import {Client} from "./Client.js"
 import Programs from "./Programs.js";
 import Address from "./Address.js";
+import Medication from "./Medication.js";
 
 /**
  * @author Orlando Trujillo-Ortiz
@@ -68,6 +69,8 @@ export class ClientBuilder {
     pictureURL = "";
     /** @type {Program[]} */
     programs = [];
+    /** @type {Date} */
+    POS = null;
 
     // Builder methods
 
@@ -320,6 +323,15 @@ export class ClientBuilder {
      */
     setPrograms(programs){
         this.programs = programs;
+        return this;
+    }
+
+    /**
+     * @param pos
+     * @returns {ClientBuilder} Returns this current ClientBuilder to allow method chaining.
+     */
+    setPOS(pos){
+        this.POS = pos;
         return this;
     }
 

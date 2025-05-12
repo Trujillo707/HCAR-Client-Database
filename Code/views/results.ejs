@@ -3,7 +3,7 @@
 <head>
     <%- include("fontLinks") -%>
     <title>Search Results</title>
-    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link href="../css/style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 
@@ -15,6 +15,7 @@
         <tr>
             <th scope="col">Photo</th>
             <th scope="col">First Name</th>
+            <th scope="col">M.I.</th>
             <th scope="col">Last Name</th>
             <th scope="col">Pronouns</th>
             <th scope="col">Gender</th>
@@ -34,6 +35,7 @@
                              src="<%= current.getPictureURL() %>">
                     </td>
                     <td><%= current.getFirstName() %></td>
+                    <td><%= current.getMiddleName().length > 0 ? current.getMiddleName().charAt(0) + "." : "" %></td>
                     <td><%= current.getLastName() %></td>
                     <td><%= current.getPronouns() %></td>
                     <td><%= current.getSex() %></td>
@@ -51,8 +53,16 @@
                             <%=currProgram.getName()%><br/>
                         <% }) %>
                     </td>
-                    <!--TODO: make this work! -->
-                    <td>Good</td>
+                    <%  const daysDiff = current.getPOS() instanceof Date ? Math.ceil((current.getPOS().getTime() - Date.now()) / (1000 * 3600 * 24)) : "";
+                        if (current.getPOS() === ""){ %>
+                        <td class="expired">Not on File</td>
+                    <% } else if ( daysDiff === 0 ) { %>
+                        <td class="expired">Expires Today</td>
+                    <% } else if (daysDiff < 0) { %>
+                        <td class="expired">Expired on <%= current.getPOS().toLocaleDateString("en-US") %></td>
+                    <% } else { %>
+                        <td>Good until <%= current.getPOS().toLocaleDateString("en-US") %></td>
+                    <% } %>
                 </tr>
             <% }) %>
         </tbody>
@@ -67,8 +77,8 @@
     <button id="goBackButton" class="dimHover footerButton">Go Back</button>
 
     <div id="pageChanger">
-        <button type="button" disabled="disabled">← Previous</button>
-        <button type="button">Next →</button>
+        <button type="button" id="prevButton">← Previous</button>
+        <button type="button" id="nextButton">Next →</button>
     </div>
     <!-- Probably going to need JavaScript to make this button work nicely -->
     <button id="selectButton" class="dimHover footerButton">Select</button>

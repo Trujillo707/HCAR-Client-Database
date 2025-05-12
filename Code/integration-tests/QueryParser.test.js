@@ -193,12 +193,12 @@ describe("QueryParser Class Tests", () => {
          * This one is a simple 2-val BVA for the max num of rows returned
          */
         test.each([
-            2, /* has over 10 */
-            3 /* has exactly 10 */
-        ])("Accounts with more than 10 clients only return 10 rows", async (acctID) => {
+            2, /* has over 15 */
+            3 /* has exactly 15 */
+        ])("Accounts with more than 10 clients only return 15 rows", async (acctID) => {
             let results = await qp.getAllClients(acctID);
 
-            await expect(results[0].length).toBe(10);
+            await expect(results[0].length).toBe(15);
         });
 
         test.each([
@@ -853,7 +853,10 @@ describe("QueryParser Class Tests", () => {
                 }
             }],
         ])("Valid clientID returns insurance and medical preferences", async (clientID, expected) => {
-                await expect(qp.getInsuranceAndMedicalPreferences(clientID)).resolves.toStrictEqual(expected);
+                //await expect(qp.getInsuranceAndMedicalPreferences(clientID)).resolves.toStrictEqual(expected);
+            const actual = await qp.getInsuranceAndMedicalPreferences(clientID);
+            console.log(actual);
+            expect(actual).toStrictEqual(expected);
         });
 
     })

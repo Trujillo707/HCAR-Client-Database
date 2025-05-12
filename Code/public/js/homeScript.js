@@ -6,6 +6,6 @@ const quickViewButton = document.getElementById("quickViewButton");
 const searchButton = document.getElementById("searchButton");
 const reportsButton = document.getElementById("reportsButton");
 
-quickViewButton.addEventListener("click", () => {window.location.href='/results'});
+quickViewButton.addEventListener("click", () => {window.location.href='/results/all'});
 searchButton.addEventListener("click", () => {window.location.href='/search'});
 reportsButton.addEventListener("click", () => {window.location.href='/reports'});

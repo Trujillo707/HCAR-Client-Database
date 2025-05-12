@@ -1,15 +1,25 @@
 import express from "express"
 import session from 'express-session';
-const app = express()
-import {reportTypes} from "./reportsLogic.js";
+const app = express();
+import MySQLSession from 'express-mysql-session';
+const MySQLStore = MySQLSession(session);
+const port = process.env.PORT || 8080;
+import {reportTypes} from "./reports-logic/reportsLogic.js";
 import {ClientBuilder} from "./objects/ClientBuilder.js";
 import Programs from "./objects/Programs.js";
-const port = process.env.PORT || 8080;
+import Medication from "./objects/Medication.js";
+import Insurance from "./objects/Insurance.js";
+import ContactInfo from "./objects/ContactInfo.js";
+import Address from "./objects/Address.js";
+import Vaccination from "./objects/Vaccination.js";
+import {SupportStaff} from "./objects/SupportStaff.js";
+import CaseNote from "./objects/CaseNote.js";
 import { fileURLToPath } from 'url';
 import path from 'path';
 import {testClientArray} from "./testData.js"
 import QueryParser from "./objects/QueryParser.js";
 import QueryParserBuilder from "./objects/QueryParserBuilder.js";
+import {expPurchaseInMonthReport, listAllClientsReport, mailListReport} from "./reports-logic/reports.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -22,84 +32,197 @@ app.use(express.urlencoded({extended: true}));
 
 // Handling JSON payloads
 app.use(express.json());
-
+app.set('trust proxy', 1) // trust first proxy
+let topQP = await new QueryParserBuilder().build();
+const sessionStore = new MySQLStore({}, topQP.getPool());
 app.use(
     session({
-      secret: process.env.SESSION_SECRET,
-      saveUninitialized: false, //Doesn't save every session, only modified ones.
-      resave: false, //Avoids resaving of the session if it hasn't changed
-      cookie: {
-        maxAge: 86400000, //One day(miliseconds)
-        secure: process.env.SECURE_SESSION, //Set to true in prod(Requires HTTPS for cookies to be set)
-        httpOnly: true, //Disallows browser js from accessing cookie
-        sameSite: 'strict', //CSRF Protection
-      },
+        name: '__session',
+        secret: process.env.SESSION_SECRET,
+        saveUninitialized: false, //Doesn't save every session, only modified ones.
+        resave: false, //Avoids resaving of the session if it hasn't changed
+        store: sessionStore, //  Make express-sesssion use the MySQL session store
+        cookie: {
+          maxAge: 86400000, //One day(miliseconds)
+          secure: process.env.SECURE_SESSION === "true", //Set to true in prod(Requires HTTPS for cookies to be set)
+          httpOnly: true, //Disallows browser js from accessing cookie
+          sameSite: 'strict', //CSRF Protection
+        },
     })
   );
+
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + "/views");
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, "public/html/index.html"))
+app.get('/', async (req, res) => {
+    if (req.session.accountID){
+        res.redirect("/home");
+    } else{
+        res.sendFile(path.join(__dirname, "public/html/index.html"))
+    }
 });
 
-app.post('/home', getPath, (req, res) => {
-    // After verification of credentials
-    res.render("home");
+app.post('/home', getPath, async (req, res) => {
+    let qp = await new QueryParserBuilder().build();
+    const results = await qp.auth(req);
+    if (results !== "Successful Login"){
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login failures
+        res.redirect("/");
+    }else{
+        // After verification of credentials
+        res.render("home");
+    }
 });
 
 // Clicking home from home will re-render the page
-app.get('/home', getPath, (req, res) => {
-    res.render("home");
+app.get('/home', getPath, async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        res.render("home");
+    }
 });
 
-app.get("/search", getPath, (req, res) => {
-    res.render("search");
+app.get("/search", getPath, async (req, res) => {
+    console.log(req.session)
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        res.render("search");
+    }
 })
 
-// TODO: MAKE THIS POST OBVIOUSLY
-app.get('/results', (req, res) => {
-    res.render("results", {clientList: testClientArray});
-});
-
 // Sanitize data sent to results
-app.post('/results', sanitize, async (req, res) => {
-    // Get client list from fetched results (Uncomment later)
-    /* const resClients = req.clients; */
-    const searchData = req.body;
+app.get('/results', sanitize, async (req, res) => {
     let qp = await new QueryParserBuilder().build()
-    let results = await qp.getAllFilteredClients(1, searchData);    // Later replace with accID
-    // Build Clients for each returned row
-    let clients = [];
-    if (results[0] !== undefined)
-    {
-        console.log("Results: ", results[0]);   // Uncomment for debugging
-        console.log("Programs: ", results[1]);   // Uncomment for debugging
-        for (const client of results[0])
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        // Get client list from fetched results (Uncomment later)
+        const offset = parseInt(req.query.page) ? (parseInt(req.query.page) -1) : 0;
+        const searchData = req.query;
+        let results = await qp.getAllFilteredClients(req.session.accountID, searchData, offset);    // Later replace with accID
+        // Build Clients for each returned row
+        let clients = [];
+        if (results[0] !== undefined)
         {
-            clients.push(new ClientBuilder()
-            .setClientID(client.clientID !== null ? client.clientID : "Empty")
-            .setFirstName(client.fName !== null ? client.fName : "Empty")
-            .setLastName(client.lName !== null ? client.lName : "Empty")
-            .setPhoneNumber(client.phoneNumber !== null ? client.phoneNumber : "Empty")
-            .setEmail(client.email !== null ? client.email : "Empty")
-            .setDOB(client.dateOfBirth !== null ? new Date(client.dateOfBirth) : "Empty")
-            .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
-            .setSex(client.gender !== null ? client.gender : "Empty")
-            .setPrograms(new Programs(results[1].filter(program => program.clientID === client.clientID)))
-            .build());
+            console.log("Results: ", results[0]);   // Uncomment for debugging
+            console.log("Programs: ", results[1]);   // Uncomment for debugging
+            for (const client of results[0])
+            {
+                clients.push(new ClientBuilder()
+                    .setClientID(client.clientID !== null ? client.clientID : "Empty")
+                    .setFirstName(client.fName !== null ? client.fName : "Empty")
+                    .setMiddleName(client.mName !== null ? client.mName : "")
+                    .setLastName(client.lName !== null ? client.lName : "Empty")
+                    .setPhoneNumber(client.phoneNumber !== null ? client.phoneNumber : "Empty")
+                    .setEmail(client.email !== null ? client.email : "Empty")
+                    .setDOB(client.dateOfBirth !== null ? new Date(client.dateOfBirth) : "Empty")
+                    .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
+                    .setSex(client.gender !== null ? client.gender : "Empty")
+                    .setPrograms(new Programs(results[1].filter(program => program.clientID === client.clientID)))
+                    .setPOS(client.pos !== null ? new Date(client.pos) : "")
+                    .build());
+            }
         }
+        res.render("results", {clientList: clients});
     }
-    res.render("results", {clientList: clients});
 });
 
-app.get("/reports", getPath, (req, res) => {
+app.get("/results/all", async(req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        // Get client list from fetched results (Uncomment later)
+        const offset = parseInt(req.query.page) ? (parseInt(req.query.page) -1) : 0;
+        let results = await qp.getAllClients(req.session.accountID, offset);
+        // Build Clients for each returned row
+        let clients = [];
+        if (results[0] !== undefined)
+        {
+            //console.log("Results: ", results[0]);   // Uncomment for debugging
+            //console.log("Programs: ", results[1]);   // Uncomment for debugging
+            for (const client of results[0])
+            {
+                clients.push(new ClientBuilder()
+                    .setClientID(client.clientID !== null ? client.clientID : "Empty")
+                    .setFirstName(client.fName !== null ? client.fName : "Empty")
+                    .setMiddleName(client.mName !== null ? client.mName : "")
+                    .setLastName(client.lName !== null ? client.lName : "Empty")
+                    .setPhoneNumber(client.phoneNumber !== null ? client.phoneNumber : "Empty")
+                    .setEmail(client.email !== null ? client.email : "Empty")
+                    .setDOB(client.dateOfBirth !== null ? new Date(client.dateOfBirth) : "Empty")
+                    .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
+                    .setSex(client.gender !== null ? client.gender : "Empty")
+                    .setPOS(client.pos !== null ? new Date(client.pos) : "")
+                    .setPrograms(new Programs(results[1].filter(program => program.clientID === client.clientID)))
+                    .build());
+            }
+        }
+        res.render("results", {clientList: clients});
+    }
+});
+
+app.get("/reports", authCheck, getPath, async (req, res) => {
+    // After verification of credentials
     res.render("reports", {availableReportsMap: reportTypes});
 });
 
-app.get("/caseNote", (req, res) => {
-    res.render("caseNote", {theClient: testClientArray[0]});
+app.post("/reports/generate", authCheck, sanitize, getPath,  async (req, res) => {
+    const reportType = req.body.reportType.toString();
+    if (!reportTypes.has(reportType)){
+        // Invalid report, just send the wacky user back to reports page
+        res.redirect("/reports");
+    }
+    switch (reportType) {
+        case "mailList":
+            res.render("generatedReportData", {reportType: reportType, reportName: "Mailing List"});
+            break;
+        case "expPurchaseInMonth":
+            res.render("generatedReportData", {reportType: reportType, reportName: "Purchase of Services Expiring Soon"});
+            break;
+        case "listAllClients":
+            res.render("generatedReportData", {reportType: reportType, reportName: "List of All Viewable Clients"});
+            break;
+        default:
+            // Theoretically, this should never happen...
+            res.redirect("/reports");
+            break;
+    }
+});
+
+app.get("/caseNote", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        res.render("caseNote", {theClient: testClientArray[0]});
+    }
 })
 
 app.post('/api/auth', async (req, res) => {
@@ -222,23 +345,185 @@ app.post('/api/updateCaseNote', async (req, res) => {
 
 
 // TODO: MAKE THIS POST OBVIOUSLY 
-app.get('/client', (req, res) => {
+/*app.get('/client', (req, res) => {
     let rawData = req.body.clientID;
-    res.render("clientDetails", {theClient: testClientArray[0]});
-});
+    res.render("clientDetails", {theAccount: false, theClient: testClientArray[0]});
+});*/
 
-// Probably use sanitize here
-app.post('/client', sanitize, (req, res) => {
+app.post('/client', sanitize, async (req, res) => {
     let cliID = req.body.clientID;
-    console.log("Client ID received: ", cliID);
-    res.render("clientDetails", {theClient: testClientArray[0]});
+    res.json({redirect: `/client/${cliID}`});
 });
 
-app.get("/test", async (req, res) => {
+// Redirection from POST request 
+app.get('/client/:id', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
-    let results = await qp.getAllClients(1)
-    res.send(results);
-})
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        console.log(req.params.id);
+        // After verification of credentials
+        const cliID = Number(req.params.id);
+        // DB Queries
+        let cliDem = await qp.getClientDemographics(cliID);
+        let insurAndMed = await qp.getInsuranceAndMedicalPreferences(cliID);
+        let medicationList = await qp.getMedicationList(cliID);
+        let vaccinationList = await qp.getVaccinationList(cliID);
+        let caseNotesList = await qp.getCaseNoteList(cliID);
+        let supportStaffList = await qp.getSupportStaffList(cliID);
+
+        let meds = [];
+        let vaccines = [];
+        let caseNotes = [];
+        let supportStaff = [];
+
+        console.log("Demographics: ", cliDem);
+        console.log("Insurance: ", insurAndMed);
+        console.log("Medication: ", medicationList);
+        console.log("Vaccination: ", vaccinationList);
+        console.log("Case Notes: ", caseNotesList);
+        console.log("Support Staff: ", supportStaffList)
+
+        // Comprehension for med list
+        for (const med of medicationList)
+        {
+            let m = new Medication({
+                name: med.name !== null ? med.name : "Empty",
+                prn: med.prn !== null ? med.prn : 0,
+                dosage: med.dosage !== null ? med.dosage : "Empty",
+                timesOfDay: med.frequency !== null ? med.frequency : "Empty",
+                purpose: med.purpose !== null ? med.purpose : "Empty",
+                sideEffects: med.sideEffects !== null ? med.sideEffects : "Empty",
+                prescriber: med.prescriber !== null ? med.prescriber : "Empty"
+            });
+            meds.push(m);
+        }
+
+        // Comprehension for Vaccinations
+        for (const vac of vaccinationList)
+        {
+            let v = new Vaccination({
+                shotType: vac.name !== null ? vac.name : "Empty",
+                dateTaken: vac.dateTaken !== null ? new Date(vac.dateTaken) : "Empty"
+            })
+            vaccines.push(v);
+        }
+
+        // Comprehension for Case Notes
+        for (const note of caseNotesList)
+        {
+            // Setting only values needed for display, retrieve other columns when necessary
+            let n = new CaseNote({
+                subject: note.subject !== null ? note.subject : "Empty",
+                program: note.programName !== null ? note.programName : "Empty",
+                date: note.date !== null ? new Date(note.date) : "Empty",
+                employeeSign: note.creator !== null ? note.creator : "Empty"
+            })
+            caseNotes.push(n);
+        }
+
+        // Comprehension for Support Staff
+        for (const staff of supportStaffList)
+        {
+            let s = new SupportStaff({
+                name: staff.staffName !== null ? staff.staffName : "Empty",
+                title: staff.title !== null ? staff.title : "Empty",
+                idNumber: staff.staffID !== null ? staff.staffID : 0,
+                dateAssigned: staff.dateAssigned !== null ? new Date(staff.dateAssigned) : "Empty",
+                dateRemoved: staff.dateRemoved !== null ? new Date(staff.dateRemoved) : "Empty"
+            })
+            supportStaff.push(s);
+        }
+
+        // Build client
+        const client = new ClientBuilder()
+        .setClientID(cliDem.clientId !== null ? cliDem.clientID : "Empty")
+        .setFirstName(cliDem.fName !== null ? cliDem.fName : "Empty")
+            .setMiddleName(cliDem.mName !== null ? cliDem.mName : "")
+            .setLastName(cliDem.lName !== null ? cliDem.lName : "Empty")
+        .setEmail(cliDem.email !== null ? cliDem.email : "Empty")
+        .setAddress(new Address({
+            streetAddress: cliDem.address !== null ? cliDem.address : "Empty",
+            city: cliDem.city !== null ? cliDem.city : "Empty",
+            state: cliDem.state !== null ? cliDem.state : "Empty",
+            zip: cliDem.zip !== null ? cliDem.zip : "Empty" 
+        }))
+        .setDOB(cliDem.dateOfBirth !== null ? new Date(cliDem.dateOfBirth) : "Empty")
+        .setPhoneNumber(cliDem.phoneNumber !== null ? cliDem.phoneNumber : "Empty")
+        .setSex(cliDem.gender !== null ? cliDem.gender : "Empty")
+        .setPronouns(cliDem.pronouns !== null ? cliDem.pronouns : "Empty")
+        .setMaritalStatus(cliDem.maritalStatus === 0 ? "Single" : "Divorced")   // Change later?
+        .setPreferredHospital(cliDem.preferredHospital !== null ? cliDem.preferredHospital : "Empty")
+        .setLikes(cliDem.likes !== null ? cliDem.likes : "Empty")
+        .setDislikes(cliDem.dislikes !== null ? cliDem.dislikes : "Empty")
+        .setGoals(cliDem.goals !== null ? cliDem.goals : "Empty")
+        .setHobbies(cliDem.hobbies !== null ? cliDem.hobbies : "Empty")
+        .setAchievements(cliDem.achievements !== null ? cliDem.achievements : "Empty")
+        .setPictureURL(cliDem.profilePicture !== null ? cliDem.profilePicture : "")
+        // Setting insurance
+        .setPrimaryInsurance(new Insurance({
+            name: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.name !== null) ? insurAndMed.primaryInsurance.name : "Empty",
+            policyNumber: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.policyNumber !== null) ? insurAndMed.primaryInsurance.policyNumber : "Empty"
+        }))
+        .setSecondaryInsurance(new Insurance({
+            name: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.name !== null) ? insurAndMed.secondaryInsurance.name : "Empty",
+            policyNumber: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.policyNumber !== null) ? insurAndMed.secondaryInsurance.policyNumber : "Empty"
+        }))
+        .setPcp(new ContactInfo({
+            name: (insurAndMed.pcp && insurAndMed.pcp.name !== null) ? insurAndMed.pcp.name : "Empty",
+            phoneNumber: (insurAndMed.pcp && insurAndMed.pcp.phoneNumber !== null) ? insurAndMed.pcp.phoneNumber : "Empty",
+            address: (insurAndMed.pcp && insurAndMed.pcp.address !== null) ? insurAndMed.pcp.address : "Empty"
+        }))
+        .setPrimaryPhysician(new ContactInfo({
+            name: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.name !== null) ? insurAndMed.primaryPhysician.name : "Empty",
+            phoneNumber: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.phoneNumber !== null) ? insurAndMed.primaryPhysician.phoneNumber : "Empty",
+            address: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.address !== null) ? insurAndMed.primaryPhysician.address : "Empty"
+        }))
+        // Setting medication
+        .setMedicationList(meds)
+        // Setting vaccinations
+        .setVaccinationList(vaccines)
+        // Setting support staff
+        .setSupportTeam(supportStaff)
+        // Setting case notes
+        .setCaseNoteList(caseNotes)
+            .setPOS(cliDem.pos !== null ? new Date(cliDem.pos) : "")
+            .build();
+
+        res.render("clientDetails", {theAccount: account, theClient: client});
+    }
+});
+
+/**
+ * See reports.js for the implementation of the reports
+ */
+app.get("/api/reports/:reportType", authCheck, async (req, res) => {
+    const reportType = req.params.reportType.toString();
+    if (!reportTypes.has(reportType)){
+        // Invalid report, just send the wacky user back to reports page
+        res.redirect("/reports");
+    }
+    switch (reportType) {
+        case "mailList":
+            await mailListReport(req.session.accountID, req, res);
+            break;
+        case "expPurchaseInMonth":
+            await expPurchaseInMonthReport(req.session.accountID, req, res);
+            break;
+        case "listAllClients":
+            await listAllClientsReport(req.session.accountID, req, res);
+            break;
+        default:
+            // Theoretically, this should never happen...
+            res.status(500).json({error: "Unknown report type"});
+            break;
+    }
+});
+
+/* Misc. Middleware and Configuration */
 
 /* Port Number should be an environment variable fyi */
 app.listen(port, () => {
@@ -246,6 +531,12 @@ app.listen(port, () => {
 })
 
 process.on('SIGTERM',async () => {
+    try{
+        await sessionStore.close();
+    } catch (e) {
+        console.log("Error: Failed to cleanly close the session store => " + e);
+    }
+    
     try {
         if (QueryParser.hasInstance()) {
             const queryParser = new QueryParserBuilder().build();
@@ -254,24 +545,41 @@ process.on('SIGTERM',async () => {
     } catch (error) {
         console.error('Error while closing the database connection:', error);
     } finally {
+        console.log("Server shutting down...");
         process.exit(0);
     }
 });
 
 function sanitize(req, res, next)
 {
-    for (const key in req.body)
-    {
-        // If non-null field
-        if (req.body[key] !== "")
+    if (req.method === "POST"){
+        for (const key in req.body)
         {
-            // Sanitize data
-            if (key === "email")
-                req.body[key] = req.body[key].replace(/[^\w@\.]/g, "");
-            else
-                req.body[key] = req.body[key].replace(/[\W]/g, "");
+            // If non-null field
+            if (req.body[key] !== "")
+            {
+                // Sanitize data
+                if (key === "email")
+                    req.body[key] = req.body[key].replace(/[^\w@\.]/g, "");
+                else
+                    req.body[key] = req.body[key].replace(/[\W]/g, "");
+            }
+        }
+    } else{
+        for (const key in req.query)
+        {
+            // If non-null field
+            if (req.query[key] !== "")
+            {
+                // Sanitize data
+                if (key === "email")
+                    req.query[key] = req.query[key].replace(/[^\w@\.]/g, "");
+                else
+                    req.query[key] = req.query[key].replace(/[\W]/g, "");
+            }
         }
     }
+
     next();
 }
 
@@ -279,4 +587,18 @@ function getPath(req, res, next)
 {
     res.locals.currentPath = req.path;
     next();
+}
+
+async function authCheck(req, res, next) {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        res.locals.username = account.username;
+        next();
+    }
 }

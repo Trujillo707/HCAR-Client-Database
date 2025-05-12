@@ -15,7 +15,7 @@ export default class Insurance{
      * @param {string} name
      * @param {string} policyNumber
      */
-    constructor(name, policyNumber) {
+    constructor({name, policyNumber}) {
         this.#name = name;
         this.#policyNumber = policyNumber;
     }

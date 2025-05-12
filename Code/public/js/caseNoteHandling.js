@@ -14,7 +14,11 @@ const editCaseNoteButton = document.getElementById("editCaseNote");
 const viewCaseNoteButton = document.getElementById("viewCaseNote");
 const downloadCaseNoteButton = document.getElementById("downloadCaseNote");
 
-newCaseNoteButton.addEventListener("click", () => {window.location.href='/caseNote'});
+newCaseNoteButton.addEventListener("click", () => {
+    // api to create a new case note
+
+    window.location.href='/caseNote'}); // <-- location for new case note
+
 editCaseNoteButton.addEventListener("click", () => {window.location.href='/caseNote'});
 viewCaseNoteButton.addEventListener("click", () => {window.location.href='/caseNote'});
 

@@ -4,7 +4,7 @@
     <title>Case Note</title>
     <%- include("fontLinks") -%>
     <link href="../css/style.css" rel="stylesheet" type="text/css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" />
 </head>
 <body>
     <%-include("header")-%>
@@ -14,6 +14,10 @@
             " " + locals.theClient.getLastName()%></p>
         <div class="tabContainer">
             <div class="caseNoteContent">
+                <div class="cn_subject">
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="subject" width="64" />
+                </div>
                 <div class="cn_program">
                     <label for="program">Program:</label>
                     <select name="program" id="program">
