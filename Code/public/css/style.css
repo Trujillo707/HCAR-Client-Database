@@ -20,6 +20,11 @@ header {
     padding: 0 0.3125em; /* 5px to em */
 }
 
+.logout-link {
+    flex-grow: 1;
+    text-align: right;
+}
+
 @media (max-width: 40.625em){ /* 650px to em */
     header{
         flex-direction: column;
@@ -75,7 +80,7 @@ tr {
 }
 
 .clickableRow.selected {
-    background-color: #989898;
+    background-color: #989898 !important;
 }
 
 input[type="button"]:disabled, button:disabled
@@ -143,16 +148,17 @@ select{
 }
 
 #reportForm {
-    margin: 2.5% 5%;
+    margin: 2.5% 10%;
     padding: 0.625em 0.9375em; /* 10px 15px to em */
     height: 25%;
     background-color: #B3B3B3;
+    border-radius: 0.5em;
 }
 
 #reportForm form{
     display: flex;
     align-items: flex-end;
-    justify-content: flex-end;
+    justify-content: center;
     align-content: flex-start;
     flex-wrap: wrap;
 }
@@ -176,12 +182,24 @@ select{
     cursor: pointer;
 }
 
+/* Some slight color for expired pos */
+td.expired {
+    background-color: #ffcccc;
+}
+.selected td.expired {
+    background-color: #989898;
+}
+
 .lightHover {
     background-color: white;
 }
 
 .lightHover:hover {
     background-color: #989898;
+}
+
+.lightHover:hover td.expired{
+    background-color: #989898 !important;
 }
 
 #reportForm button{
@@ -201,9 +219,9 @@ select{
     font-size: 1.2em;
 }
 
-#reportForm div{
+/*#reportForm div{
     margin-right: auto;
-}
+}*/
 
 #reportForm img {
     height: 1.2em;
@@ -342,7 +360,7 @@ select{
     background-color: black;
     color: white;
     padding: 0.75em; /* 12px to em */
-    width: 70%;
+    width: 8em;
     height: 17.58em; /* 33px to em */
     border-radius: 0.5em; /* 8px to em */
     font-size: 2em;
@@ -548,7 +566,7 @@ select{
     display: grid;
     grid-template-areas: "fName midName lName DoB"
                          "phone address email ."
-                         "sex maritalStatus . ."
+                         "sex maritalStatus pos ."
                          "regionalCenterID . . photo";
     justify-content: center;
     grid-template-columns: 21% 21% 26% 30%;
@@ -567,6 +585,9 @@ select{
 .cli_maritalStatus { grid-area: maritalStatus; }
 .cli_regionalCenterID { grid-area: regionalCenterID; }
 .cli_image { grid-area: photo; }
+.cli_pos {
+    grid-area: pos;
+}
 
 .clientIdContent > div > *:not(label) {
     display: block;
@@ -595,7 +616,7 @@ select{
     grid-template-areas: "p_insurance p_insurance_num p_care_provider"
                          "s_insurance s_insurance_num p_physician"
                          "pref_hospital . ."
-                         "vaccinationList . ."
+                         "vaccinationList . medReportButtonContainer"
                          "medicationList . .";
     grid-template-columns: 33% 33% 33%;
     row-gap: 1em;
@@ -611,6 +632,9 @@ select{
 .p_care_provider { grid-area: p_care_provider; }
 .p_physician { grid-area: p_physician; }
 .pref_hospital { grid-area: pref_hospital; }
+#medReportButtonContainer{
+    grid-area: medReportButtonContainer;
+}
 
 .medContent > div > *:not(label, table, th, td) {
     display: block;
@@ -817,10 +841,83 @@ div#supportTeam.tabcontent {
 .caseNoteContent > div > *:not(label) {
     display: block;
     padding: 0.25em;
-    margin: 1em 1em 1em 0em;
+    margin: 1em 1em 1em 0;
 }
 
 .caseNoteFooter {
     min-width: 52.1875em;
     padding: 0.5em 3.7% 0.5em 3.7%;
 }
+
+/* admin.ejs CSS start */
+
+.adminContainer {
+    width: 95%;
+    height: 90%;
+    margin: 1em auto;
+    background-color: #f5f5f5;
+    padding: 0.5em;
+
+    display: grid;
+    grid-template-areas: "adminEmployeeButtons adminClientButtons adminContent";
+    grid-template-columns: 11em 11em;
+    gap: 1em;
+}
+
+.employee_actions {
+    grid-area: adminEmployeeButtons;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+.client_actions {
+    grid-area: adminClientButtons;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.assignClient, .addEmployee, .removeEmployee, .addNewClient, .removeClient {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-area: adminContent;
+}
+
+/* generatedReportData.ejs CSS start */
+.greyBox{
+    margin: 2.5% 5% 1% 5%;
+    background-color: #B3B3B3;
+    padding: 0 0.625em;
+    border-radius: 0.5em;
+}
+
+.greyBox + * {
+    justify-content: center;
+}
+.bigFooterButton {
+    padding: 1em 5em;
+    background-color: black;
+    color: #fff;
+    border-radius: 0.3125em;
+    cursor: pointer;
+    font-size: 1.2em;
+}
+
+/* generatedReportData.ejs CSS end */
+
+/* medical report button css start */
+/*
+#medReportButtonContainer {
+    display: grid;
+    grid-template-columns: 10% 10% 80%;
+    grid-template-rows: 33% 33% 33%;
+}*/
+/*
+#medReportButton{
+    grid-column: 3 / 4;
+    grid-row: 3 / 4;
+    justify-self: end;
+}
+*/

@@ -10,6 +10,13 @@
             <button class="home-button" id="quickViewButton">Quick View All</button>
             <button class="home-button" id="searchButton">Search Client</button>
             <button class="home-button" id="reportsButton">Reports</button>
+            <%
+                if(locals.theAccount.admin) {
+                    %>
+                    <button class="home-button" id="adminButton">Admin</button>
+                    <%
+                }
+            %>
         </div>
         <script src="../js/homeScript.js" defer="defer"></script>
     </body>

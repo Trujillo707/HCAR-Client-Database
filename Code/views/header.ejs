@@ -2,5 +2,6 @@
     <span id="hcar-header"> <strong>HCAR Staff Portal</strong></span>
     <a href="/home" class="header-link <%= locals.currentPath === '/home' ? 'active' : '' %>">Home</a>
     <a href="/search" class="header-link <%= locals.currentPath === '/search' ? 'active' : '' %>" >Search</a>
-    <a href="/reports" class="header-link <%= locals.currentPath === '/reports' ? 'active' : '' %>">Reports</a>
+    <a href="/reports" class="header-link <%= (locals.currentPath === '/reports' || locals.currentPath === '/reports/generate') ? 'active' : '' %>">Reports</a>
+    <a href="/logout" class="logout-link">Logout</a>
 </div>

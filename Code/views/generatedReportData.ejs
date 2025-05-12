@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report: <%= locals.reportName %></title>
+    <%-include("fontLinks")-%>
+    <link href = ../css/style.css rel="stylesheet" type="text/css">
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js" ></script>
+    <script src="https://unpkg.com/jspdf-autotable" ></script>
+</head>
+<body>
+    <%-include("header")-%>
+    <div class="greyBox">
+        <h1>Report: <%= locals.reportName %></h1>
+        <p id="pdfStatus">Your report is generating and will be displayed below...</p>
+        <div id="pdfContainer" data-type="<%= locals.reportType %>" data-user="<%= locals.username %>">
+            <object type="application/pdf" width="100%" height="600" data="" id="pdf">
+            </object>
+        </div>
+    </div>
+    <footer>
+        <button type="button" class="bigFooterButton" id="backFromReport">Go Back</button>
+    </footer>
+    <script src="../js/reportFetcher.js" defer></script>
+</body>
+</html>
