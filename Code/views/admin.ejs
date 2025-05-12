@@ -24,88 +24,106 @@
         </div>
         <div class="assignClient" id="assignClient">
             <!-- employee name selected from a select, client select filtered from that -->
+            <fieldset>
+                <legend>Assign a Client to an Employee</legend>
 
-            <label for="assignClientName"> Enter Client Name: </label>
-            <input type="text" id="assignClientName" />
+                <label for="assignClientName"> Enter Client Name: </label>
+                <input type="text" id="assignClientName" />
 
-            <button id="assignClientSearchButton">Search</button>
+                <button id="assignClientSearchButton">Search</button>
 
-            <div>
-                <label for="assignClient_empl">Employees: </label>
-                <select name="assignClient_empl" id="assignClient_empl">
+                <div class="assignClientResult">
+                    <label for="assignClient_empl">Employees: </label>
+                    <select name="assignClient_empl" id="assignClient_empl">
+                        <option value="null">Select an Employee</option>
+                        <%
+                        // foreach for array of employees as options
+                        %>
+                    </select>
+                    <label for="assignClient_client">Clients: </label>
+                    <select name="assignClient_client" id="assignClient_client">
+                        <option value="null">Select a Client:</option>
+                        <%
+                        // foreach for array of filtered clients as options
+                        %>
+                    </select>
+                    <button id="submit">Assign</button>
+                </div>
+            </fieldset>
+        </div>
+        <div class="addEmployee" id="addEmployee">
+            <!-- employee username, email, password, program(s), submit -->
+            <fieldset>
+                <legend>Add an Employee</legend>
+
+                <label for="addEmployee_fName">First Name: </label>
+                <input type="text" id="addEmployee_fName" />
+
+                <label for="addEmployee_lName">Last Name: </label>
+                <input type="text" id="addEmployee_lName" />
+
+                <label for="addEmployee_user">Username: </label>
+                <input type="text" id="addEmployee_user" />
+
+                <label for="addEmployee_pass">Password: </label>
+                <input type="password" id="addEmployee_pass" />
+
+                <label for="addEmployee_passConfirm">Confirm Password: </label>
+                <input type="text" id="addEmployee_passConfirm" />
+
+                <button id="submit">Submit</button>
+            </fieldset>
+        </div>
+        <div class="removeEmployee" id="removeEmployee">
+            <!-- employee username, name, search with table and selector, submit -->
+            <fieldset>
+                <legend>Remove an Employee</legend>
+
+                <label for="removeEmpl_empl">Employee</label>
+                <select name="removeEmpl_empl" id="removeEmpl_empl">
                     <option value="null">Select an Employee</option>
                     <%
                     // foreach for array of employees as options
                     %>
                 </select>
-                <label for="assignClient_client">Clients: </label>
-                <select name="assignClient_client" id="assignClient_client">
-                    <option value="null">Select a Client:</option>
-                    <%
-                    // foreach for array of filtered clients as options
-                    %>
-                </select>
-            </div>
 
-            <button id="submit">Assign</button>
-        </div>
-        <div class="addEmployee" id="addEmployee">
-            <!-- employee username, email, password, program(s), submit -->
-            <label for="addEmployee_fName">First Name: </label>
-            <input type="text" id="addEmployee_fName" />
-
-            <label for="addEmployee_lName">Last Name: </label>
-            <input type="text" id="addEmployee_lName" />
-
-            <label for="addEmployee_user">Username: </label>
-            <input type="text" id="addEmployee_user" />
-
-            <label for="addEmployee_pass">Password: </label>
-            <input type="password" id="addEmployee_pass" />
-
-            <label for="addEmployee_passConfirm">Confirm Password: </label>
-            <input type="text" id="addEmployee_passConfirm" />
-
-            <button id="submit">Submit</button>
-        </div>
-        <div class="removeEmployee" id="removeEmployee">
-            <!-- employee username, name, search with table and selector, submit -->
-            <select name="removeEmpl_empl" id="removeEmpl_empl">
-                <option value="null">Select an Employee</option>
-                <%
-                    // foreach for array of employees as options
-                %>
-            </select>
-
-            <button id="submit">Submit</button>
+                <button id="submit">Submit</button>
+            </fieldset>
         </div>
         <div class="addNewClient" id="addNewClient">
             <!-- sends you to empty client page to put in info -->
-            <label for="addNewClient_fName">First Name: </label>
-            <input type="text" id="addNewClient_fName" required="required"/>
-            <label for="addNewClient_mName">Middle Name: </label>
-            <input type="text" id="addNewClient_mName" />
-            <label for="addNewClient_lName">Last Name: </label>
-            <input type="text" id="addNewClient_lName" required="required"/>
+            <fieldset>
+                <legend>Add a New Client</legend>
 
-            <button id="addNewClient_buildButton">Build</button>
+                <label for="addNewClient_fName">First Name: </label>
+                <input type="text" id="addNewClient_fName" required="required"/>
+                <label for="addNewClient_mName">Middle Name: </label>
+                <input type="text" id="addNewClient_mName" />
+                <label for="addNewClient_lName">Last Name: </label>
+                <input type="text" id="addNewClient_lName" required="required"/>
 
-
+                <button id="addNewClient_buildButton">Build</button>
+            </fieldset>
         </div>
         <div class="removeClient" id="removeClient">
             <!-- search by name, program, id?, phone, email, display info in mini table -->
-            <label for="removeClientName"> Enter Client Name: </label>
-            <input type="text" id="removeClientName" />
+            <fieldset>
+                <legend>Remove a Client</legend>
 
-            <button id="removeClientSearchButton">Search</button>
+                <label for="removeClientName"> Enter Client Name: </label>
+                <input type="text" id="removeClientName" />
 
-            <label for="removeClientResult">Clients: </label>
-            <select id="removeClientResult">
-                <option value="null">Select a Client:</option>
-                <%
-                    // foreach for array of filtered clients as options
-                %>
-            </select>
+                <button id="removeClientSearchButton">Search</button>
+                <div class="removeClientResult">
+                    <label for="removeClientSelect">Clients: </label>
+                    <select id="removeClientSelect">
+                        <option value="null">Select a Client:</option>
+                        <%
+                        // foreach for array of filtered clients as options
+                        %>
+                    </select>
+                </div>
+            </fieldset>
         </div>
     </div>
 </div>
