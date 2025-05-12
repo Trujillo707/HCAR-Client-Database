@@ -41,6 +41,7 @@ CREATE TABLE Program(
 CREATE TABLE Staff(
     staffID INT AUTO_INCREMENT PRIMARY KEY, 
     fName VARCHAR(64) NOT NULL, 
+    mName VARCHAR(64), 
     lName VARCHAR(64) NOT NULL, 
     address VARCHAR(64),
     city VARCHAR(64), 
@@ -51,12 +52,12 @@ CREATE TABLE Staff(
 
 CREATE TABLE Account(
     accountID INT AUTO_INCREMENT PRIMARY KEY, 
-    username VARCHAR(32) UNIQUE, 
-    hash VARCHAR(128), 
+    username VARCHAR(32) NOT NULL UNIQUE, 
+    hash VARCHAR(128) NOT NULL, 
     admin BOOL,
     disabled BOOL,
     staffID INT, 
-    FOREIGN KEY (staffID) REFERENCES Staff(staffID)
+    FOREIGN KEY (staffID) REFERENCES Staff(staffID) ON DELETE CASCADE
 );
 
 CREATE TABLE Note(
@@ -161,7 +162,7 @@ ADD CONSTRAINT fk_programClient_client FOREIGN KEY (clientID) REFERENCES Client(
 ADD CONSTRAINT fk_programClient_program FOREIGN KEY (programID) REFERENCES Program(programID);
 
 ALTER TABLE StaffClient 
-ADD CONSTRAINT fk_staffClient_staff FOREIGN KEY (staffID) REFERENCES Staff(staffID),
+ADD CONSTRAINT fk_staffClient_staff FOREIGN KEY (staffID) REFERENCES Staff(staffID) ON DELETE CASCADE,
 ADD CONSTRAINT fk_staffClient_client FOREIGN KEY (clientID) REFERENCES Client(clientID) ON DELETE CASCADE;
 
 ALTER TABLE NoteClient 

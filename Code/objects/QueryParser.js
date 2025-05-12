@@ -683,6 +683,152 @@ export default class QueryParser {
         await connection.rollback();
         return {"Error":"Error deleting client"};
       }
+      
+      finally{
+        await connection.release();
+      }
+    }
+
+    async searchStaff(req){
+      const connection = await this.#pool.getConnection();
+      try{
+        const account = await this.isAuthenticated(req, true);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        const fName = typeof req.body.fName === 'string' ? `%${req.body.fName}%` : '%%';
+        const lName = typeof req.body.lName === 'string' ? `%${req.body.lName}%` : '%%';
+        await connection.beginTransaction();
+        let [staffResults] = await connection.execute("SELECT staffID, fName, lName FROM Staff WHERE fName LIKE ? AND lName LIKE ?", [fName, lName]);
+        await connection.commit();
+        return staffResults;
+      }
+      catch(err){
+        console.log(err);
+        await connection.rollback();
+        return {"Error":"Error retrieving Staff"};
+      }
+      finally{
+        await connection.release();
+      }
+    }
+
+    async createAccount(req){
+      const connection = await this.#pool.getConnection();
+      try{
+        const account = await this.isAuthenticated(req, true);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        // Allow only A–Z, a–z, 0–9 for username
+        const usernameValidation = /^[A-Za-z0-9]+$/;
+        // Allow only letters for names and an empty string to be sent
+        const nameValidation = /^[A-Za-z]+$/;
+        const mNameValidation = /^[A-Za-z]*$/;
+
+        if(this.#validateInput(req.body.username, req.body.password)["status"] === false || !usernameValidation.test(req.body.username) || !nameValidation.test(req.body.fName) || !mNameValidation.test(req.body.mName) || !nameValidation.test(req.body.lName)){
+          return {"Error":"Invalid input"};
+        }
+        await connection.beginTransaction();
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(req.body.password, salt);
+        
+        const accountQuery = "INSERT INTO Account(username, hash, admin, disabled) VALUES(?, ?, ?, ?)";
+        const [accountResponse] = await connection.execute(accountQuery, [req.body.username, hash, 0, 0]);
+        const accountID = accountResponse.insertId;
+        
+        const staffQuery = "INSERT INTO Staff (fName, mName, lName, address, city, state, zip, phoneNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        const [staffResponse] = await connection.execute(staffQuery, [req.body.fName, req.body.mName, req.body.lName, req.body.address, req.body.city, req.body.state, req.body.zip, req.body.phoneNumber]);
+        const staffID = staffResponse.insertId;
+
+        const updateAccountQuery = "UPDATE Account SET staffID = ? WHERE accountID = ?";
+        const [updateResponse] = await connection.execute(updateAccountQuery, [staffID, accountID]);
+      
+        await connection.commit();
+        return "Account successfully created";
+      }
+      catch(err){
+        console.log(err);
+        await connection.rollback();
+        return {"Error":"Error creating account"};
+      }
+      finally{
+        await connection.release();
+      }
+    }
+
+    async updateAccount(req){
+      const connection = await this.#pool.getConnection();
+      try{
+        const account = await this.isAuthenticated(req, true);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        // Allow only A–Z, a–z, 0–9 for username
+        const usernameValidation = /^[A-Za-z0-9]+$/;
+        // Allow only letters for names
+        const nameValidation = /^[A-Za-z]+$/;
+        // Allow only letters for names but and an empty string to be sent
+        const mNameValidation = /^[A-Za-z]*$/;
+
+        const accountID = parseInt(req.body.accountID);
+        if(!Number.isInteger(accountID) || !usernameValidation.test(req.body.username) || !nameValidation.test(req.body.fName) || !mNameValidation.test(req.body.mName) || !nameValidation.test(req.body.lName)){
+          return {"Error":"Invalid input"};
+        }
+        await connection.beginTransaction();
+        
+        const accountQuery = "UPDATE Account SET disabled = ? WHERE accountID = ?";
+        const [accountResponse] = await connection.execute(accountQuery, [req.body.disabled, accountID]);
+        const [acctRows] = await connection.execute(`SELECT staffID FROM Account WHERE accountID = ?`,[accountID]);
+        if (acctRows.length != 1) {
+          await connection.rollback();
+          return { "Error": "Account not found" };
+        }
+        const staffID = acctRows[0].staffID;
+        
+        const staffQuery = "UPDATE Staff SET fName = ?, mName = ?, lName = ?, address = ?, city = ?, state = ?, zip = ?, phoneNumber = ? WHERE staffID = ?";
+        const [staffResponse] = await connection.execute(staffQuery, [req.body.fName, req.body.mName, req.body.lName, req.body.address, req.body.city, req.body.state, req.body.zip, req.body.phoneNumber, staffID]);
+
+        await connection.commit();
+        return "Account successfully updated";
+      }
+      catch(err){
+        console.log(err);
+        await connection.rollback();
+        return {"Error":"Error updating account"};
+      }
+      finally{
+        await connection.release();
+      }
+    }
+
+    async deleteAccount(req){
+      const connection = await this.#pool.getConnection();
+      try{
+        const account = await this.isAuthenticated(req, true);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        const accountID = parseInt(req.body.accountID);
+        if(!Number.isInteger(accountID)){
+          return {"Error":"Invalid Request"};
+        }
+        await connection.beginTransaction();
+        const [acctRows] = await connection.execute(`SELECT staffID FROM Account WHERE accountID = ?`,[accountID]);
+        if (acctRows.length != 1) {
+          await connection.rollback();
+          return { "Error": "Account not found" };
+        }
+        const staffID = acctRows[0].staffID;
+        const [accountResponse] = await connection.execute(`DELETE FROM Account WHERE accountID = ?`, [accountID]);
+        const [staffResponse] = await connection.execute(`DELETE FROM Staff WHERE staffID = ?`, [staffID]);
+        await connection.commit();
+        return "Account successfully deleted";
+      }
+      catch(err){
+        await connection.rollback();
+        return {"Error":"Error deleting account"};
+      }
       finally{
         await connection.release();
       }

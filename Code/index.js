@@ -179,6 +179,32 @@ app.post('/api/updateCaseNote', async (req, res) => {
     const results = await qp.deleteClient(req);
     return res.send(results);
   });
+  app.post('/api/deleteClient', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.deleteClient(req);
+    return res.send(results);
+  });
+  app.post('/api/createAccount', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.createAccount(req);
+    return res.send(results);
+  });
+  app.post('/api/updateAccount', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.updateAccount(req);
+    return res.send(results);
+  });
+  app.post('/api/deleteAccount', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.deleteAccount(req);
+    return res.send(results);
+  });
+  app.post("/api/searchStaff", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.searchStaff(req);
+    return res.send(results);
+  })
+
 
 // TODO: MAKE THIS POST OBVIOUSLY 
 app.get('/client', (req, res) => {
