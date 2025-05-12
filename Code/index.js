@@ -80,7 +80,8 @@ app.post('/home', getPath, async (req, res) => {
         res.redirect("/");
     }else{
         // After verification of credentials
-        res.render("home");
+        const account = await qp.isAuthenticated(req);
+        res.render("home", {theAccount: account});
     }
 });
 
@@ -94,9 +95,14 @@ app.get('/home', getPath, async (req, res) => {
         res.redirect("/");
     } else {
         // After verification of credentials
-        res.render("home");
+        res.render("home", {theAccount: account});
     }
 });
+
+app.get('/logout', async (req, res) => {
+    req.session.destroy();
+    res.redirect("/");
+})
 
 app.get("/search", getPath, async (req, res) => {
     console.log(req.session)
@@ -219,6 +225,10 @@ app.post("/reports/generate", authCheck, sanitize, getPath,  async (req, res) =>
             break;
     }
 });
+
+app.get("/admin", async (req, res) => {
+    res.render("admin");
+})
 
 app.get("/caseNote", async (req, res) => {
     let qp = await new QueryParserBuilder().build()
