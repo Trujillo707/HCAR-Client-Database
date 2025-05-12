@@ -1,9 +1,11 @@
 import express from "express"
 import session from 'express-session';
+import favicon from "serve-favicon";
 const app = express();
 import MySQLSession from 'express-mysql-session';
 const MySQLStore = MySQLSession(session);
-import {reportTypes} from "./reportsLogic.js";
+const port = process.env.PORT || 8080;
+import {reportTypes} from "./reports-logic/reportTypes.js";
 import {ClientBuilder} from "./objects/ClientBuilder.js";
 import Programs from "./objects/Programs.js";
 import Medication from "./objects/Medication.js";
@@ -13,17 +15,23 @@ import Address from "./objects/Address.js";
 import Vaccination from "./objects/Vaccination.js";
 import {SupportStaff} from "./objects/SupportStaff.js";
 import CaseNote from "./objects/CaseNote.js";
-
-const port = process.env.PORT || 8080;
 import { fileURLToPath } from 'url';
 import path from 'path';
 import {testClientArray} from "./testData.js"
 import QueryParser from "./objects/QueryParser.js";
 import QueryParserBuilder from "./objects/QueryParserBuilder.js";
+import {
+    expPurchaseInMonthReport,
+    listAllClientsReport,
+    mailListReport,
+    medInfoReport
+} from "./reports-logic/reports.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.disable('x-powered-by');
+
+app.use(favicon(__dirname + '/public/icons/favicon.ico'));
 
 app.use(express.static(__dirname + '/public'));
 
@@ -55,7 +63,7 @@ app.use(
 app.set('view engine', 'ejs');
 app.set('views', __dirname + "/views");
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
     if (req.session.accountID){
         res.redirect("/home");
     } else{
@@ -104,7 +112,6 @@ app.get("/search", getPath, async (req, res) => {
     }
 })
 
-
 // Sanitize data sent to results
 app.get('/results', sanitize, async (req, res) => {
     let qp = await new QueryParserBuilder().build()
@@ -130,6 +137,7 @@ app.get('/results', sanitize, async (req, res) => {
                 clients.push(new ClientBuilder()
                     .setClientID(client.clientID !== null ? client.clientID : "Empty")
                     .setFirstName(client.fName !== null ? client.fName : "Empty")
+                    .setMiddleName(client.mName !== null ? client.mName : "")
                     .setLastName(client.lName !== null ? client.lName : "Empty")
                     .setPhoneNumber(client.phoneNumber !== null ? client.phoneNumber : "Empty")
                     .setEmail(client.email !== null ? client.email : "Empty")
@@ -137,6 +145,7 @@ app.get('/results', sanitize, async (req, res) => {
                     .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
                     .setSex(client.gender !== null ? client.gender : "Empty")
                     .setPrograms(new Programs({names: results[1].filter(program => program.clientID === client.clientID).map(program => program.name)}))
+                    .setPOS(client.pos !== null ? new Date(client.pos) : "")
                     .build());
             }
         }
@@ -167,6 +176,7 @@ app.get("/results/all", async(req, res) => {
                 clients.push(new ClientBuilder()
                     .setClientID(client.clientID !== null ? client.clientID : "Empty")
                     .setFirstName(client.fName !== null ? client.fName : "Empty")
+                    .setMiddleName(client.mName !== null ? client.mName : "")
                     .setLastName(client.lName !== null ? client.lName : "Empty")
                     .setPhoneNumber(client.phoneNumber !== null ? client.phoneNumber : "Empty")
                     .setEmail(client.email !== null ? client.email : "Empty")
@@ -174,6 +184,7 @@ app.get("/results/all", async(req, res) => {
                     .setPronouns(client.pronouns !== null ? client.pronouns : "Empty")
                     .setSex(client.gender !== null ? client.gender : "Empty")
                     .setPrograms(new Programs({names: results[1].filter(program => program.clientID === client.clientID).map(program => program.name)}))
+                    .setPOS(client.pos !== null ? new Date(client.pos) : "")
                     .build());
             }
         }
@@ -181,16 +192,31 @@ app.get("/results/all", async(req, res) => {
     }
 });
 
-app.get("/reports", getPath, async (req, res) => {
-    let qp = await new QueryParserBuilder().build()
-    const account = await qp.isAuthenticated(req);
-    if (!account.username) {
-        // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
-        res.redirect("/");
-    } else {
-        // After verification of credentials
-        res.render("reports", {availableReportsMap: reportTypes});
+app.get("/reports", authCheck, getPath, async (req, res) => {
+    // After verification of credentials
+    res.render("reports", {availableReportsMap: reportTypes});
+});
+
+app.post("/reports/generate", authCheck, sanitize, getPath,  async (req, res) => {
+    const reportType = req.body.reportType.toString();
+    if (!reportTypes.has(reportType)){
+        // Invalid report, just send the wacky user back to reports page
+        res.redirect("/reports");
+    }
+    switch (reportType) {
+        case "mailList":
+            res.render("generatedReportData", {reportType: reportType, reportName: "Mailing List"});
+            break;
+        case "expPurchaseInMonth":
+            res.render("generatedReportData", {reportType: reportType, reportName: "Purchase of Services Expiring Soon"});
+            break;
+        case "listAllClients":
+            res.render("generatedReportData", {reportType: reportType, reportName: "List of All Viewable Clients"});
+            break;
+        default:
+            // Theoretically, this should never happen...
+            res.redirect("/reports");
+            break;
     }
 });
 
@@ -269,9 +295,9 @@ app.get("/caseNote/download", async (req, res) => {
 })
 
 app.post('/api/auth', sanitize, async (req, res) => {
-  
   let qp = await new QueryParserBuilder().build()
   const results = await qp.auth(req);
+  console.log(req.session.id);
   return res.send(results);
 });
 /**
@@ -287,9 +313,9 @@ app.post('/api/auth', sanitize, async (req, res) => {
  * Response on success: "Case note successfully created"
  */
 app.post('/api/createCaseNote', sanitize, async (req, res) => {
-  
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createCaseNote(req);
+    console.log(req.session.id);
     return res.send(results);
   });
 
@@ -328,12 +354,72 @@ app.post('/api/updateCaseNote', sanitize, async (req, res) => {
     return res.send(results);
   });
 
+  app.post('/api/createClient', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.createClient(req);
+    return res.send(results);
+  });
+
+  app.post('/api/updateClient', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.updateClient(req);
+    return res.send(results);
+  });
+
+  app.post('/api/deleteClient', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.deleteClient(req);
+    return res.send(results);
+  });
+  app.post('/api/deleteClient', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.deleteClient(req);
+    return res.send(results);
+  });
+  app.post('/api/createAccount', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.createAccount(req);
+    return res.send(results);
+  });
+  app.post('/api/updateAccount', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.updateAccount(req);
+    return res.send(results);
+  });
+  app.post('/api/deleteAccount', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.deleteAccount(req);
+    return res.send(results);
+  });
+  app.post('/api/updateAccount', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.updateAccount(req);
+    return res.send(results);
+  });
+  app.post('/api/createStaffClient', async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.createStaffClient(req);
+    return res.send(results);
+  });
+  app.post("/api/deleteStaffClient", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.deleteStaffClient(req);
+    return res.send(results);
+  })
+  app.post("/api/searchStaff", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.searchStaff(req);
+    return res.send(results);
+  })
+
+
+// TODO: MAKE THIS POST OBVIOUSLY 
 /*app.get('/client', (req, res) => {
     let rawData = req.body.clientID;
     res.render("clientDetails", {theAccount: false, theClient: testClientArray[0]});
 });*/
 
-app.post('/client', sanitize, (req, res) => {
+app.post('/client', sanitize, async (req, res) => {
     let cliID = req.body.clientID;
     res.json({redirect: `/client/${cliID}`});
 });
@@ -347,6 +433,7 @@ app.get('/client/:id', async (req, res) => {
         // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
+        //console.log(req.params.id);
         // After verification of credentials
         const cliID = Number(req.params.id);
         // DB Queries
@@ -361,13 +448,14 @@ app.get('/client/:id', async (req, res) => {
         let vaccines = [];
         let caseNotes = [];
         let supportStaff = [];
-
+        /*
         console.log("Demographics: ", cliDem);
         console.log("Insurance: ", insurAndMed);
         console.log("Medication: ", medicationList);
         console.log("Vaccination: ", vaccinationList);
         console.log("Case Notes: ", caseNotesList);
         console.log("Support Staff: ", supportStaffList)
+         */
 
         // Comprehension for med list
         for (const med of medicationList)
@@ -425,7 +513,8 @@ app.get('/client/:id', async (req, res) => {
         const client = new ClientBuilder()
         .setClientID(cliDem.clientID !== null ? cliDem.clientID : "Empty")
         .setFirstName(cliDem.fName !== null ? cliDem.fName : "Empty")
-        .setLastName(cliDem.lName !== null ? cliDem.lName : "Empty")
+            .setMiddleName(cliDem.mName !== null ? cliDem.mName : "")
+            .setLastName(cliDem.lName !== null ? cliDem.lName : "Empty")
         .setEmail(cliDem.email !== null ? cliDem.email : "Empty")
         .setAddress(new Address({
             streetAddress: cliDem.address !== null ? cliDem.address : "Empty",
@@ -472,17 +561,62 @@ app.get('/client/:id', async (req, res) => {
         .setSupportTeam(supportStaff)
         // Setting case notes
         .setCaseNoteList(caseNotes)
-        .build();
+            .setPOS(cliDem.pos !== null ? new Date(cliDem.pos) : "")
+            .build();
 
         res.render("clientDetails", {theAccount: account, theClient: client});
     }
 });
 
-app.get("/test", async (req, res) => {
-    let qp = await new QueryParserBuilder().build()
-    let results = await qp.getAllClients(1)
-    res.send(results);
-})
+/**
+ * Endpoint for medical reports
+ * response: {
+ *
+ * }
+ */
+app.post("/api/reports/medInfo", authCheck, sanitize, async (req, res) => {
+    const clientID = parseInt(req.body.clientID);
+    if (clientID == null || typeof clientID !== "number"){
+        return res.status(400).json({error: "Missing valid POST body"});
+    }
+    const qp = await new QueryParserBuilder().build();
+    const permCheck = await qp.checkAccountClientPerms(req.session.accountID, clientID);
+    if (!permCheck){
+        return res.status(403).json({error: "You do not have permission to view this client"});
+    }
+
+    await medInfoReport(clientID, req, res);
+});
+
+/**
+ * See reports.js for the implementation of the reports
+ */
+app.get("/api/reports/:reportType", authCheck, async (req, res) => {
+    const reportType = req.params.reportType.toString();
+    if (!reportTypes.has(reportType)){
+        // Invalid report
+        res.status(500).json({error: "Unknown report type"});
+    }
+    switch (reportType) {
+        case "mailList":
+            await mailListReport(req.session.accountID, req, res);
+            break;
+        case "expPurchaseInMonth":
+            await expPurchaseInMonthReport(req.session.accountID, req, res);
+            break;
+        case "listAllClients":
+            await listAllClientsReport(req.session.accountID, req, res);
+            break;
+        default:
+            // Theoretically, this should never happen...
+            res.status(500).json({error: "Unknown report type. Unsure of how you got here."});
+            break;
+    }
+});
+
+
+
+/* Misc. Middleware and Configuration */
 
 /* Port Number should be an environment variable fyi */
 app.listen(port, () => {
@@ -583,4 +717,19 @@ function rebuildClient(client, programs)
         .setPictureURL(client.profilePicture !== null ? client.profilePicture : "")
         .setPrograms(programs !== null ? new Programs({names: programs.map(program => program.name)}) : new Programs({names: []}))
         .build();
+}
+
+async function authCheck(req, res, next) {
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req);
+    if (!account.username) {
+        // Not verified
+        // TODO: Change index.html to an EJS file so we can render login and auth failures
+        res.redirect("/");
+    } else {
+        // After verification of credentials
+        res.locals.username = account.username;
+        res.locals.admin = account.admin;
+        next();
+    }
 }

@@ -1,3 +1,5 @@
 /coverage/
 /.idea/
 /.idea/jsLibraryMappings.xml
+.env
+/code/node_modules
