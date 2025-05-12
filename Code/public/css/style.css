@@ -600,7 +600,7 @@ select{
     grid-template-areas: "p_insurance p_insurance_num p_care_provider"
                          "s_insurance s_insurance_num p_physician"
                          "pref_hospital . ."
-                         "vaccinationList . ."
+                         "vaccinationList . medReportButtonContainer"
                          "medicationList . .";
     grid-template-columns: 33% 33% 33%;
     row-gap: 1em;
@@ -616,6 +616,9 @@ select{
 .p_care_provider { grid-area: p_care_provider; }
 .p_physician { grid-area: p_physician; }
 .pref_hospital { grid-area: pref_hospital; }
+#medReportButtonContainer{
+    grid-area: medReportButtonContainer;
+}
 
 .medContent > div > *:not(label, table, th, td) {
     display: block;
@@ -852,3 +855,17 @@ div#supportTeam.tabcontent {
 
 /* generatedReportData.ejs CSS end */
 
+/* medical report button css start */
+/*
+#medReportButtonContainer {
+    display: grid;
+    grid-template-columns: 10% 10% 80%;
+    grid-template-rows: 33% 33% 33%;
+}*/
+/*
+#medReportButton{
+    grid-column: 3 / 4;
+    grid-row: 3 / 4;
+    justify-self: end;
+}
+*/

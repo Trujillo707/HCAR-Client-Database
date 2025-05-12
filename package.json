@@ -27,7 +27,8 @@
     "express-mysql-session": "^3.0.3",
     "express-session": "^1.18.1",
     "jspdf": "^3.0.1",
-    "mysql2": "^3.14.0"
+    "mysql2": "^3.14.0",
+    "serve-favicon": "^2.5.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",

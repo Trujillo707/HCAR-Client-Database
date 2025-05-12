@@ -73,3 +73,45 @@ export async function listAllClientsReport(account, req, res) {
     }
 }
 
+export async function medInfoReport(clientID, req, res){
+    const qp = await new QueryParserBuilder().build();
+    try {
+        let data = {};
+        let [client, preferences, vaccinations, medications ] = await Promise.all([
+            qp.getSimpleClientBio(clientID),
+            qp.getInsuranceAndMedicalPreferences(clientID),
+            qp.getVaccinationList(clientID),
+            qp.getMedicationList(clientID)
+        ]).catch(
+            (e) => {
+                console.log("medInfoReport failed: " + e);
+                res.status(500).json({error: "Failed to get data"});
+            }
+        );
+        client.dateOfBirth = client.dateOfBirth instanceof Date ? client.dateOfBirth.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+        }) : "Unknown";
+        data.client = client;
+        data.preferences = preferences;
+        for (const vaccination of vaccinations){
+            vaccination.dateTaken = vaccination.dateTaken instanceof Date ? vaccination.dateTaken.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            }) : "Unknown";
+        }
+        data.vaccinations = vaccinations;
+        for (const medication of medications){
+            medication.prn = medication.prn ? "Yes" : "No";
+        }
+        data.medications = medications;
+
+        res.json(data);
+    } catch (e) {
+        console.log("medInfoReport failed: " + e);
+        res.status(500).json({error: "Failed to query all medical"});
+    }
+}
+

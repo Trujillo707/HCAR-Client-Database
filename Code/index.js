@@ -1,10 +1,11 @@
 import express from "express"
 import session from 'express-session';
+import favicon from "serve-favicon";
 const app = express();
 import MySQLSession from 'express-mysql-session';
 const MySQLStore = MySQLSession(session);
 const port = process.env.PORT || 8080;
-import {reportTypes} from "./reports-logic/reportsLogic.js";
+import {reportTypes} from "./reports-logic/reportTypes.js";
 import {ClientBuilder} from "./objects/ClientBuilder.js";
 import Programs from "./objects/Programs.js";
 import Medication from "./objects/Medication.js";
@@ -19,11 +20,18 @@ import path from 'path';
 import {testClientArray} from "./testData.js"
 import QueryParser from "./objects/QueryParser.js";
 import QueryParserBuilder from "./objects/QueryParserBuilder.js";
-import {expPurchaseInMonthReport, listAllClientsReport, mailListReport} from "./reports-logic/reports.js";
+import {
+    expPurchaseInMonthReport,
+    listAllClientsReport,
+    mailListReport,
+    medInfoReport
+} from "./reports-logic/reports.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.disable('x-powered-by');
+
+app.use(favicon(__dirname + '/public/icons/favicon.ico'));
 
 app.use(express.static(__dirname + '/public'));
 
@@ -364,7 +372,7 @@ app.get('/client/:id', async (req, res) => {
         // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
-        console.log(req.params.id);
+        //console.log(req.params.id);
         // After verification of credentials
         const cliID = Number(req.params.id);
         // DB Queries
@@ -379,13 +387,14 @@ app.get('/client/:id', async (req, res) => {
         let vaccines = [];
         let caseNotes = [];
         let supportStaff = [];
-
+        /*
         console.log("Demographics: ", cliDem);
         console.log("Insurance: ", insurAndMed);
         console.log("Medication: ", medicationList);
         console.log("Vaccination: ", vaccinationList);
         console.log("Case Notes: ", caseNotesList);
         console.log("Support Staff: ", supportStaffList)
+         */
 
         // Comprehension for med list
         for (const med of medicationList)
@@ -498,13 +507,33 @@ app.get('/client/:id', async (req, res) => {
 });
 
 /**
+ * Endpoint for medical reports
+ * response: {
+ *
+ * }
+ */
+app.post("/api/reports/medInfo", authCheck, sanitize, async (req, res) => {
+    const clientID = parseInt(req.body.clientID);
+    if (clientID == null || typeof clientID !== "number"){
+        return res.status(400).json({error: "Missing valid POST body"});
+    }
+    const qp = await new QueryParserBuilder().build();
+    const permCheck = await qp.checkAccountClientPerms(req.session.accountID, clientID);
+    if (!permCheck){
+        return res.status(403).json({error: "You do not have permission to view this client"});
+    }
+
+    await medInfoReport(clientID, req, res);
+});
+
+/**
  * See reports.js for the implementation of the reports
  */
 app.get("/api/reports/:reportType", authCheck, async (req, res) => {
     const reportType = req.params.reportType.toString();
     if (!reportTypes.has(reportType)){
-        // Invalid report, just send the wacky user back to reports page
-        res.redirect("/reports");
+        // Invalid report
+        res.status(500).json({error: "Unknown report type"});
     }
     switch (reportType) {
         case "mailList":
@@ -518,10 +547,12 @@ app.get("/api/reports/:reportType", authCheck, async (req, res) => {
             break;
         default:
             // Theoretically, this should never happen...
-            res.status(500).json({error: "Unknown report type"});
+            res.status(500).json({error: "Unknown report type. Unsure of how you got here."});
             break;
     }
 });
+
+
 
 /* Misc. Middleware and Configuration */
 
@@ -599,6 +630,7 @@ async function authCheck(req, res, next) {
     } else {
         // After verification of credentials
         res.locals.username = account.username;
+        res.locals.admin = account.admin;
         next();
     }
 }

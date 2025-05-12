@@ -6,7 +6,13 @@ let pdfContainer = document.getElementById("pdfContainer");
 let pdfObjectElement = document.getElementById("pdf");
 const reportType = pdfContainer.dataset.type;
 const user = pdfContainer.dataset.user;
-const currentDate = new Date().toLocaleDateString();
+const currentDate = new Date().toLocaleString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+});
 
 
 switch (reportType) {
@@ -48,6 +54,9 @@ switch (reportType) {
                     {header: "State", dataKey: "state"},
                     {header: "Zip", dataKey: "zip"},
                 ]
+
+                doc.addImage("../icons/logo-color.png", "PNG", 40, 20, 70, 70);
+
                 const xMargin = 40;
                 let lastY = 0;
                 doc.setFontSize(18);
@@ -78,7 +87,7 @@ switch (reportType) {
                     startY: lastY
                 });
 
-                const pdfBlob = doc.output("blob");
+                const pdfBlob = doc.output("blob", {filename: "Mailing_List_" + user + "_" + currentDate + ".pdf"});
                 const pdfURL = URL.createObjectURL(pdfBlob);
                 pdfObjectElement.data = pdfURL;
                 const fallback = document.createElement('div');
@@ -130,7 +139,10 @@ switch (reportType) {
                     {header: "Phone Number", dataKey: "phoneNumber"},
                     {header: "Latest Purchase of Services", dataKey: "pos"},
                     {header: "Days Remaining", dataKey: "daysRemaining"},
-                ]
+                ];
+
+                doc.addImage("../icons/logo-color.png", "PNG", 40, 20, 70, 70);
+
                 const xMargin = 40;
                 let lastY = 0;
                 doc.setFontSize(18);
@@ -161,7 +173,7 @@ switch (reportType) {
                     startY: lastY
                 });
 
-                const pdfBlob = doc.output("blob");
+                const pdfBlob = doc.output("blob", {filename: "Expiring_PoS_List_" + user + "_" + currentDate + ".pdf"});
                 const pdfURL = URL.createObjectURL(pdfBlob);
                 pdfObjectElement.data = pdfURL;
                 const fallback = document.createElement('div');
@@ -211,7 +223,10 @@ switch (reportType) {
                     {header: "Client Name", dataKey: "name"},
                     {header: "Date of Birth", dataKey: "dateOfBirth"},
                     {header: "Gender", dataKey: "gender"}
-                ]
+                ];
+
+                doc.addImage("../icons/logo-color.png", "PNG", 40, 20, 70, 70);
+
                 const xMargin = 40;
                 let lastY = 0;
                 doc.setFontSize(18);
@@ -243,7 +258,7 @@ switch (reportType) {
                     startY: lastY
                 });
 
-                const pdfBlob = doc.output("blob");
+                const pdfBlob = doc.output("blob", {filename: "Client_List_" + user + "_" + currentDate + ".pdf"});
                 const pdfURL = URL.createObjectURL(pdfBlob);
                 pdfObjectElement.data = pdfURL;
                 const fallback = document.createElement('div');
