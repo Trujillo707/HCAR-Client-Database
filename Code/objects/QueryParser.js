@@ -82,7 +82,7 @@ export default class QueryParser {
         const basicDetailsStmt = "SELECT c.clientID, f.filename AS profilePictureFilename, c.fName, c.mName, c.lName, c.phoneNumber, c.email, DATE(c.dateOfBirth) AS 'dateOfBirth', c.pronouns, c.gender, c.pos " +
             "FROM Account a " +
             "LEFT JOIN StaffClient sc ON a.staffID = sc.staffID " +
-            "INNER JOIN Client c ON ((a.admin = 1) OR (sc.clientID = c.clientID AND sc.clientID = c.clientID)) " +
+            "INNER JOIN Client c ON ((a.admin = 1) OR (sc.clientID = c.clientID AND a.admin = 0)) " +
             "LEFT JOIN File f ON c.profilePicture = f.fileID " +
             "WHERE a.accountID = ? " +
             "ORDER BY c.clientID " +
@@ -183,7 +183,7 @@ export default class QueryParser {
         let basicDetailsStmt = "SELECT c.clientID, f.filename AS profilePictureFilename, c.fName, c.mName, c.lName, c.phoneNumber, c.email, DATE(c.dateOfBirth) AS 'dateOfBirth', c.pronouns, c.gender, c.pos " +
             "FROM Account a " +
             "LEFT JOIN StaffClient sc ON a.staffID = sc.staffID " +
-            "INNER JOIN Client c ON ((a.admin = 1) OR (sc.clientID = c.clientID AND sc.clientID = c.clientID)) " +
+            "INNER JOIN Client c ON ((a.admin = 1) OR (sc.clientID = c.clientID AND a.admin = 0)) " +
             "LEFT JOIN File f ON c.profilePicture = f.fileID " +
             "WHERE a.accountID = ? ";
 
@@ -646,7 +646,7 @@ export default class QueryParser {
      * @returns {Promise<Object[]|undefined[]>}
      */
     async getSimpleClientList(account) {
-        const stmt = "SELECT CONCAT_WS(' ', fName, mName, lName) as name, dateOfBirth, gender FROM Account a LEFT JOIN StaffClient sc on a.staffID = sc.staffID INNER JOIN listAllClients c ON ((a.admin = 1) OR (sc.clientID = c.clientID AND sc.clientID = c.clientID)) WHERE accountID = ? ORDER BY c.lName";
+        const stmt = "SELECT CONCAT_WS(' ', fName, mName, lName) as name, dateOfBirth, gender FROM Account a LEFT JOIN StaffClient sc on a.staffID = sc.staffID INNER JOIN listAllClients c ON ((a.admin = 1) OR (sc.clientID = c.clientID AND a.admin = 0)) WHERE accountID = ? ORDER BY c.lName";
         try{
             const [results] = await this.#pool.execute(stmt, [account]);
             if (results.length > 0) {
@@ -660,8 +660,20 @@ export default class QueryParser {
         }
     }
 
+    async getSimpleClientBio(clientID) {
+        const stmt = "SELECT fname, mName, lName, dateOfBirth, phoneNumber, address, city, state, zip, sex, gender, pronouns FROM simpleClientBio WHERE clientID = ?";
+        try{
+            const [results] = await this.#pool.execute(stmt, [clientID]);
+            return results[0];
+        } catch (e) {
+            console.log("Error: Failure getting client's simple demographics => " + e );
+            return {error: "Failure getting client's simple demographics"};
+        }
+
+    }
+
     async getMailingList(account) {
-        const stmt = "SELECT CONCAT_WS(' ', fName, mName, lName) as name, phoneNumber, address, city, state, zip FROM Account a LEFT JOIN StaffClient sc on a.staffID = sc.staffID INNER JOIN mailList c ON ((a.admin = 1) OR (sc.clientID = c.clientID AND sc.clientID = c.clientID)) WHERE accountID = ? ORDER BY c.lName";
+        const stmt = "SELECT CONCAT_WS(' ', fName, mName, lName) as name, phoneNumber, address, city, state, zip FROM Account a LEFT JOIN StaffClient sc on a.staffID = sc.staffID INNER JOIN mailList c ON ((a.admin = 1) OR (sc.clientID = c.clientID AND a.admin = 0)) WHERE accountID = ? ORDER BY c.lName";
         try{
             const [results] = await this.#pool.execute(stmt, [account]);
             if (results.length > 0) {
@@ -687,6 +699,29 @@ export default class QueryParser {
         } catch (e) {
             console.log("Error: Failure getting Simple Client List; " + e);
             return [];
+        }
+    }
+
+    async checkAccountClientPerms(accountID, clientID){
+        if (accountID == null || clientID == null) {
+            return {"Error": "Invalid Authentication"};
+        }
+        try{
+            const [acctRows] = await this.#pool.execute("SELECT admin FROM Account WHERE accountID = ?",
+                [accountID]);
+            // forgot js has the nullable check
+            if (acctRows[0]?.admin === 1) {
+                return true;
+            }
+
+            // Check staff-client mapping for non-admins
+            const [rows] = await this.#pool.execute("SELECT COUNT(*) as count FROM StaffClient SC JOIN Account A ON SC.staffID = A.staffID WHERE A.accountID = ? AND SC.clientID = ?",
+                [accountID, clientID]
+            );
+            return rows[0]?.count > 0;
+        } catch (e) {
+            console.log("Error: Failed to check AccountClient perms" + e);
+            return false;
         }
     }
 

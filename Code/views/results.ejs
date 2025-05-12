@@ -57,11 +57,11 @@
                         if (current.getPOS() === ""){ %>
                         <td class="expired">Not on File</td>
                     <% } else if ( daysDiff === 0 ) { %>
-                        <td class="expired">Expires Today</td>
-                    <% } else if (daysDiff < 0) { %>
-                        <td class="expired">Expired on <%= current.getPOS().toLocaleDateString("en-US") %></td>
+                        <td class="expired">Today</td>
+                    <% } else if (daysDiff < 31) { %>
+                        <td class="expired"><%= current.getPOS().toLocaleDateString("en-US") %></td>
                     <% } else { %>
-                        <td>Good until <%= current.getPOS().toLocaleDateString("en-US") %></td>
+                        <td><%= current.getPOS().toLocaleDateString("en-US") %></td>
                     <% } %>
                 </tr>
             <% }) %>
