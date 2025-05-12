@@ -271,7 +271,7 @@
 
         <div id="caseNotes" class="tabcontent">
             <div class="caseNotes">
-                <table class="caseNoteTable">
+                <table id="caseNoteTable" class="caseNoteTable" data-clientid="<%= locals.theClient.getClientID() %>">
                     <tr>
                         <th>Subject</th>
                         <th>Date</th>
@@ -279,9 +279,9 @@
                         <th>Program</th>
                     </tr>
                     <% caseNotes.forEach((caseNote) => { %>
-                    <tr id="caseNoteRow" class="lightHover clickableRow">
+                    <tr id="caseNoteRow" class="lightHover clickableRow" data-noteid="<%=caseNote.getNoteID()%>">
                         <td><%=caseNote.getSubject()%></td>
-                        <td><%=caseNote.getDate()%></td>
+                        <td><%=new Intl.DateTimeFormat("en-US").format(caseNote.getDateCreated())%></td>
                         <td><%=caseNote.getEmployeeSign()%></td>
                         <td><%=caseNote.getProgram()%></td>
                     </tr>
@@ -292,12 +292,11 @@
                 <div class="caseNoteButtons">
                     <!-- Buttons for CaseNote Navigation, handled with caseNoteHandling.js -->
                     <input type="button" value="new" name="newCaseNote" id="newCaseNote"/>
-                    <input type="button" value="edit" name="editCaseNote" id="editCaseNote" disabled="disabled"/>
-                    <input type="button" value="view" name="viewCaseNote" id="viewCaseNote" disabled="disabled"/>
+                    <input type="button" value="view/edit" name="vieweditCaseNote" id="vieweditCaseNote" disabled="disabled"/>
                     <input type="button" value="download" name="downloadCaseNote" id="downloadCaseNote" disabled="disabled"/>
                 </div>
 
-                <script src="../js/caseNoteHandling.js" async="async"></script>
+                <script src="../js/caseNoteHandling.js" defer="defer"></script>
             </div>
         </div>
         <script src="../js/tab.js" defer="defer"></script>

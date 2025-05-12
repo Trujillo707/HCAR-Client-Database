@@ -5,51 +5,63 @@
  * This class holds information for a single Case Note associated with a particular client.
  */
 export default class CaseNote {
+    #noteID = -1;
     #subject = "";
-    #program = "";
+    #programName = "";
     /** @type {Date} */
-    #date = null;
+    #dateCreated = null;
     #contactType = {
-        IN_PERSON: "inPerson",
+        IN_PERSON: "In-Person",
         WRITTEN: "written",
         OVER_THE_PHONE: "overThePhone"
     };
-    #goalWorkedOn = {
+    #goal = {
         ISP_GOAL: "ISP Goal",
         IPP_GOAL: "IPP Goal",
         PERSONAL_GOAL: "Personal Goal"
     };
     #narrative = "";
-    #progressOnGoal = "";
+    #goalProgress = "";
     #nextSteps = "";
     #employeeSign = "";
     /** @type {Date} */
     #signDate = null;
+    /** @type {Date} */
+    #dateOfEvent = null;
 
     /**
+     * @param {number} noteID
      * @param {string} subject
-     * @param {string} program
-     * @param {Date} date
+     * @param {string} programName
+     * @param {Date} dateCreated
      * @enum {string} contactType
-     * @enum {string} goalWorkedOn
+     * @enum {string} goal
      * @param {string} narrative
-     * @param {string} progressOnGoal
+     * @param {string} goalProgress
      * @param {string} nextSteps
      * @param {string} employeeSign
      * @param {Date} signDate
+     * @param {Date} dateOfEvent
      */
-    constructor({subject, program, date, contactType, goalWorkedOn, narrative,
-                progressOnGoal, nextSteps, employeeSign, signDate}) {
+    constructor({noteID, subject, programName, dateCreated, contactType, goal, narrative,
+                goalProgress, nextSteps, employeeSign, signDate, dateOfEvent}) {
+        this.#noteID = noteID;
         this.#subject = subject;
-        this.#program = program;
-        this.#date = date;
+        this.#programName = programName;
+        this.#dateCreated = dateCreated;
         this.#contactType = contactType;
-        this.#goalWorkedOn = goalWorkedOn;
+        this.#goal = goal;
         this.#narrative = narrative;
-        this.#progressOnGoal = progressOnGoal;
+        this.#goalProgress = goalProgress;
         this.#nextSteps = nextSteps;
         this.#employeeSign = employeeSign;
         this.#signDate = signDate;
+        this.#dateOfEvent = dateOfEvent;
+    }
+    
+
+    getNoteID() {
+        return this.#noteID;
     }
 
     getSubject() {
@@ -57,11 +69,11 @@ export default class CaseNote {
     }
 
     getProgram() {
-        return this.#program;
+        return this.#programName;
     }
 
-    getDate() {
-        return this.#date;
+    getDateCreated() {
+        return this.#dateCreated;
     }
 
     getContactType() {
@@ -69,7 +81,7 @@ export default class CaseNote {
     }
 
     getGoalWorkedOn() {
-        return this.#goalWorkedOn;
+        return this.#goal;
     }
 
     getNarrative() {
@@ -77,7 +89,7 @@ export default class CaseNote {
     }
 
     getProgressOnGoal() {
-        return this.#progressOnGoal;
+        return this.#goalProgress;
     }
 
     getNextSteps() {
@@ -90,5 +102,9 @@ export default class CaseNote {
 
     getSignDate() {
         return this.#signDate;
+    }
+
+    getDateOfEvent() {
+        return this.#dateOfEvent;
     }
 }

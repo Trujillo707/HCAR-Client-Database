@@ -47,8 +47,8 @@
                         <%} %>
                     </td>
                     <td>
-                        <% Array.from(current.getPrograms()).forEach((currProgram) => { %>
-                            <%=currProgram.getName()%><br/>
+                        <% Array.from(current.getPrograms().getNames()).forEach((currProgram) => { %>
+                            <%=currProgram%><br/>
                         <% }) %>
                     </td>
                     <!--TODO: make this work! -->
@@ -74,7 +74,7 @@
     <button id="selectButton" class="dimHover footerButton">Select</button>
 
 </footer>
-<script src="../js/resultsScript.js"></script>
+<script src="../js/resultsScript.js" defer="defer"></script>
 </body>
 
 </html>
