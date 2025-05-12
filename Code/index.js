@@ -231,7 +231,7 @@ app.get("/admin", async (req, res) => {
 })
 
 // Complete this to accomodate for new, and edit/view/delete
-app.get("/caseNote", async (req, res) => {
+app.post("/caseNote", async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
