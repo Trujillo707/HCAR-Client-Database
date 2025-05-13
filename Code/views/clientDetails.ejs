@@ -301,7 +301,15 @@
                     <input type="button" value="new" name="newCaseNote" id="newCaseNote"/>
                     <input type="button" value="view/edit" name="vieweditCaseNote" id="vieweditCaseNote" disabled="disabled"/>
                     <input type="button" value="download" name="downloadCaseNote" id="downloadCaseNote" disabled="disabled"/>
+                    <input type="button" value="delete" name="deleteCaseNote" id="deleteCaseNote" disabled="disabled"/>
                 </div>
+                <dialog id="confirmDelete">
+                    <p> Are you sure you would like to delete this case note?</p>
+                    <div id="dialogButtons">
+                        <button id="yesDelete">Yes</button>
+                        <button id="noDelete">No</button>
+                    </div>
+                </dialog>
 
                 <script src="../js/caseNoteHandling.js" defer="defer"></script>
             </div>

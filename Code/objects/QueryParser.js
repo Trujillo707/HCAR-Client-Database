@@ -126,7 +126,7 @@ export default class QueryParser {
      * @param {string} filters.phoneNumber Phone Number
      * @param {Date} filters.dob Date of Birth
      * @param {string} filters.gender Gender
-     * @param {string} filters.maritalStatus Marital Status
+     * @param {string} filters.program Program
      * @param {string} filters.email Email
      * @param {string} filters.payee Payee
      * @param {string} filters.conservator Conservator
@@ -136,12 +136,12 @@ export default class QueryParser {
     async getAllFilteredClients(acctID,
                                 filters = {
                                     firstName: "%", lastName: "%", phoneNumber: "%", dob: "%", gender: "%",
-                                    maritalStatus: "%", email: "%", payee: "%", conservator: "%"
+                                    program: "%", email: "%", payee: "%", conservator: "%"
                                 },
                                 offset = 0) {
 
         const allowedFilters = ["firstName", "lastName", "phoneNumber", "dob", "gender",
-            "maritalStatus", "email", "payee", "conservator"];
+            "program", "email", "payee", "conservator"];
 
         if (acctID == null) {
             return {"Error": "Invalid Authentication"};
@@ -180,22 +180,27 @@ export default class QueryParser {
         /**
          * See getAllClients() for a description of this query.
          */
-        let basicDetailsStmt = "SELECT c.clientID, f.filename AS profilePictureFilename, c.fName, c.mName, c.lName, c.phoneNumber, c.email, DATE(c.dateOfBirth) AS 'dateOfBirth', c.pronouns, c.gender, c.pos " +
-            "FROM Account a " +
+        let basicDetailsStmt = "SELECT distinct c.clientID, f.filename AS profilePictureFilename, c.fName, c.mName, c.lName, c.phoneNumber, c.email, DATE(c.dateOfBirth) AS 'dateOfBirth', c.pronouns, c.gender, c.pos " +
+            "FROM Program p, ProgramClient pc, Account a " +
             "LEFT JOIN StaffClient sc ON a.staffID = sc.staffID " +
             "INNER JOIN Client c ON ((a.admin = 1) OR (sc.clientID = c.clientID AND a.admin = 0)) " +
             "LEFT JOIN File f ON c.profilePicture = f.fileID " +
-            "WHERE a.accountID = ? ";
+            "WHERE a.accountID = ? " + 
+            "AND pc.clientID = c.clientID " +
+            "AND pc.programID = p.programID ";
 
         for (const key of Object.keys(filters)) {
             if (filters[key] !== "" && filters[key] !== "%" && allowedFilters.includes(key)) {
                 // Handling date conversion from js to mysql FIX ME
                 if (key === "dob") {
-                    values.push(filters[key].toISOString().slice(0, 10));
+                    values.push(new Date(filters[key]).toISOString().slice(0, 10));
                     basicDetailsStmt += ` AND dateOfBirth LIKE ?`;
-                } else if (key === "gender" || key === "maritalStatus") {
+                } else if (key === "gender") {
                     values.push(filters[key]);
                     basicDetailsStmt += ` AND LOWER(${key}) = LOWER(?)`; // DB has "Male" instead of "male"
+                } else if (key === 'program') {
+                    values.push(Number(filters[key]));
+                    basicDetailsStmt += ` AND pc.programID = ?`;
                 } else {
                     values.push(`%${filters[key]}%`);
                     if (key === "firstName")
@@ -452,14 +457,18 @@ export default class QueryParser {
                 var [staffClient] = await connection.execute(staffClientQuery, [staffID, clientID]);
             }
             if (account.admin === 1 || staffClient[0]['COUNT(*)'] === 1) {
-                await connection.execute("CALL CreateCaseNote(?, ?, ?, ?, ?, ?, ?)", [
+                await connection.execute("CALL CreateCaseNote(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
                     staffID,
                     req.body.clientID,
                     req.body.contactType,
                     req.body.goal,
                     req.body.goalProgress,
                     req.body.narrative,
-                    req.body.nextSteps
+                    req.body.nextSteps,
+                    req.body.subject,
+                    req.body.dateOfSignoff,
+                    req.body.dateOfEvent,
+                    req.body.program
                 ]);
                 await connection.commit();
                 return "Case note successfully created";

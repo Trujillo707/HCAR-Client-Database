@@ -11,8 +11,12 @@
 const newCaseNoteButton = document.getElementById("newCaseNote");
 const vieweditCaseNoteButton = document.getElementById("vieweditCaseNote");
 const downloadCaseNoteButton = document.getElementById("downloadCaseNote");
+const deleteCaseNoteButton = document.getElementById("deleteCaseNote")
 const caseNoteRows = document.querySelectorAll(".clickableRow");
 const caseNoteTable = document.getElementById("caseNoteTable");
+const dialogDelete = document.getElementById("confirmDelete");
+const yesDelete = document.getElementById("yesDelete");
+const noDelete = document.getElementById("noDelete");
 
 // Selectable case note rows
 caseNoteRows.forEach(row => {
@@ -32,12 +36,14 @@ caseNoteRows.forEach(row => {
             // Enable buttons
             vieweditCaseNoteButton.disabled = false;
             downloadCaseNoteButton.disabled = false;
+            deleteCaseNoteButton.disabled = false;
         }
         else
         {
             // Disable buttons
             vieweditCaseNoteButton.disabled = true;
             downloadCaseNoteButton.disabled = true;
+            deleteCaseNoteButton.disabled = true;
         }
     })
 });
@@ -116,6 +122,25 @@ downloadCaseNoteButton.addEventListener("click", () => {
                 window.location.href = data.redirect;
         }) 
         .catch(error => console.log("Error: ", error))
+});
+
+
+// Show dialog if user clicks delete
+deleteCaseNoteButton.addEventListener("click", () => {
+    dialogDelete.showModal();
+});
+
+// Event Listener for when user clicks yes to delete
+yesDelete.addEventListener("click", () =>
+{
+    // Deletion logic
+    dialogDelete.close();
+});
+
+// Close dialog if user clicks no
+noDelete.addEventListener("click", () =>
+{
+    dialogDelete.close();
 });
 /*
     - if no casenote selected, then edit/view/download buttons are dim

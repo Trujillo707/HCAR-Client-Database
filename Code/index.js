@@ -331,13 +331,17 @@ app.post('/api/createCaseNote', sanitize, async (req, res) => {
 
 /*
 * Body: {
- *   clientID:    string
- *   contactType: string,
- *   goal:        string,
- *   goalProgress:string,
- *   narrative:   string,
- *   nextSteps:   string
- *   noteID:      string
+ *   clientID:      string
+ *   contactType:   string,
+ *   goal:          string,
+ *   goalProgress:  string,
+ *   narrative:     string,
+ *   nextSteps:     string
+ *   noteID:        string
+ *   subject:       string
+ *   dateOfSignoff: Date
+ *   dateOfEvent:   Date
+ *   program:       string
  * }
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully updated"
@@ -381,31 +385,25 @@ app.post('/api/updateCaseNote', sanitize, async (req, res) => {
     const results = await qp.deleteClient(req);
     return res.send(results);
   });
-  app.post('/api/deleteClient', async (req, res) => {
-    let qp = await new QueryParserBuilder().build()
-    const results = await qp.deleteClient(req);
-    return res.send(results);
-  });
+
   app.post('/api/createAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createAccount(req);
     return res.send(results);
   });
+
   app.post('/api/updateAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.updateAccount(req);
     return res.send(results);
   });
+
   app.post('/api/deleteAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteAccount(req);
     return res.send(results);
   });
-  app.post('/api/updateAccount', async (req, res) => {
-    let qp = await new QueryParserBuilder().build()
-    const results = await qp.updateAccount(req);
-    return res.send(results);
-  });
+
   app.post('/api/createStaffClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createStaffClient(req);
@@ -659,7 +657,7 @@ function sanitize(req, res, next)
         for (const key in req.body)
         {
             // If non-null field
-            if (req.body[key] !== "")
+            if (req.body[key] !== "" && typeof req.body[key] == "string") 
             {
                 // Sanitize data
                 if (key === "email")
@@ -672,7 +670,7 @@ function sanitize(req, res, next)
         for (const key in req.query)
         {
             // If non-null field
-            if (req.query[key] !== "")
+            if (req.query[key] !== "" && typeof req.query[key] == "string")
             {
                 // Sanitize data
                 if (key === "email")
