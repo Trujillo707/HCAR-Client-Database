@@ -226,27 +226,27 @@
             <div class="personalInfoContent">
                 <div class="cli_likes">
                     <label for="cli_likes"> Client Likes: </label>
-                    <textarea name="client_likes" id="cli_likes"><%=locals.theClient.getLikes()%></textarea>
+                    <textarea name="client_likes" id="cli_likes" <% if (!isAdmin){%>readonly="readonly"<%}%> ><%=locals.theClient.getLikes()%></textarea>
                 </div>
                 <div class="cli_dislikes">
                     <label for="cli_dislikes"> Client Dislikes: </label>
-                    <textarea name="client_dislikes" id="cli_dislikes"><%=locals.theClient.getDislikes()%></textarea>
+                    <textarea name="client_dislikes" id="cli_dislikes" <% if (!isAdmin){%>readonly="readonly"<%}%> ><%=locals.theClient.getDislikes()%></textarea>
                 </div>
                 <div class="cli_goals">
                     <label for="cli_goals"> Client Goals: </label>
-                    <textarea name="client_goals" id="cli_goals"><%=locals.theClient.getGoals()%></textarea>
+                    <textarea name="client_goals" id="cli_goals" <% if (!isAdmin){%>readonly="readonly"<%}%> ><%=locals.theClient.getGoals()%></textarea>
                 </div>
                 <div class="cli_hobs">
                     <label for="cli_hobs"> Client Hobbies / Favorite Activities: </label>
-                    <textarea name="client_hobbies" id="cli_hobs"><%=locals.theClient.getHobbies()%></textarea>
+                    <textarea name="client_hobbies" id="cli_hobs" <% if (!isAdmin){%>readonly="readonly"<%}%> ><%=locals.theClient.getHobbies()%></textarea>
                 </div>
                 <div class="cli_ach">
                     <label for="cli_ach"> Client Achievements: </label>
-                    <textarea name="client_achievements" id="cli_ach"><%=locals.theClient.getAchievements()%></textarea>
+                    <textarea name="client_achievements" id="cli_ach" <% if (!isAdmin){%>readonly="readonly"<%}%> ><%=locals.theClient.getAchievements()%></textarea>
                 </div>
                 <div class="cli_add_notes">
                     <label for="cli_add_notes"> Additional Notes: </label>
-                    <textarea name="client_additional_notes" id="cli_add_notes"><%=locals.theClient.getLikes()%></textarea>
+                    <textarea name="client_additional_notes" id="cli_add_notes" <% if (!isAdmin){%>readonly="readonly"<%}%> ><%=locals.theClient.getLikes()%></textarea>
                 </div>
             </div>
         </div>
@@ -303,11 +303,11 @@
                     <input type="button" value="download" name="downloadCaseNote" id="downloadCaseNote" disabled="disabled"/>
                     <input type="button" value="delete" name="deleteCaseNote" id="deleteCaseNote" disabled="disabled"/>
                 </div>
-                <dialog id="confirmDelete">
+                <dialog id="dialogBox">
                     <p> Are you sure you would like to delete this case note?</p>
                     <div id="dialogButtons">
-                        <button id="yesDelete">Yes</button>
-                        <button id="noDelete">No</button>
+                        <button id="dialogBlack">Yes</button>
+                        <button id="dialogWhite">No</button>
                     </div>
                 </dialog>
 

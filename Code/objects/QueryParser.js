@@ -471,7 +471,7 @@ export default class QueryParser {
                     req.body.program
                 ]);
                 await connection.commit();
-                return "Case note successfully created";
+                return {"message": "Case note successfully created"};
             } else {
                 await connection.rollback();
                 return {"Error": "Invalid authentication"};
@@ -485,6 +485,7 @@ export default class QueryParser {
 
     async updateCaseNote(req) {
         const connection = await this.#pool.getConnection();
+        let programID;
         try {
             const account = await this.isAuthenticated(req);
             if (account["Error"]) {
@@ -503,16 +504,34 @@ export default class QueryParser {
                 var [staffClient] = await connection.execute(staffClientQuery, [staffID, clientID]);
             }
             if (account.admin === 1 || staffClient[0]['COUNT(*)'] === 1) {
-                await connection.execute("UPDATE Note SET contactType = ?, goal = ?, goalProgress = ?, narrative = ?, nextSteps = ? WHERE noteID = ?", [
+
+                // Get program name
+                let programStmt = "SELECT programID FROM Program WHERE name = ?";
+                try {
+                    const [rows] = await connection.execute(programStmt, [req.body.program]);
+                    if (rows.length === 0) 
+                        return {"Error": "Could not find ID matching program name"};
+                    
+                    programID = rows[0].programID;
+                } catch (e) {
+                    console.log("Error: Failure getting program ID given program name" + e);
+                    return {"Error": "Failure getting program ID given program name"};
+                }
+
+                await connection.execute("UPDATE Note SET contactType = ?, goal = ?, goalProgress = ?, narrative = ?, nextSteps = ?, subject = ?, dateModified = ?, dateOfEvent = ?, programID = ? WHERE noteID = ?", [
                     req.body.contactType,
                     req.body.goal,
                     req.body.goalProgress,
                     req.body.narrative,
                     req.body.nextSteps,
+                    req.body.subject,
+                    req.body.dateOfSignoff,
+                    req.body.dateOfEvent,
+                    programID,
                     noteID
                 ]);
                 await connection.commit();
-                return "Case note successfully updated";
+                return {"message": "Case note successfully updated"};
             } else {
                 await connection.rollback();
                 return {"Error": "Invalid authentication"};
@@ -555,7 +574,7 @@ export default class QueryParser {
                     await connection.rollback();
                     return {"Error": "Case note already deleted/does not exist"};
                 } else {
-                    return "Case note successfully deleted";
+                    return {"message": "Case note successfully deleted"};
                 }
             } else {
                 await connection.rollback();
@@ -611,7 +630,7 @@ export default class QueryParser {
             conservator: req.body.conservator
         });
         await connection.commit();
-        return "Client successfully created";
+        return {"message": "Client successfully created"};
       }
       catch(err){
         await connection.rollback();
@@ -698,7 +717,7 @@ export default class QueryParser {
             conservator:      req.body.conservator
         });
         await connection.commit();
-        return "Client successfully updated";
+        return {"message": "Client successfully updated"};
       }
       catch(err){
         console.log(err);
@@ -724,7 +743,7 @@ export default class QueryParser {
         await connection.beginTransaction();
         let [deleteResults] = await connection.execute("CALL DeleteClient(?)", [clientID]);
         await connection.commit();
-        return "Client successfully deleted";
+        return {"message": "Client successfully deleted"};
       }
       catch(err){
         console.log(err);
@@ -793,7 +812,7 @@ export default class QueryParser {
         const [updateResponse] = await connection.execute(updateAccountQuery, [staffID, accountID]);
       
         await connection.commit();
-        return "Account successfully created";
+        return {"message": "Account successfully created"};
       }
       catch(err){
         console.log(err);
@@ -838,7 +857,7 @@ export default class QueryParser {
         const [staffResponse] = await connection.execute(staffQuery, [req.body.fName, req.body.mName, req.body.lName, req.body.address, req.body.city, req.body.state, req.body.zip, req.body.phoneNumber, staffID]);
 
         await connection.commit();
-        return "Account successfully updated";
+        return {"message": "Account successfully updated"};
       }
       catch(err){
         console.log(err);
@@ -871,7 +890,7 @@ export default class QueryParser {
         const [accountResponse] = await connection.execute(`DELETE FROM Account WHERE accountID = ?`, [accountID]);
         const [staffResponse] = await connection.execute(`DELETE FROM Staff WHERE staffID = ?`, [staffID]);
         await connection.commit();
-        return "Account successfully deleted";
+        return {"message": "Account successfully deleted"};
       }
       catch(err){
         await connection.rollback();
@@ -909,7 +928,7 @@ export default class QueryParser {
         const [staffClientResponse] = await connection.execute(staffClientQuery, [clientID, staffID, req.body.title]);
         
         await connection.commit();
-        return "Staff linked to client successfully";
+        return {"message": "Staff linked to client successfully"};
       }
       catch(err){
         console.log(err);
@@ -941,7 +960,7 @@ export default class QueryParser {
         const [staffClientResponse] = await connection.execute(staffClientQuery, [clientID, staffID]);
         
         await connection.commit();
-        return "Staff-client link successfully created";
+        return {"message": "Staff-client link successfully created"};
       }
       catch(err){
         await connection.rollback();

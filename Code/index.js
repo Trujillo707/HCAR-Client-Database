@@ -326,7 +326,7 @@ app.post('/api/createCaseNote', sanitize, async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createCaseNote(req);
     console.log(req.session.id);
-    return res.send(results);
+    return res.json(results);
   });
 
 /*
@@ -349,7 +349,7 @@ app.post('/api/createCaseNote', sanitize, async (req, res) => {
 app.post('/api/updateCaseNote', sanitize, async (req, res) => {
   let qp = await new QueryParserBuilder().build()
   const results = await qp.updateCaseNote(req);
-  return res.send(results);
+  return res.json(results);
 });
   
   
@@ -365,59 +365,59 @@ app.post('/api/updateCaseNote', sanitize, async (req, res) => {
   
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteCaseNote(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/createClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createClient(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/updateClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.updateClient(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/deleteClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteClient(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/createAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createAccount(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/updateAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.updateAccount(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/deleteAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteAccount(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/createStaffClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createStaffClient(req);
-    return res.send(results);
+    return res.json(results);
   });
   app.post("/api/deleteStaffClient", async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteStaffClient(req);
-    return res.send(results);
+    return res.json(results);
   })
   app.post("/api/searchStaff", async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.searchStaff(req);
-    return res.send(results);
+    return res.json(results);
   })
 
 
@@ -663,7 +663,7 @@ function sanitize(req, res, next)
                 if (key === "email")
                     req.body[key] = req.body[key].replace(/[^\w@\.]/g, "");
                 else
-                    req.body[key] = req.body[key].replace(/[\W]/g, "");
+                    req.body[key] = req.body[key].replace(/[^\w- ]/g, "");
             }
         }
     } else{
@@ -676,7 +676,7 @@ function sanitize(req, res, next)
                 if (key === "email")
                     req.query[key] = req.query[key].replace(/[^\w@\.]/g, "");
                 else
-                    req.query[key] = req.query[key].replace(/[\W]/g, "");
+                    req.query[key] = req.query[key].replace(/[^\w- ]/g, "");
             }
         }
     }

@@ -602,9 +602,9 @@ td.expired {
     width: 9em;
 } */
 
-.cli_regionalCenterID {
+/* .cli_regionalCenterID {
 
-}
+} */
 
 .clientIdContent > div {
     padding-top: 0.5em;
@@ -805,7 +805,7 @@ div#supportTeam.tabcontent {
     cursor: pointer;
 }
 
-#confirmDelete {
+#dialogBox {
   border: none;
   border-radius: 12px;
   padding: 2rem;
@@ -813,22 +813,21 @@ div#supportTeam.tabcontent {
   width: 400px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   background-color: #fff;
-  font-family: 'Segoe UI', sans-serif;
   text-align: center;
 }
 
-#confirmDelete::backdrop {
+#dialogBox::backdrop {
   background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(2px);
 }
 
-#confirmDelete p {
+#dialogBox p {
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
   color: #333;
 }
 
-#confirmDelete button {
+#dialogBox button {
   flex: 1 1 45%;
   padding: 0.6rem 1rem;
   font-size: 1rem;
@@ -845,21 +844,21 @@ div#supportTeam.tabcontent {
   margin-top: 1.5rem;
 }
 
-#yesDelete {
+#dialogBlack {
   background-color: black;
   color: white;
 }
 
-#yesDelete:hover {
+#dialogBlack:hover {
   background-color: #323232;
 }
 
-#noDelete {
+#dialogWhite {
   background-color: #ccc;
   color: #333;
 }
 
-#noDelete:hover {
+#dialogWhite:hover {
   background-color: #bbb;
 }
 

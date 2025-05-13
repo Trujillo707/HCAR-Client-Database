@@ -82,6 +82,12 @@
                 </div>
             </div>
         </div>
+        <dialog id="dialogBox">
+            <p> <%= locals.method === 'new' ? "Case Note Successfully Created" : "Case Note Successfully Saved" %></p>
+            <div id="dialogButtons">
+                <button id="dialogBlack">Okay</button>
+            </div>
+        </dialog>
     </div>
 <footer class="caseNoteFooter">
     <button id="cancelButton" class="dimHover footerButton">Cancel</button>
