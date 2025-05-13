@@ -20,6 +20,11 @@ header {
     padding: 0 0.3125em; /* 5px to em */
 }
 
+.logout-link {
+    flex-grow: 1;
+    text-align: right;
+}
+
 @media (max-width: 40.625em){ /* 650px to em */
     header{
         flex-direction: column;
@@ -70,12 +75,20 @@ tr {
 
 }
 
-#clientRow:hover {
+.clickableRow:hover {
     cursor: pointer;
 }
-#clientRow.selected {
+
+.clickableRow.selected {
     background-color: #989898 !important;
 }
+
+input[type="button"]:disabled, button:disabled
+{
+    cursor: default;
+    background-color: #999999;
+}
+
 td,th {
     border: 0.0625em solid black; /* 1px to em */
 }
@@ -170,8 +183,11 @@ select{
 }
 
 /* Some slight color for expired pos */
-#clientRow[class="lightHover"] td.expired {
+td.expired {
     background-color: #ffcccc;
+}
+.selected td.expired {
+    background-color: #989898;
 }
 
 .lightHover {
@@ -344,7 +360,7 @@ select{
     background-color: black;
     color: white;
     padding: 0.75em; /* 12px to em */
-    width: 70%;
+    width: 8em;
     height: 17.58em; /* 33px to em */
     border-radius: 0.5em; /* 8px to em */
     font-size: 2em;
@@ -831,6 +847,42 @@ div#supportTeam.tabcontent {
 .caseNoteFooter {
     min-width: 52.1875em;
     padding: 0.5em 3.7% 0.5em 3.7%;
+}
+
+/* admin.ejs CSS start */
+
+.adminContainer {
+    width: 95%;
+    height: 90%;
+    margin: 1em auto;
+    background-color: #f5f5f5;
+    padding: 0.5em;
+
+    display: grid;
+    grid-template-areas: "adminEmployeeButtons adminClientButtons adminContent";
+    grid-template-columns: 11em 11em;
+    gap: 1em;
+}
+
+.employee_actions {
+    grid-area: adminEmployeeButtons;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+.client_actions {
+    grid-area: adminClientButtons;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.assignClient, .addEmployee, .removeEmployee, .addNewClient, .removeClient {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-area: adminContent;
 }
 
 /* generatedReportData.ejs CSS start */

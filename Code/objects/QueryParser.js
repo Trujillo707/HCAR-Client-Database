@@ -277,6 +277,36 @@ export default class QueryParser {
     }
 
     /**
+     * Queries the database for the programs a single client belongs to.
+     * @param {number} clientID The ID of the client whose demographics are being queried
+     * @returns {Promise<Object>} An object containing the client's demographic details or an error message
+     */
+    async getClientPrograms(clientID) {
+        if (clientID == null) {
+            return {"Error": "Invalid ClientID"};
+        }
+
+        if (typeof clientID != "number")
+            clientID = Number(clientID);
+
+        const demoStmt = "SELECT p.programID, p.name" +
+            " FROM Program p JOIN HCAR.ProgramClient pc ON p.programID = pc.programID" + 
+            " WHERE pc.clientID = ?";
+
+        try {
+            const [rows] = await this.#pool.execute(demoStmt, [clientID]);
+            if (rows.length > 0) {
+                return rows; 
+            } else {
+                return {"Error": "Client not found / Client belongs to no programs"};
+            }
+        } catch (e) {
+            console.log("Error: Failure getting Client's programs" + e);
+            return {"Error": "Failure getting Client's programs"};
+        }
+    }
+
+    /**
      * Queries the database for the client's insurance and medical preferences.
      * @param {number} clientID
      * @returns {Promise<{primaryInsurance: Object, secondaryInsurance: Object, pcp: Object, primaryPhysician: Object}|{Error: string}>}
@@ -986,7 +1016,7 @@ export default class QueryParser {
             return {"Error": "Invalid NoteID"};
         }
 
-        let caseNoteStmt = "SELECT Note.noteID, subject, dateCreated, staffID, name as programName, dateModified, contactType, goal, narrative, goalProgress, nextSteps FROM Note JOIN HCAR.Program P on Note.programID = P.programID WHERE Note.noteID = ?";
+        let caseNoteStmt = "SELECT Note.noteID, subject, dateCreated, staffID, name as programName, dateModified, contactType, goal, narrative, goalProgress, nextSteps, dateOfEvent FROM Note JOIN HCAR.Program P on Note.programID = P.programID WHERE Note.noteID = ?";
 
         try {
             const [rows] = await this.#pool.execute(caseNoteStmt, [noteID]);

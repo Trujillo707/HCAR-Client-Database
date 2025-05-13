@@ -223,7 +223,7 @@ export class Client {
         return this.#pictureURL;
     }
 
-    /** @returns {Programs[]} */
+    /** @returns {Programs} */
     getPrograms(){
         return this.#programs;
     }

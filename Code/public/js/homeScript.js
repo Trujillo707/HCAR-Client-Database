@@ -5,7 +5,9 @@
 const quickViewButton = document.getElementById("quickViewButton");
 const searchButton = document.getElementById("searchButton");
 const reportsButton = document.getElementById("reportsButton");
+const adminButton = document.getElementById("adminButton");
 
 quickViewButton.addEventListener("click", () => {window.location.href='/results/all'});
 searchButton.addEventListener("click", () => {window.location.href='/search'});
 reportsButton.addEventListener("click", () => {window.location.href='/reports'});
+adminButton.addEventListener("click", () => {window.location.href='/admin'});

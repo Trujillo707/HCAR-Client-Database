@@ -1,21 +1,21 @@
 /**
- * This class contains data for a single Program a Client or Staff is part of.
+ * This class contains all of the programs a Client or Staff is part of.
  * In-progress, current fields may be added/deleted in future versions
  * @author Orlando Trujillo-Ortiz
  * @version 2025-03-17
  */
 export default class Programs {
-    #name = "";
+    #names = "";
 
     /**
-     * @param {string} name
+     * @param {string[]} names
      */
-    constructor({name}) {
-        this.#name = name;
+    constructor({names}) {
+        this.#names = names;
     }
 
-    /** @returns {string} */
-    getName(){
-        return this.#name;
+    /** @returns {string[]} */
+    getNames(){
+        return this.#names;
     }
 }

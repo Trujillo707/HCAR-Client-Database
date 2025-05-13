@@ -30,7 +30,7 @@
     <% if (locals.clientList && Array.isArray(clientList) && clientList.length > 0){ %>
         <tbody id="clientTableBody">
             <% clientList.forEach((current) => { %>
-                <tr id="clientRow" class="lightHover" data-id="<%= current.getClientID() %>">
+                <tr id="clientRow" class="lightHover clickableRow" data-id="<%= current.getClientID() %>">
                     <td><img width="256" alt="Picture of <%= current.getFirstName() %>"
                              src="<%= current.getPictureURL() %>">
                     </td>
@@ -49,8 +49,8 @@
                         <%} %>
                     </td>
                     <td>
-                        <% Array.from(current.getPrograms()).forEach((currProgram) => { %>
-                            <%=currProgram.getName()%><br/>
+                        <% Array.from(current.getPrograms().getNames()).forEach((currProgram) => { %>
+                            <%=currProgram%><br/>
                         <% }) %>
                     </td>
                     <%  const daysDiff = current.getPOS() instanceof Date ? Math.ceil((current.getPOS().getTime() - Date.now()) / (1000 * 3600 * 24)) : "";
@@ -84,7 +84,7 @@
     <button id="selectButton" class="dimHover footerButton">Select</button>
 
 </footer>
-<script src="../js/resultsScript.js"></script>
+<script src="../js/resultsScript.js" defer="defer"></script>
 </body>
 
 </html>
