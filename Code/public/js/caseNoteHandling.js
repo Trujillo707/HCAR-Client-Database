@@ -11,8 +11,12 @@
 const newCaseNoteButton = document.getElementById("newCaseNote");
 const vieweditCaseNoteButton = document.getElementById("vieweditCaseNote");
 const downloadCaseNoteButton = document.getElementById("downloadCaseNote");
+const deleteCaseNoteButton = document.getElementById("deleteCaseNote")
 const caseNoteRows = document.querySelectorAll(".clickableRow");
 const caseNoteTable = document.getElementById("caseNoteTable");
+const dialogDelete = document.getElementById("dialogBox");
+const yesDelete = document.getElementById("dialogBlack");
+const noDelete = document.getElementById("dialogWhite");
 
 // Selectable case note rows
 caseNoteRows.forEach(row => {
@@ -32,12 +36,14 @@ caseNoteRows.forEach(row => {
             // Enable buttons
             vieweditCaseNoteButton.disabled = false;
             downloadCaseNoteButton.disabled = false;
+            deleteCaseNoteButton.disabled = false;
         }
         else
         {
             // Disable buttons
             vieweditCaseNoteButton.disabled = true;
             downloadCaseNoteButton.disabled = true;
+            deleteCaseNoteButton.disabled = true;
         }
     })
 });
@@ -74,13 +80,13 @@ newCaseNoteButton.addEventListener("click", () => {
 vieweditCaseNoteButton.addEventListener("click", () => {
     const clientID = caseNoteTable.dataset.clientid;
     let chosenRow = caseNoteTable.querySelector(".selected");
-    let nID = Number(chosenRow.dataset.noteid);
+    let noteID = Number(chosenRow.dataset.noteid);
     fetch("/caseNote", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({button: "viewedit", noteID: nID, clientID: clientID})
+        body: JSON.stringify({button: "viewedit", noteID: noteID, clientID: clientID})
         })
         .then(response => {
             // Check for errors, if ok then parse JSON
@@ -223,27 +229,42 @@ downloadCaseNoteButton.addEventListener("click", () => {
         }) 
         .catch(error => console.log("Error: Failed to download case note => ", error))
 });
-/*
-    - if no casenote selected, then edit/view/download buttons are dim
-    - if casenote selected, edit/view/download buttons are active
-    - new casenote button will route to a new empty casenote object, only
-        saved when employee hits save button in note
-    - edit will load a casenote editable by staff
-    - view will show an uneditable casenote
- */
 
 
+// Show dialog if user clicks delete
+deleteCaseNoteButton.addEventListener("click", () => { dialogDelete.showModal(); });
 
-// downloadCaseNoteButton.addEventListener("click", () => {
-//     var caseNoteDocument = document.createElement('a');
-//     caseNoteDocument.href='/caseNote.ejs';
-//
-//     // const { jsPDF } = require("jspdf");
-//     //
-//     // const doc = new jsPDF();
-//     // doc.text("hello world", 10, 10);
-//     // doc.save("a4.pdf");
-//
-//     caseNoteDocument.download = 'file.pdf';
-//     caseNoteDocument.dispatchEvent(new MouseEvent('click'));
-// });
+// Event Listener for when user clicks yes to delete
+yesDelete.addEventListener("click", () =>
+{
+    const clientID = Number(caseNoteTable.dataset.clientid);
+    let chosenRow = caseNoteTable.querySelector(".selected");
+    let noteID = Number(chosenRow.dataset.noteid);
+    // Deletion logic
+    fetch("/api/deleteCaseNote", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({noteID: noteID, clientID: clientID})
+            })
+            .then(response => {
+                // Check for errors, if ok then parse JSON
+                if (!response.ok)
+                    throw new Error(`Error: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                // Consider outputting message to screen
+                console.log(data.message);
+            }) 
+            .catch(error => console.log("Error: ", error))
+
+    // Take out selected row
+    caseNoteTable.querySelector(".selected").remove();
+    // Close dialog
+    dialogDelete.close();
+});
+
+// Close dialog if user clicks no
+noDelete.addEventListener("click", () => { dialogDelete.close(); });

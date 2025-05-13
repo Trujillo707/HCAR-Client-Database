@@ -338,18 +338,22 @@ app.post('/api/createCaseNote', sanitize, async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createCaseNote(req);
     console.log(req.session.id);
-    return res.send(results);
+    return res.json(results);
   });
 
 /*
 * Body: {
- *   clientID:    string
- *   contactType: string,
- *   goal:        string,
- *   goalProgress:string,
- *   narrative:   string,
- *   nextSteps:   string
- *   noteID:      string
+ *   clientID:      string
+ *   contactType:   string,
+ *   goal:          string,
+ *   goalProgress:  string,
+ *   narrative:     string,
+ *   nextSteps:     string
+ *   noteID:        string
+ *   subject:       string
+ *   dateOfSignoff: Date
+ *   dateOfEvent:   Date
+ *   program:       string
  * }
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully updated"
@@ -357,7 +361,7 @@ app.post('/api/createCaseNote', sanitize, async (req, res) => {
 app.post('/api/updateCaseNote', sanitize, async (req, res) => {
   let qp = await new QueryParserBuilder().build()
   const results = await qp.updateCaseNote(req);
-  return res.send(results);
+  return res.json(results);
 });
   
   
@@ -373,65 +377,59 @@ app.post('/api/updateCaseNote', sanitize, async (req, res) => {
   
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteCaseNote(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/createClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createClient(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/updateClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.updateClient(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/deleteClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteClient(req);
-    return res.send(results);
+    return res.json(results);
   });
-  app.post('/api/deleteClient', async (req, res) => {
-    let qp = await new QueryParserBuilder().build()
-    const results = await qp.deleteClient(req);
-    return res.send(results);
-  });
+
   app.post('/api/createAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createAccount(req);
-    return res.send(results);
+    return res.json(results);
   });
+
   app.post('/api/updateAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.updateAccount(req);
-    return res.send(results);
+    return res.json(results);
   });
+
   app.post('/api/deleteAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteAccount(req);
-    return res.send(results);
+    return res.json(results);
   });
-  app.post('/api/updateAccount', async (req, res) => {
-    let qp = await new QueryParserBuilder().build()
-    const results = await qp.updateAccount(req);
-    return res.send(results);
-  });
+
   app.post('/api/createStaffClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createStaffClient(req);
-    return res.send(results);
+    return res.json(results);
   });
   app.post("/api/deleteStaffClient", async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteStaffClient(req);
-    return res.send(results);
+    return res.json(results);
   })
   app.post("/api/searchStaff", async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.searchStaff(req);
-    return res.send(results);
+    return res.json(results);
   })
 
 
@@ -671,26 +669,26 @@ function sanitize(req, res, next)
         for (const key in req.body)
         {
             // If non-null field
-            if (req.body[key] !== "")
+            if (req.body[key] !== "" && typeof req.body[key] == "string") 
             {
                 // Sanitize data
                 if (key === "email")
                     req.body[key] = req.body[key].replace(/[^\w@\.]/g, "");
                 else
-                    req.body[key] = req.body[key].replace(/[\W]/g, "");
+                    req.body[key] = req.body[key].replace(/[^\w- ]/g, "");
             }
         }
     } else{
         for (const key in req.query)
         {
             // If non-null field
-            if (req.query[key] !== "")
+            if (req.query[key] !== "" && typeof req.query[key] == "string")
             {
                 // Sanitize data
                 if (key === "email")
                     req.query[key] = req.query[key].replace(/[^\w@\.]/g, "");
                 else
-                    req.query[key] = req.query[key].replace(/[\W]/g, "");
+                    req.query[key] = req.query[key].replace(/[^\w- ]/g, "");
             }
         }
     }

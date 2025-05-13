@@ -22,7 +22,7 @@
                 </div>
                 <div id="birthDateFilter">
                     <label for="dob">Birthdate</label> <br />
-                    <input type="date" class="searchField" id="dob" name="dob" />
+                    <input type="date" class="searchField" id="dob" name="dob" max="<%= new Date().toISOString().slice(0, 10) %>"/>
                 </div>
                 <!-- Additional Fields with More Options -->
                 <div id="sexTypeFilter" class="hidden">
@@ -31,18 +31,21 @@
                         <option value="" selected>-- Select an option --</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
-                        <option value="other">Other</option>
+                        <option value="non-binary">Non-Binary</option>
+                        <option value="agender">Agender</option>
                     </select>
                 </div>
-                <div id="maritalStatusFilter" class="hidden">
-                    <label for="maritalStatus">Marital Status</label> <br />
-                    <select class="searchField" id="maritalStatus" name="maritalStatus">
+                <div id="programFilter" class="hidden">
+                    <label for="program">Program</label> <br />
+                    <select class="searchField" id="program" name="program">
                         <option value="" selected>-- Select an option --</option>
-                        <option value="single">Single</option>
-                        <option value="married">Married</option>
-                        <option value="divorced">Divorced</option>
-                        <option value="widowed">Widowed</option>
-                        <option value="other">Other</option>
+                        <option value="1">Summit Support Services</option>
+                        <option value="2">Bay Center Day Services</option>
+                        <option value="3">Canvas + Clay Studio</option>
+                        <option value="4">Comprehensive Career Services</option>
+                        <option value="5">Respite Services</option>
+                        <option value="6">Clinical Services</option>
+                        <option value="7">Self-Determination Program</option>
                     </select>
                 </div>
                 <div id="emailFilter" class="hidden">

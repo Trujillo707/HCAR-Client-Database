@@ -35,28 +35,28 @@
                 </div>
                 <div class="cn_date_of_case">
                     <label for="date_of_case">Date of Meeting/Activity:</label>
-                    <input type="date" name="date_of_case" id="date_of_case" value="<%= locals.method === 'new' ? '' : new Date(locals.note.getDateOfEvent()).toISOString().slice(0, 10) %>" />
+                    <input type="date" name="date_of_case" id="date_of_case" required="required" max="<%= new Date().toISOString().slice(0, 10) %>" value="<%= locals.method === 'new' ? '' : new Date(locals.note.getDateOfEvent()).toISOString().slice(0, 10) %>" />
                 </div>
                 <div></div>
                 <div class="cn_contact_type">
                     <label for="contact_type">Contact Type: </label>
                     <p id="contact_type">
-                        <input type="radio" name="contact_type" id="in_person" <%= locals.method === 'viewedit' && locals.note.getContactType() == 'In-Person' ? "checked" : "" %> />
+                        <input type="radio" name="contact_type" value="In-Person" id="in_person" <%= (locals.method === 'new' || (locals.method === 'viewedit' && locals.note.getContactType() == 'In-Person')) ? "checked" : "" %> />
                         <label for="in_person">In-Person</label>
-                        <input type="radio" name="contact_type" id="written" <%= locals.method === 'viewedit' && locals.note.getContactType() == 'Written' ? "checked" : "" %> />
+                        <input type="radio" name="contact_type" value="Written" id="written" <%= locals.method === 'viewedit' && locals.note.getContactType() == 'Written' ? "checked" : "" %> />
                         <label for="written">Written</label>
-                        <input type="radio" name="contact_type" id="over_the_phone" <%= locals.method === 'viewedit' && locals.note.getContactType() == 'Over the Phone' ? "checked" : "" %> />
+                        <input type="radio" name="contact_type" value="Over the Phone" id="over_the_phone" <%= locals.method === 'viewedit' && locals.note.getContactType() == 'Over the Phone' ? "checked" : "" %> />
                         <label for="over_the_phone">Over the Phone</label>
                     </p>
                 </div>
                 <div class="cn_goal_worked_on">
                     <label for="goal_worked_on">Goal Worked on: </label>
                     <p id="goal_worked_on">
-                        <input type="radio" name="goal_worked_on" id="isp_goal" <%= locals.method === 'viewedit' && locals.note.getGoalWorkedOn() == 'ISP Goal' ? "checked" : "" %> />
+                        <input type="radio" name="goal_worked_on" value="ISP Goal" id="isp_goal" <%= (locals.method === 'new' || (locals.method === 'viewedit' && locals.note.getGoalWorkedOn() == 'ISP Goal')) ? "checked" : "" %> />
                         <label for="isp_goal">ISP Goal</label>
-                        <input type="radio" name="goal_worked_on" id="ipp_goal" <%= locals.method === 'viewedit' && locals.note.getGoalWorkedOn() == 'IPP Goal' ? "checked" : "" %> />
+                        <input type="radio" name="goal_worked_on" value="IPP Goal" id="ipp_goal" <%= locals.method === 'viewedit' && locals.note.getGoalWorkedOn() == 'IPP Goal' ? "checked" : "" %> />
                         <label for="ipp_goal">IPP Goal</label>
-                        <input type="radio" name="goal_worked_on" id="personal_goal" <%= locals.method === 'viewedit' && locals.note.getGoalWorkedOn() == 'Personal Goal' ? "checked" : "" %> />
+                        <input type="radio" name="goal_worked_on" value="Personal Goal" id="personal_goal" <%= locals.method === 'viewedit' && locals.note.getGoalWorkedOn() == 'Personal Goal' ? "checked" : "" %> />
                         <label for="personal_goal">Personal Goal</label>
                     </p>
                 </div>
@@ -78,15 +78,22 @@
                 </div>
                 <div class="cn_date_of_signoff">
                     <label for="date_of_signoff">Date of Sign-Off: </label>
-                    <input type="date" id="date_of_signoff" name="date_of_signoff" value="<%= (locals.method === 'new' || locals.note.getSignDate() == undefined) ? new Date().toISOString().slice(0, 10) : new Date(locals.note.getSignDate()).toISOString().slice(0, 10) %>"/>
+                    <input type="date" id="date_of_signoff" name="date_of_signoff" required="required" max="<%= new Date().toISOString().slice(0, 10) %>" value="<%= (locals.method === 'new' || locals.note.getSignDate() == undefined) ? new Date().toISOString().slice(0, 10) : new Date(locals.note.getSignDate()).toISOString().slice(0, 10) %>"/>
                 </div>
             </div>
         </div>
+        <dialog id="dialogBox">
+            <p> <%= locals.method === 'new' ? "Case Note Successfully Created" : "Case Note Successfully Saved" %></p>
+            <div id="dialogButtons">
+                <button id="dialogBlack">Okay</button>
+            </div>
+        </dialog>
     </div>
 <footer class="caseNoteFooter">
     <button id="cancelButton" class="dimHover footerButton">Cancel</button>
-    <button id="saveButton" class="dimHover footerButton"><%= locals.method === 'new' ? 'Create' : 'Save' %></button>
+    <button id="saveButton" class="dimHover footerButton" data-clientid="<%= locals.theClient.getClientID() %>" data-method="<%= locals.method %>" data-noteid="<%= locals.note !== undefined ? locals.note.getNoteID() : '' %>"><%= locals.method === 'new' ? 'Create' : 'Save' %></button>
 </footer>
+
 <script src="../js/caseNoteEditing.js" defer="defer"></script>
 </body>
 </html>
