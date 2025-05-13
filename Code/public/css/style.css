@@ -863,12 +863,12 @@ div#supportTeam.tabcontent {
 }
 
 @media (max-width: 500px) {
-  #confirmDelete {
+  #dialogBox {
     width: 90%;
     padding: 1.5rem;
   }
 
-  #confirmDelete button {
+  #dialogBox button {
     flex: 1 1 100%;
   }
 }
