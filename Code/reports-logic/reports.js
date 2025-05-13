@@ -115,3 +115,41 @@ export async function medInfoReport(clientID, req, res){
     }
 }
 
+export async function caseNotePDFData(noteID, req, res){
+    const qp = await new QueryParserBuilder().build();
+    try {
+        const data = await qp.getCaseNote(noteID);
+        if (data.Error) {
+            throw new Error(data.Error);
+        }
+
+        data.dateCreated = data.dateCreated instanceof Date ? data.dateCreated.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+            }) : "Unknown";
+
+        if (data.dateModified == null){
+            data.dateModified = "Not Modified";
+        } else if (data.dateModified instanceof Date) {
+            data.dateModified = data.dateModified.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            });
+        } else {
+            data.dateModified = "Unknown";
+        }
+
+        data.dateOfEvent = data.dateOfEvent instanceof Date ? data.dateOfEvent.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+            }) : "Unknown";
+        res.json(data);
+    } catch (e) {
+        console.log("getCaseNotePDF failed: " + e);
+        res.status(500).json({error: "Failed to get case note data"});
+    }
+}
+

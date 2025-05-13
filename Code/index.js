@@ -21,6 +21,7 @@ import {testClientArray} from "./testData.js"
 import QueryParser from "./objects/QueryParser.js";
 import QueryParserBuilder from "./objects/QueryParserBuilder.js";
 import {
+    caseNotePDFData,
     expPurchaseInMonthReport,
     listAllClientsReport,
     mailListReport,
@@ -300,8 +301,19 @@ app.get("/caseNote/viewedit", async (req, res) => {
 })
 
 // Download a case note
-app.get("/caseNote/download", async (req, res) => {
+app.post("/caseNote/download",authCheck, async (req, res) => {
+    const clientID = parseInt(req.body.clientID);
+    const noteID = parseInt(req.body.noteID);
+    if (clientID == null || noteID == null || typeof clientID !== "number" || typeof noteID !== "number"){
+        return res.status(400).json({error: "Missing valid POST body"});
+    }
+    const qp = await new QueryParserBuilder().build();
+    const permCheck = await qp.checkAccountClientPerms(req.session.accountID, clientID);
+    if (!permCheck){
+        return res.status(403).json({error: "You do not have permission to view this client"});
+    }
 
+    await caseNotePDFData(noteID, req, res);
 })
 
 app.post('/api/auth', sanitize, async (req, res) => {
