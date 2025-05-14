@@ -398,7 +398,7 @@ td.expired {
     grid-area: 1 / 2 / 1 / 3;
 }
 
-#phoneFilter
+#programFilter
 {
     grid-area: 2 / 1 / 2 / 2;
 }
@@ -482,7 +482,7 @@ td.expired {
     grid-area: 3 / 1 / 3 / 2;
 }
 
-#programFilter
+#pronounsFilter
 {
     grid-area: 3 / 2 / 3 / 3;
 }
@@ -492,17 +492,17 @@ td.expired {
     grid-area: 4 / 1 / 4 / 2;
 }
 
-#payeeFilter
+#phoneFilter
 {
     grid-area: 4 / 2 / 4 / 3;
 }
 
-#conservatorFilter
+#mNameFilter
 {
     grid-area: 5 / 1 / 5 / 2;
 }
 
-#labelFilter
+#posFilter
 {
     grid-area: 5 / 2 / 5 / 3;
 }
