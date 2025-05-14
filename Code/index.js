@@ -106,7 +106,6 @@ app.get('/logout', async (req, res) => {
 })
 
 app.get("/search", getPath, async (req, res) => {
-    console.log(req.session)
     let qp = await new QueryParserBuilder().build()
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
@@ -132,13 +131,14 @@ app.get('/results', sanitize, async (req, res) => {
         // Get client list from fetched results (Uncomment later)
         const offset = parseInt(req.query.page) ? (parseInt(req.query.page) -1) : 0;
         const searchData = req.query;
-        let results = await qp.getAllFilteredClients(req.session.accountID, searchData, offset);    // Later replace with accID
+        //console.log(searchData)
+        let results = await qp.getAllFilteredClients(req.session.accountID, searchData, offset);
         // Build Clients for each returned row
         let clients = [];
         if (results[0] !== undefined)
         {
             // console.log("Results: ", results[0]);   // Uncomment for debugging
-            console.log("Programs: ", results[1]);   // Uncomment for debugging
+            // console.log("Programs: ", results[1]);   // Uncomment for debugging
             for (const client of results[0])
             {
                 clients.push(new ClientBuilder()
@@ -687,6 +687,9 @@ function sanitize(req, res, next)
                 // Sanitize data
                 if (key === "email")
                     req.query[key] = req.query[key].replace(/[^\w@\.]/g, "");
+                else if (key === "pronouns"){
+                    req.query[key] = req.query[key].replace(/[^\w\- /]/g, "");
+                }
                 else
                     req.query[key] = req.query[key].replace(/[^\w- ]/g, "");
             }
