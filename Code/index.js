@@ -469,6 +469,16 @@ app.post('/api/updateCaseNote', sanitize, async (req, res) => {
     const results = await qp.searchStaff(req);
     return res.json(results);
   })
+  app.post("/api/resetPassword", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.resetPassword(req);
+    return res.json(results);
+  })
+  app.post("/api/updatePassword", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.updatePassword(req);
+    return res.json(results);
+  })
 
 
 // TODO: MAKE THIS POST OBVIOUSLY 
