@@ -127,17 +127,23 @@ CREATE TABLE Medication(
 
 CREATE TABLE ProgramClient(
     clientID INT, 
-    programID INT
+    programID INT,
+    PRIMARY KEY (clientID, programID)
 );
 
 CREATE TABLE StaffClient(
     staffID INT, 
-    clientID INT
+    clientID INT,
+    title VARCHAR(64),
+    dateAssigned DATE,
+    dateRemoved DATE,
+    PRIMARY KEY (staffID, clientID)
 );
 
 CREATE TABLE NoteClient(
     noteID INT,
-    clientID INT
+    clientID INT,
+    PRIMARY KEY (noteID, clientID)
 );
 
 ALTER TABLE Vaccination
@@ -174,14 +180,19 @@ DELIMITER $$
 CREATE PROCEDURE CreateCaseNote(
   IN in_staffID INT,
   IN in_clientID INT,
-  IN in_contactType ENUM('In-Person', 'Written', 'Over the Phone'),
-  IN in_goal ENUM('ISP Goal', 'IPP Goal', 'Personal Goal'),
+  IN in_contactType VARCHAR(30),
+  IN in_goal VARCHAR(30),
   IN in_goalProgress VARCHAR(2048),
   IN in_narrative VARCHAR(2048),
-  IN in_nextSteps VARCHAR(2048)
+  IN in_nextSteps VARCHAR(2048),
+  IN in_subject VARCHAR(2048),
+  IN in_signoffDate DATE,
+  IN in_eventDate DATE,
+  IN in_program VARCHAR(2048)
 )
 BEGIN
   DECLARE newNoteID INT;
+  DECLARE progID    INT;
   DECLARE EXIT HANDLER FOR SQLEXCEPTION
   BEGIN
     -- Rollback if there's any SQL error
@@ -189,7 +200,29 @@ BEGIN
     RESIGNAL;
   END;
 
-  -- START TRANSACTION;
+  -- Check 
+  IF in_contactType NOT IN ('In-Person', 'Written', 'Over the Phone') THEN
+	  SIGNAL SQLSTATE '45000'
+	  SET MESSAGE_TEXT = 'Invalid contact type';
+	END IF;
+    
+  IF in_goal NOT IN ('ISP Goal', 'IPP Goal', 'Personal Goal') THEN
+		SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Invalid goal type';
+	END IF;
+    
+  -- Get Program ID
+  select programID INTO progID
+  from Program
+  where name = in_program;
+    
+  -- Check programID not null
+  IF progID IS NULL THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Program not found';
+	END IF;
+
+  START TRANSACTION;
 
   -- Insert into Note
   INSERT INTO Note (
