@@ -15,7 +15,7 @@
         let medicationList = locals.theClient.getMedicationList();
         let vaccinationList = locals.theClient.getVaccinationList();
         let maritalStatusTypes = ["Single", "Married", "Divorced", "Other"];
-        let sexTypes = ["Male", "Female", "Other/Unspecified"];
+        let genderTypes = ["Male", "Female", "Non-Binary", "Agender"];
         let supportTeam = locals.theClient.getSupportTeam();
         let caseNotes = locals.theClient.getCaseNoteList();
 
@@ -35,7 +35,7 @@
         else{
         %> Unknown Client <%
         } %></p>
-    <div id="tabContainer" class="tabContainer" data-user="<%= locals.theAccount.username %>">
+    <div id="tabContainer" class="tabContainer" data-user="<%= locals.theAccount.username %>" data-admin="<%= isAdmin %>">
         <div class="tab">
             <button class="tablinks" data-tabName="clientID" id="defaultOpen" >Client ID</button>
             <button class="tablinks" data-tabName="medInfo"> Medical Information</button>
@@ -60,7 +60,7 @@
                 </div>
                 <div class="cli_midName">
                     <label for="middleName">Middle Name: </label>
-                    <input type="text" placeholder="Middle" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                    <input type="text" placeholder="Middle Name" <% if (!isAdmin){%>readonly="readonly"<%}%>
                            value="<%=locals.theClient.getMiddleName()%>" id="middleName" />
                 </div>
                 <div class="cli_lName">
@@ -70,33 +70,44 @@
                 </div>
                 <div class="cli_DoB">
                     <label for="DoB">Date of Birth: </label>
-                    <input type="date" placeholder="DoB" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                    <input type="date" <% if (!isAdmin){%>readonly="readonly"<%}%>
                            value="<%=new Date(locals.theClient.getDOB()).toISOString().slice(0, 10)%>" id="DoB" />
                 </div>
                 <div class="cli_phone">
                     <label for="phone">Phone Number: </label>
-                    <input type="text" placeholder="555-555-5555" <% if (!isAdmin){%>readonly="readonly"<%}%>
-                           value="<%=locals.theClient.getPhoneNumber()%>" id="address" />
+                    <input type="text" placeholder="###-###-####" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%=locals.theClient.getPhoneNumber()%>" id="phoneNumber" />
                 </div>
                 <div class="cli_address">
                     <label for="address">Street Address: </label>
                     <input type="text" placeholder="Address" <% if (!isAdmin){%>readonly="readonly"<%}%>
                            value="<%=locals.theClient.getAddress().getStreetAddress()%>" id="address" />
                 </div>
-                <div class="cli_email">
-                    <label for="email">Email: </label>
-                    <input type="text" placeholder="First Name" <% if (!isAdmin){%>readonly="readonly"<%}%>
-                           value="<%=locals.theClient.getEmail()%>" id="email" />
+                <div id="cli_city">
+                    <label for="city">City: </label>
+                    <input type="text" placeholder="City" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%=locals.theClient.getAddress().getCity()%>" id="city" />
                 </div>
-                <div class="cli_sex">
-                    <% /** using sexTypes[] to remove current value, and use values as other sex options */
-                    sexTypes = sexTypes.filter(e => e !== locals.theClient.getSex())
+                <div id="cli_state">
+                    <label for="state">State: </label>
+                    <input type="text" placeholder="State" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%=locals.theClient.getAddress().getState()%>" id="state" maxlength="2" minlength="2"/>
+                </div>
+                <div id="cli_zip">
+                    <label for="zip">ZIP Code: </label>
+                    <input type="text" placeholder="#####" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%=locals.theClient.getAddress().getZip()%>" id="zip" />
+                </div>
+                <div id="cli_gender">
+                    <% /** using genderTypes[] to remove current value, and use values as other sex options */
+                    genderTypes = genderTypes.filter(e => e !== locals.theClient.getSex())
                     %>
-                    <label for="sex">Sex: </label>
-                    <select name="sex" id="sex" <% if (!isAdmin){%>disabled="disabled"<%}%>>
+                    <label for="gender">Gender: </label>
+                    <select name="gender" id="gender" <% if (!isAdmin){%>disabled="disabled"<%}%>>
                         <option value="<%=locals.theClient.getSex()%>" id="current"> <%=locals.theClient.getSex()%> </option>
-                        <option value="<%=sexTypes[0]%>" id="option2"> <%=sexTypes[0]%> </option>
-                        <option value="<%=sexTypes[1]%>" id="option3"> <%=sexTypes[1]%> </option>
+                        <option value="<%=genderTypes[0]%>" id="option2"> <%=genderTypes[0]%> </option>
+                        <option value="<%=genderTypes[1]%>" id="option3"> <%=genderTypes[1]%> </option>
+                        <option value="<%=genderTypes[2]%>" id="option4"> <%=genderTypes[2]%> </option>
                     </select>
                 </div>
                 <div class="cli_maritalStatus">
@@ -116,12 +127,14 @@
                     <input type="date" <% if (!isAdmin){%>readonly="readonly"<%}%>
                         value="<%= locals.theClient.getPOS() instanceof Date ? locals.theClient.getPOS().toISOString().slice(0, 10) : "" %>" id="pos" />
                 </div>
-<!--                <div class="cli_regionalCenterID">-->
-<!--                    <p>Regional Center ID: <br /> </p>-->
-<!--                </div>-->
+                <div class="cli_email">
+                    <label for="email">Email: </label>
+                    <input type="text" placeholder="email@example.com" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%=locals.theClient.getEmail()%>" id="email" />
+                </div>
                 <div class="cli_photo">
                     <label for="cli_photo">Photo: </label>
-                    <img src="<%= locals.theClient.getPictureURL() %>" alt="client_photo" id="cli_photo" />
+                    <img src="<%= locals.theClient.getPictureURL() %>" alt="client_photo" id="cli_photo" height="100%"  />
                 </div>
             </div>
         </div>
@@ -188,7 +201,8 @@
                 <div class="p_insurance">
                     <label for="p_insurance">Primary Insurance Provider: </label>
                     <input type="text" placeholder="Primary Insurance Provider" <% if (!isAdmin){%>readonly="readonly"<%}%>
-                           value="<%=primaryInsurance.getName()%>" id="p_insurance" />
+                           value="<%=primaryInsurance.getName()%>" id="p_insurance"
+                           data-id="<%= primaryInsurance.getID()%>"/>
                 </div>
                 <div class="p_insurance_num">
                     <label for="p_insurance_num"> Primary Ins. Number: </label>
@@ -198,7 +212,8 @@
                 <div class="s_insurance">
                     <label for="s_insurance"> Secondary Insurance Provider: </label>
                     <input type="text" placeholder="Secondary Insurance Provider" <% if (!isAdmin){%>readonly="readonly"<%}%>
-                           value="<%=secondaryInsurance.getName()%>" id="s_insurance" />
+                           value="<%=secondaryInsurance.getName()%>" id="s_insurance"
+                           data-id="<%= secondaryInsurance.getID()%>"/>
                 </div>
                 <div class="s_insurance_num">
                     <label for="s_insurance_num">Secondary Ins. Number: </label>
@@ -209,12 +224,14 @@
                     <label for="p_care_provider">Primary Care Provider: </label>
 
                     <input type="text" placeholder="Primary Care Provider" <% if (!isAdmin){%>readonly="readonly"<%}%>
-                           value="<%=locals.theClient.getPcp().getName()%>" id="p_care_provider" />
+                           value="<%=locals.theClient.getPcp().getName()%>" id="p_care_provider"
+                           data-id="<%=locals.theClient.getPcp().getID()%>"/>
                 </div>
                 <div class="p_physician">
                     <label for="p_physician">Primary Physician: </label>
                     <input type="text" placeholder="Primary Physician" <% if (!isAdmin){%>readonly="readonly"<%}%>
-                           value="<%=locals.theClient.getPrimaryPhysician().getName()%>" id="p_physician" />
+                           value="<%=locals.theClient.getPrimaryPhysician().getName()%>" id="p_physician"
+                           data-id="<%=locals.theClient.getPrimaryPhysician().getID()%>"/>
                 </div>
                 <div class="pref_hospital">
                     <label for="pref_hospital">Preferred Hospital: </label>
@@ -248,7 +265,7 @@
                 </div>
                 <div class="cli_add_notes">
                     <label for="cli_add_notes"> Additional Notes: </label>
-                    <textarea name="client_additional_notes" id="cli_add_notes" <% if (!isAdmin){%>readonly="readonly"<%}%> ><%=locals.theClient.getLikes()%></textarea>
+                    <textarea name="client_additional_notes" id="cli_add_notes" <% if (!isAdmin){%>readonly="readonly"<%}%> ><%=locals.theClient.getMiscNotes()%></textarea>
                 </div>
             </div>
         </div>
@@ -300,10 +317,10 @@
                 </table>
                 <div class="caseNoteButtons">
                     <!-- Buttons for CaseNote Navigation, handled with caseNoteHandling.js -->
-                    <input type="button" value="new" name="newCaseNote" id="newCaseNote"/>
-                    <input type="button" value="view/edit" name="vieweditCaseNote" id="vieweditCaseNote" disabled="disabled"/>
-                    <input type="button" value="download" name="downloadCaseNote" id="downloadCaseNote" disabled="disabled"/>
-                    <input type="button" value="delete" name="deleteCaseNote" id="deleteCaseNote" disabled="disabled"/>
+                    <input type="button" value="New" name="newCaseNote" id="newCaseNote"/>
+                    <input type="button" value="View/Edit" name="vieweditCaseNote" id="vieweditCaseNote" disabled="disabled"/>
+                    <input type="button" value="Download" name="downloadCaseNote" id="downloadCaseNote" disabled="disabled"/>
+                    <input type="button" value="Delete" name="deleteCaseNote" id="deleteCaseNote" disabled="disabled"/>
                 </div>
                 <dialog id="dialogBox">
                     <p> Are you sure you would like to delete this case note?</p>
@@ -312,12 +329,8 @@
                         <button id="dialogWhite">No</button>
                     </div>
                 </dialog>
-
-                <script src="../js/caseNoteHandling.js" defer="defer"></script>
             </div>
         </div>
-        <script src="../js/tab.js" defer="defer"></script>
-        <script src="../js/medReport.js" defer="defer" ></script>
     </div>
 </div>
 <footer class="caseNoteFooter">
@@ -327,4 +340,8 @@
     <!--/div-->
     <button id="saveButton" class="dimHover footerButton">Save</button>
 </footer>
+<script src="../js/caseNoteHandling.js" defer="defer"></script>
+<script src="../js/tab.js" defer="defer"></script>
+<script src="../js/medReport.js" defer="defer" ></script>
+<script src="../js/saveClient.js" defer="defer"></script>
 </body>

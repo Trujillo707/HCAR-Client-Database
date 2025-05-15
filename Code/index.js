@@ -165,6 +165,7 @@ app.get('/results', sanitize, async (req, res) => {
                     .setSex(client.gender !== null ? client.gender : "Empty")
                     .setPrograms(new Programs({names: results[1].filter(program => program.clientID === client.clientID).map(program => program.name)}))
                     .setPOS(client.pos !== null ? new Date(client.pos) : "")
+                    .setPictureURL(client.profilePictureFilename !== null ? client.profilePictureFilename : "")
                     .build());
             }
         }
@@ -202,6 +203,7 @@ app.get("/results/all", async(req, res) => {
                     .setSex(client.gender !== null ? client.gender : "Empty")
                     .setPrograms(new Programs({names: results[1].filter(program => program.clientID === client.clientID).map(program => program.name)}))
                     .setPOS(client.pos !== null ? new Date(client.pos) : "")
+                    .setPictureURL(client.profilePictureFilename !== null ? client.profilePictureFilename : "")
                     .build());
             }
         }
@@ -600,47 +602,51 @@ app.get('/client/:id', async (req, res) => {
 
         // Build client
         const client = new ClientBuilder()
-        .setClientID(cliDem.clientID !== null ? cliDem.clientID : "Empty")
-        .setFirstName(cliDem.fName !== null ? cliDem.fName : "Empty")
+        .setClientID(cliDem.clientID !== null ? cliDem.clientID : "")
+        .setFirstName(cliDem.fName !== null ? cliDem.fName : "")
             .setMiddleName(cliDem.mName !== null ? cliDem.mName : "")
-            .setLastName(cliDem.lName !== null ? cliDem.lName : "Empty")
-        .setEmail(cliDem.email !== null ? cliDem.email : "Empty")
+            .setLastName(cliDem.lName !== null ? cliDem.lName : "")
+        .setEmail(cliDem.email !== null ? cliDem.email : "")
         .setAddress(new Address({
-            streetAddress: cliDem.address !== null ? cliDem.address : "Empty",
-            city: cliDem.city !== null ? cliDem.city : "Empty",
-            state: cliDem.state !== null ? cliDem.state : "Empty",
-            zip: cliDem.zip !== null ? cliDem.zip : "Empty" 
+            streetAddress: cliDem.address !== null ? cliDem.address : "",
+            city: cliDem.city !== null ? cliDem.city : "",
+            state: cliDem.state !== null ? cliDem.state : "",
+            zip: cliDem.zip !== null ? cliDem.zip : ""
         }))
-        .setDOB(cliDem.dateOfBirth !== null ? new Date(cliDem.dateOfBirth) : "Empty")
-        .setPhoneNumber(cliDem.phoneNumber !== null ? cliDem.phoneNumber : "Empty")
-        .setSex(cliDem.gender !== null ? cliDem.gender : "Empty")
-        .setPronouns(cliDem.pronouns !== null ? cliDem.pronouns : "Empty")
+        .setDOB(cliDem.dateOfBirth !== null ? new Date(cliDem.dateOfBirth) : "")
+        .setPhoneNumber(cliDem.phoneNumber !== null ? cliDem.phoneNumber : "")
+        .setSex(cliDem.gender !== null ? cliDem.gender : "")
+        .setPronouns(cliDem.pronouns !== null ? cliDem.pronouns : "")
         .setMaritalStatus(cliDem.maritalStatus === 0 ? "Single" : "Divorced")   // Change later?
-        .setPreferredHospital(cliDem.preferredHospital !== null ? cliDem.preferredHospital : "Empty")
-        .setLikes(cliDem.likes !== null ? cliDem.likes : "Empty")
-        .setDislikes(cliDem.dislikes !== null ? cliDem.dislikes : "Empty")
-        .setGoals(cliDem.goals !== null ? cliDem.goals : "Empty")
-        .setHobbies(cliDem.hobbies !== null ? cliDem.hobbies : "Empty")
-        .setAchievements(cliDem.achievements !== null ? cliDem.achievements : "Empty")
+        .setPreferredHospital(cliDem.preferredHospital !== null ? cliDem.preferredHospital : "")
+        .setLikes(cliDem.likes !== null ? cliDem.likes : "")
+        .setDislikes(cliDem.dislikes !== null ? cliDem.dislikes : "")
+        .setGoals(cliDem.goals !== null ? cliDem.goals : "")
+        .setHobbies(cliDem.hobbies !== null ? cliDem.hobbies : "")
+        .setAchievements(cliDem.achievements !== null ? cliDem.achievements : "")
         .setPictureURL(cliDem.profilePicture !== null ? cliDem.profilePicture : "")
         // Setting insurance
         .setPrimaryInsurance(new Insurance({
-            name: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.name !== null) ? insurAndMed.primaryInsurance.name : "Empty",
-            policyNumber: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.policyNumber !== null) ? insurAndMed.primaryInsurance.policyNumber : "Empty"
+            id: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.insuranceID !== null) ? insurAndMed.primaryInsurance.insuranceID : "",
+            name: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.name !== null) ? insurAndMed.primaryInsurance.name : "",
+            policyNumber: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.policyNumber !== null) ? insurAndMed.primaryInsurance.policyNumber : ""
         }))
         .setSecondaryInsurance(new Insurance({
-            name: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.name !== null) ? insurAndMed.secondaryInsurance.name : "Empty",
-            policyNumber: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.policyNumber !== null) ? insurAndMed.secondaryInsurance.policyNumber : "Empty"
+            id: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.insuranceID !== null) ? insurAndMed.secondaryInsurance.insuranceID : "",
+            name: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.name !== null) ? insurAndMed.secondaryInsurance.name : "",
+            policyNumber: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.policyNumber !== null) ? insurAndMed.secondaryInsurance.policyNumber : ""
         }))
         .setPcp(new ContactInfo({
-            name: (insurAndMed.pcp && insurAndMed.pcp.name !== null) ? insurAndMed.pcp.name : "Empty",
-            phoneNumber: (insurAndMed.pcp && insurAndMed.pcp.phoneNumber !== null) ? insurAndMed.pcp.phoneNumber : "Empty",
-            address: (insurAndMed.pcp && insurAndMed.pcp.address !== null) ? insurAndMed.pcp.address : "Empty"
+            id: (insurAndMed.pcp && insurAndMed.pcp.contactID !== null) ? insurAndMed.pcp.contactID : "",
+            name: (insurAndMed.pcp && insurAndMed.pcp.name !== null) ? insurAndMed.pcp.name : "",
+            phoneNumber: (insurAndMed.pcp && insurAndMed.pcp.phoneNumber !== null) ? insurAndMed.pcp.phoneNumber : "",
+            address: (insurAndMed.pcp && insurAndMed.pcp.address !== null) ? insurAndMed.pcp.address : ""
         }))
         .setPrimaryPhysician(new ContactInfo({
-            name: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.name !== null) ? insurAndMed.primaryPhysician.name : "Empty",
-            phoneNumber: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.phoneNumber !== null) ? insurAndMed.primaryPhysician.phoneNumber : "Empty",
-            address: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.address !== null) ? insurAndMed.primaryPhysician.address : "Empty"
+            id: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.contactID !== null) ? insurAndMed.primaryPhysician.contactID : "",
+            name: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.name !== null) ? insurAndMed.primaryPhysician.name : "",
+            phoneNumber: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.phoneNumber !== null) ? insurAndMed.primaryPhysician.phoneNumber : "",
+            address: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.address !== null) ? insurAndMed.primaryPhysician.address : ""
         }))
         // Setting medication
         .setMedicationList(meds)
@@ -652,7 +658,7 @@ app.get('/client/:id', async (req, res) => {
         .setCaseNoteList(caseNotes)
             .setPOS(cliDem.pos !== null ? new Date(cliDem.pos) : "")
             .build();
-
+        //console.log(client.getPcp().getID());
         res.render("clientDetails", {theAccount: account, theClient: client});
     }
 });
