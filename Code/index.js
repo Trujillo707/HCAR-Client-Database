@@ -151,8 +151,6 @@ app.get('/results', sanitize, async (req, res) => {
         let clients = [];
         if (results[0] !== undefined)
         {
-            // console.log("Results: ", results[0]);   // Uncomment for debugging
-            // console.log("Programs: ", results[1]);   // Uncomment for debugging
             for (const client of results[0])
             {
                 clients.push(new ClientBuilder()
@@ -190,8 +188,6 @@ app.get("/results/all", async(req, res) => {
         let clients = [];
         if (results[0] !== undefined)
         {
-            //console.log("Results: ", results[0]);   // Uncomment for debugging
-            //console.log("Programs: ", results[1]);   // Uncomment for debugging
             for (const client of results[0])
             {
                 clients.push(new ClientBuilder()
@@ -288,7 +284,6 @@ app.post("/caseNote", async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         // After verification of credentials
@@ -313,7 +308,6 @@ app.get("/caseNote/new", async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         const clientID = Number(req.session.caseNoteInfo.client);
@@ -333,7 +327,6 @@ app.get("/caseNote/viewedit", async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         const clientID = Number(req.session.caseNoteInfo.client);
@@ -391,12 +384,17 @@ app.post('/api/auth', sanitize, async (req, res) => {
 
 /**
  * Body: {
- *   clientID:    number,
- *   contactType: string,
- *   goal:        string,
- *   goalProgress:string,
- *   narrative:   string,
- *   nextSteps:   string
+ *   clientID:      number,
+ *   contactType:   string,
+ *   goal:          string,
+ *   goalProgress:  string,
+ *   narrative:     string,
+ *   nextSteps:     string,
+ *   noteID:        string,
+ *   subject:       string,
+ *   dateOfSignoff: Date,
+ *   dateOfEvent:   Date,
+ *   program:       string
  * }
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully created"
@@ -415,12 +413,12 @@ app.post('/api/createCaseNote', sanitize, async (req, res) => {
  *   goal:          string,
  *   goalProgress:  string,
  *   narrative:     string,
- *   nextSteps:     string
- *   noteID:        string
- *   subject:       string
- *   dateOfSignoff: Date
- *   dateOfEvent:   Date
- *   program:       string
+ *   nextSteps:     string,
+ *   noteID:        string,
+ *   subject:       string,
+ *   dateOfSignoff: Date,
+ *   dateOfEvent:   Date,
+ *   program:       string,
  * }
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully updated"
@@ -520,13 +518,6 @@ app.post('/api/updatePassword', sanitize, async (req, res) => {
 
 
 
-
-// TODO: MAKE THIS POST OBVIOUSLY 
-/*app.get('/client', (req, res) => {
-    let rawData = req.body.clientID;
-    res.render("clientDetails", {theAccount: false, theClient: testClientArray[0]});
-});*/
-
 app.post('/client', sanitize, async (req, res) => {
     let cliID = req.body.clientID;
     res.json({redirect: `/client/${cliID}`});
@@ -538,10 +529,8 @@ app.get('/client/:id', async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
-        //console.log(req.params.id);
         // After verification of credentials
         const cliID = Number(req.params.id);
         // DB Queries
@@ -556,14 +545,6 @@ app.get('/client/:id', async (req, res) => {
         let vaccines = [];
         let caseNotes = [];
         let supportStaff = [];
-        /*
-        console.log("Demographics: ", cliDem);
-        console.log("Insurance: ", insurAndMed);
-        console.log("Medication: ", medicationList);
-        console.log("Vaccination: ", vaccinationList);
-        console.log("Case Notes: ", caseNotesList);
-        console.log("Support Staff: ", supportStaffList)
-         */
 
         // Comprehension for med list
         for (const med of medicationList)
@@ -835,7 +816,6 @@ async function authCheck(req, res, next) {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         // After verification of credentials
