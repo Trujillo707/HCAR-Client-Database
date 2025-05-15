@@ -117,7 +117,7 @@ export default class QueryParser {
 
     // TODO: there is space for one more filter!
     /**
-     * @desc Queries the database for a reduced subset of attributes for at most 10 clients at a time, with applied
+     * @desc Queries the database for a reduced subset of attributes for at most 15 clients at a time, with applied
      *       filters. It is the caller's responsibility to parse the results.
      * @param {number} acctID Account ID for the current loggedin staff
      * @param {Object} filters Object containing the named parameters for filter options
@@ -126,22 +126,23 @@ export default class QueryParser {
      * @param {string} filters.phoneNumber Phone Number
      * @param {Date} filters.dob Date of Birth
      * @param {string} filters.gender Gender
-     * @param {string} filters.maritalStatus Marital Status
+     * @param {string} filters.program Program
      * @param {string} filters.email Email
-     * @param {string} filters.payee Payee
-     * @param {string} filters.conservator Conservator
-     * @param offset {number} Page offset for results, in multiples of 10 (e.g. offset = 1 --> Clients 11-20)
+     * @param {string} filters.pronouns Pronouns
+     * @param {string} filters.pos Purchase of Services Status => "good" or "bad"
+     * @param offset {number} Page offset for results, in multiples of 15 (e.g. offset = 1 --> Clients 16-25)
      * @returns {Promise<Object[]>} Array of Objects containing raw SQL column results for each client returned
      */
     async getAllFilteredClients(acctID,
                                 filters = {
-                                    firstName: "%", lastName: "%", phoneNumber: "%", dob: "%", gender: "%",
-                                    maritalStatus: "%", email: "%", payee: "%", conservator: "%"
+                                    firstName: "%", middleName: "%", lastName: "%", phoneNumber: "%", dob: "%", gender: "%",
+                                    program: "%", email: "%", pronouns: "%", pos: "%"
                                 },
                                 offset = 0) {
 
-        const allowedFilters = ["firstName", "lastName", "phoneNumber", "dob", "gender",
-            "maritalStatus", "email", "payee", "conservator"];
+        const allowedFilters = ["firstName", "mName", "lastName", "phoneNumber", "dob", "gender",
+            "program", "email", "pronouns", "pos"];
+        //console.log(filters)
 
         if (acctID == null) {
             return {"Error": "Invalid Authentication"};
@@ -180,23 +181,36 @@ export default class QueryParser {
         /**
          * See getAllClients() for a description of this query.
          */
-        let basicDetailsStmt = "SELECT c.clientID, f.filename AS profilePictureFilename, c.fName, c.mName, c.lName, c.phoneNumber, c.email, DATE(c.dateOfBirth) AS 'dateOfBirth', c.pronouns, c.gender, c.pos " +
+        let basicDetailsStmt = "SELECT distinct c.clientID, f.filename AS profilePictureFilename, c.fName, c.mName, c.lName, c.phoneNumber, c.email, DATE(c.dateOfBirth) AS 'dateOfBirth', c.pronouns, c.gender, c.pos " +
             "FROM Account a " +
             "LEFT JOIN StaffClient sc ON a.staffID = sc.staffID " +
             "INNER JOIN Client c ON ((a.admin = 1) OR (sc.clientID = c.clientID AND a.admin = 0)) " +
             "LEFT JOIN File f ON c.profilePicture = f.fileID " +
+            "LEFT JOIN ProgramClient pc ON pc.clientID = c.clientID " + 
+            "LEFT JOIN Program p ON pc.programID = p.programID " + 
             "WHERE a.accountID = ? ";
 
         for (const key of Object.keys(filters)) {
             if (filters[key] !== "" && filters[key] !== "%" && allowedFilters.includes(key)) {
                 // Handling date conversion from js to mysql FIX ME
                 if (key === "dob") {
-                    values.push(filters[key].toISOString().slice(0, 10));
+                    values.push(new Date(filters[key]).toISOString().slice(0, 10));
                     basicDetailsStmt += ` AND dateOfBirth LIKE ?`;
-                } else if (key === "gender" || key === "maritalStatus") {
+                } else if (key === "gender") {
                     values.push(filters[key]);
                     basicDetailsStmt += ` AND LOWER(${key}) = LOWER(?)`; // DB has "Male" instead of "male"
-                } else {
+                } else if (key === 'program') {
+                    values.push(Number(filters[key]));
+                    basicDetailsStmt += ` AND pc.programID = ?`;
+                } else if (key === "pos"){
+                    if (filters[key] === "bad") {
+                        basicDetailsStmt += " AND (((to_days(c.pos) - to_days(curdate())) <= 31) or (c.pos IS NULL))";
+                    } else if (filters[key] === "good") {
+                        basicDetailsStmt += " AND ((to_days(c.pos) - to_days(curdate())) > 31) AND c.pos IS NOT NULL";
+                    }
+                    // if none hit, then just ignore
+                }
+                else {
                     values.push(`%${filters[key]}%`);
                     if (key === "firstName")
                         basicDetailsStmt += ` AND fName LIKE ?`;
@@ -212,8 +226,8 @@ export default class QueryParser {
         basicDetailsStmt += " LIMIT ?, ?";
         values.push(offset.toString());
         values.push(limit.toString());
-        console.log(values)
-        console.log("Query: ", basicDetailsStmt);
+         //console.log(values)
+         //console.log("Query: ", basicDetailsStmt);
 
         let results = [];
         let clientIDs;
@@ -452,17 +466,21 @@ export default class QueryParser {
                 var [staffClient] = await connection.execute(staffClientQuery, [staffID, clientID]);
             }
             if (account.admin === 1 || staffClient[0]['COUNT(*)'] === 1) {
-                await connection.execute("CALL CreateCaseNote(?, ?, ?, ?, ?, ?, ?)", [
+                await connection.execute("CALL CreateCaseNote(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
                     staffID,
                     req.body.clientID,
                     req.body.contactType,
                     req.body.goal,
                     req.body.goalProgress,
                     req.body.narrative,
-                    req.body.nextSteps
+                    req.body.nextSteps,
+                    req.body.subject,
+                    req.body.dateOfSignoff,
+                    req.body.dateOfEvent,
+                    req.body.program
                 ]);
                 await connection.commit();
-                return "Case note successfully created";
+                return {"message": "Case note successfully created"};
             } else {
                 await connection.rollback();
                 return {"Error": "Invalid authentication"};
@@ -476,6 +494,7 @@ export default class QueryParser {
 
     async updateCaseNote(req) {
         const connection = await this.#pool.getConnection();
+        let programID;
         try {
             const account = await this.isAuthenticated(req);
             if (account["Error"]) {
@@ -494,16 +513,34 @@ export default class QueryParser {
                 var [staffClient] = await connection.execute(staffClientQuery, [staffID, clientID]);
             }
             if (account.admin === 1 || staffClient[0]['COUNT(*)'] === 1) {
-                await connection.execute("UPDATE Note SET contactType = ?, goal = ?, goalProgress = ?, narrative = ?, nextSteps = ? WHERE noteID = ?", [
+
+                // Get program name
+                let programStmt = "SELECT programID FROM Program WHERE name = ?";
+                try {
+                    const [rows] = await connection.execute(programStmt, [req.body.program]);
+                    if (rows.length === 0) 
+                        return {"Error": "Could not find ID matching program name"};
+                    
+                    programID = rows[0].programID;
+                } catch (e) {
+                    console.log("Error: Failure getting program ID given program name" + e);
+                    return {"Error": "Failure getting program ID given program name"};
+                }
+
+                await connection.execute("UPDATE Note SET contactType = ?, goal = ?, goalProgress = ?, narrative = ?, nextSteps = ?, subject = ?, dateModified = ?, dateOfEvent = ?, programID = ? WHERE noteID = ?", [
                     req.body.contactType,
                     req.body.goal,
                     req.body.goalProgress,
                     req.body.narrative,
                     req.body.nextSteps,
+                    req.body.subject,
+                    req.body.dateOfSignoff,
+                    req.body.dateOfEvent,
+                    programID,
                     noteID
                 ]);
                 await connection.commit();
-                return "Case note successfully updated";
+                return {"message": "Case note successfully updated"};
             } else {
                 await connection.rollback();
                 return {"Error": "Invalid authentication"};
@@ -546,7 +583,7 @@ export default class QueryParser {
                     await connection.rollback();
                     return {"Error": "Case note already deleted/does not exist"};
                 } else {
-                    return "Case note successfully deleted";
+                    return {"message": "Case note successfully deleted"};
                 }
             } else {
                 await connection.rollback();
@@ -602,7 +639,7 @@ export default class QueryParser {
             conservator: req.body.conservator
         });
         await connection.commit();
-        return "Client successfully created";
+        return {"message": "Client successfully created"};
       }
       catch(err){
         await connection.rollback();
@@ -689,7 +726,7 @@ export default class QueryParser {
             conservator:      req.body.conservator
         });
         await connection.commit();
-        return "Client successfully updated";
+        return {"message": "Client successfully updated"};
       }
       catch(err){
         console.log(err);
@@ -715,7 +752,7 @@ export default class QueryParser {
         await connection.beginTransaction();
         let [deleteResults] = await connection.execute("CALL DeleteClient(?)", [clientID]);
         await connection.commit();
-        return "Client successfully deleted";
+        return {"message": "Client successfully deleted"};
       }
       catch(err){
         console.log(err);
@@ -784,7 +821,7 @@ export default class QueryParser {
         const [updateResponse] = await connection.execute(updateAccountQuery, [staffID, accountID]);
       
         await connection.commit();
-        return "Account successfully created";
+        return {"message": "Account successfully created"};
       }
       catch(err){
         console.log(err);
@@ -829,7 +866,7 @@ export default class QueryParser {
         const [staffResponse] = await connection.execute(staffQuery, [req.body.fName, req.body.mName, req.body.lName, req.body.address, req.body.city, req.body.state, req.body.zip, req.body.phoneNumber, staffID]);
 
         await connection.commit();
-        return "Account successfully updated";
+        return {"message": "Account successfully updated"};
       }
       catch(err){
         console.log(err);
@@ -862,7 +899,7 @@ export default class QueryParser {
         const [accountResponse] = await connection.execute(`DELETE FROM Account WHERE accountID = ?`, [accountID]);
         const [staffResponse] = await connection.execute(`DELETE FROM Staff WHERE staffID = ?`, [staffID]);
         await connection.commit();
-        return "Account successfully deleted";
+        return {"message": "Account successfully deleted"};
       }
       catch(err){
         await connection.rollback();
@@ -900,7 +937,7 @@ export default class QueryParser {
         const [staffClientResponse] = await connection.execute(staffClientQuery, [clientID, staffID, req.body.title]);
         
         await connection.commit();
-        return "Staff linked to client successfully";
+        return {"message": "Staff linked to client successfully"};
       }
       catch(err){
         console.log(err);
@@ -932,7 +969,7 @@ export default class QueryParser {
         const [staffClientResponse] = await connection.execute(staffClientQuery, [clientID, staffID]);
         
         await connection.commit();
-        return "Staff-client link successfully created";
+        return {"message": "Staff-client link successfully created"};
       }
       catch(err){
         await connection.rollback();

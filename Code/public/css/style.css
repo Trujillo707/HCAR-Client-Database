@@ -406,7 +406,7 @@ td.expired {
     grid-area: 1 / 2 / 1 / 3;
 }
 
-#phoneFilter
+#programFilter
 {
     grid-area: 2 / 1 / 2 / 2;
 }
@@ -490,7 +490,7 @@ td.expired {
     grid-area: 3 / 1 / 3 / 2;
 }
 
-#maritalStatusFilter
+#pronounsFilter
 {
     grid-area: 3 / 2 / 3 / 3;
 }
@@ -500,17 +500,17 @@ td.expired {
     grid-area: 4 / 1 / 4 / 2;
 }
 
-#payeeFilter
+#phoneFilter
 {
     grid-area: 4 / 2 / 4 / 3;
 }
 
-#conservatorFilter
+#mNameFilter
 {
     grid-area: 5 / 1 / 5 / 2;
 }
 
-#labelFilter
+#posFilter
 {
     grid-area: 5 / 2 / 5 / 3;
 }
@@ -610,9 +610,9 @@ td.expired {
     width: 9em;
 } */
 
-.cli_regionalCenterID {
+/* .cli_regionalCenterID {
 
-}
+} */
 
 .clientIdContent > div {
     padding-top: 0.5em;
@@ -811,6 +811,74 @@ div#supportTeam.tabcontent {
     color: #fff;
     border-radius: 5px;
     cursor: pointer;
+}
+
+#dialogBox {
+  border: none;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 90%;
+  width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  background-color: #fff;
+  text-align: center;
+}
+
+#dialogBox::backdrop {
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+}
+
+#dialogBox p {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+#dialogBox button {
+  flex: 1 1 45%;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#dialog-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+#dialogBlack {
+  background-color: black;
+  color: white;
+}
+
+#dialogBlack:hover {
+  background-color: #323232;
+}
+
+#dialogWhite {
+  background-color: #ccc;
+  color: #333;
+}
+
+#dialogWhite:hover {
+  background-color: #bbb;
+}
+
+@media (max-width: 500px) {
+  #dialogBox {
+    width: 90%;
+    padding: 1.5rem;
+  }
+
+  #dialogBox button {
+    flex: 1 1 100%;
+  }
 }
 
 /* END: stuff for the clientDetails.ejs */

@@ -106,7 +106,6 @@ app.get("/logout", async (req, res) => {
 });
 
 app.get("/search", getPath, async (req, res) => {
-    console.log(req.session)
     let qp = await new QueryParserBuilder().build()
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
@@ -132,13 +131,14 @@ app.get('/results', sanitize, async (req, res) => {
         // Get client list from fetched results (Uncomment later)
         const offset = parseInt(req.query.page) ? (parseInt(req.query.page) -1) : 0;
         const searchData = req.query;
-        let results = await qp.getAllFilteredClients(req.session.accountID, searchData, offset);    // Later replace with accID
+        //console.log(searchData)
+        let results = await qp.getAllFilteredClients(req.session.accountID, searchData, offset);
         // Build Clients for each returned row
         let clients = [];
         if (results[0] !== undefined)
         {
             // console.log("Results: ", results[0]);   // Uncomment for debugging
-            console.log("Programs: ", results[1]);   // Uncomment for debugging
+            // console.log("Programs: ", results[1]);   // Uncomment for debugging
             for (const client of results[0])
             {
                 clients.push(new ClientBuilder()
@@ -376,18 +376,22 @@ app.post('/api/createCaseNote', sanitize, async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createCaseNote(req);
     console.log(req.session.id);
-    return res.send(results);
+    return res.json(results);
   });
 
 /*
 * Body: {
- *   clientID:    string
- *   contactType: string,
- *   goal:        string,
- *   goalProgress:string,
- *   narrative:   string,
- *   nextSteps:   string
- *   noteID:      string
+ *   clientID:      string
+ *   contactType:   string,
+ *   goal:          string,
+ *   goalProgress:  string,
+ *   narrative:     string,
+ *   nextSteps:     string
+ *   noteID:        string
+ *   subject:       string
+ *   dateOfSignoff: Date
+ *   dateOfEvent:   Date
+ *   program:       string
  * }
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully updated"
@@ -395,7 +399,7 @@ app.post('/api/createCaseNote', sanitize, async (req, res) => {
 app.post('/api/updateCaseNote', sanitize, async (req, res) => {
   let qp = await new QueryParserBuilder().build()
   const results = await qp.updateCaseNote(req);
-  return res.send(results);
+  return res.json(results);
 });
   
   
@@ -411,66 +415,60 @@ app.post('/api/updateCaseNote', sanitize, async (req, res) => {
   
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteCaseNote(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/createClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createClient(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/updateClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.updateClient(req);
-    return res.send(results);
+    return res.json(results);
   });
 
   app.post('/api/deleteClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteClient(req);
-    return res.send(results);
+    return res.json(results);
   });
-  app.post('/api/deleteClient', async (req, res) => {
-    let qp = await new QueryParserBuilder().build()
-    const results = await qp.deleteClient(req);
-    return res.send(results);
-  });
+
   app.post('/api/createAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createAccount(req);
-    return res.send(results);
+    return res.json(results);
   });
+
   app.post('/api/updateAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.updateAccount(req);
-    return res.send(results);
+    return res.json(results);
   });
+
   app.post('/api/deleteAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteAccount(req);
-    return res.send(results);
+    return res.json(results);
   });
-  app.post('/api/updateAccount', async (req, res) => {
-    let qp = await new QueryParserBuilder().build()
-    const results = await qp.updateAccount(req);
-    return res.send(results);
-  });
+
   app.post('/api/createStaffClient', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createStaffClient(req);
-    return res.send(results);
+    return res.json(results);
   });
   app.post("/api/deleteStaffClient", async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.deleteStaffClient(req);
-    return res.send(results);
-  });
+    return res.json(results);
+  })
   app.post("/api/searchStaff", async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.searchStaff(req);
-    return res.send(results);
-  });
+    return res.json(results);
+  })
 
 
 // TODO: MAKE THIS POST OBVIOUSLY 
@@ -709,26 +707,29 @@ function sanitize(req, res, next)
         for (const key in req.body)
         {
             // If non-null field
-            if (req.body[key] !== "")
+            if (req.body[key] !== "" && typeof req.body[key] == "string")
             {
                 // Sanitize data
                 if (key === "email")
                     req.body[key] = req.body[key].replace(/[^\w@\.]/g, "");
                 else
-                    req.body[key] = req.body[key].replace(/[\W]/g, "");
+                    req.body[key] = req.body[key].replace(/[^\w- ]/g, "");
             }
         }
     } else{
         for (const key in req.query)
         {
             // If non-null field
-            if (req.query[key] !== "")
+            if (req.query[key] !== "" && typeof req.query[key] == "string")
             {
                 // Sanitize data
                 if (key === "email")
                     req.query[key] = req.query[key].replace(/[^\w@\.]/g, "");
+                else if (key === "pronouns"){
+                    req.query[key] = req.query[key].replace(/[^\w\- /]/g, "");
+                }
                 else
-                    req.query[key] = req.query[key].replace(/[\W]/g, "");
+                    req.query[key] = req.query[key].replace(/[^\w- ]/g, "");
             }
         }
     }
