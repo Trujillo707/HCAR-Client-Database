@@ -182,13 +182,13 @@ export default class QueryParser {
          * See getAllClients() for a description of this query.
          */
         let basicDetailsStmt = "SELECT distinct c.clientID, f.filename AS profilePictureFilename, c.fName, c.mName, c.lName, c.phoneNumber, c.email, DATE(c.dateOfBirth) AS 'dateOfBirth', c.pronouns, c.gender, c.pos " +
-            "FROM Program p, ProgramClient pc, Account a " +
+            "FROM Account a " +
             "LEFT JOIN StaffClient sc ON a.staffID = sc.staffID " +
             "INNER JOIN Client c ON ((a.admin = 1) OR (sc.clientID = c.clientID AND a.admin = 0)) " +
             "LEFT JOIN File f ON c.profilePicture = f.fileID " +
-            "WHERE a.accountID = ? " + 
-            "AND pc.clientID = c.clientID " +
-            "AND pc.programID = p.programID ";
+            "LEFT JOIN ProgramClient pc ON pc.clientID = c.clientID " + 
+            "LEFT JOIN Program p ON pc.programID = p.programID " + 
+            "WHERE a.accountID = ? ";
 
         for (const key of Object.keys(filters)) {
             if (filters[key] !== "" && filters[key] !== "%" && allowedFilters.includes(key)) {
