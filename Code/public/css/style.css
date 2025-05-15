@@ -346,9 +346,9 @@ td.expired {
 .buttons-container
 {
     display: grid;
-    grid-template-areas: "quickViewButton searchButton"
-                         "reportsButton ."
-                         "adminButton .";
+    grid-template-areas: "adminButton ."
+                         "quickViewButton searchButton"
+                         "reportsButton .";
     grid-template-columns: 16em 16em;
     grid-template-rows: 6em 6em 6em;
     justify-content: center;
@@ -359,20 +359,20 @@ td.expired {
 
 #quickViewButton {
     grid-column: 1;
-    grid-row: 1;
+    grid-row: 2;
 }
 #searchButton {
     grid-column: 2;
-    grid-row: 1;
+    grid-row: 2;
 }
 #reportsButton {
     grid-column: 1 / span 2; /* Span both columns */
-    grid-row: 2;
+    grid-row: 3;
     justify-self: center; /* Center the button horizontally */
 }
 #adminButton {
     grid-column: 1 / span 2; /* Span both columns */
-    grid-row: 3;
+    grid-row: 1;
     justify-self: center;
 }
 
@@ -1013,3 +1013,16 @@ div#supportTeam.tabcontent {
     justify-self: end;
 }
 */
+
+#assignClientButton, #addEmployeeButton, #removeEmployeeButton,
+#addNewClientButton, #removeClientButton {
+    background-color: black;
+    color: white;
+    padding: 0.75em; /* 12px to em */
+    border-radius: 0.5em; /* 8px to em */
+    width: 10em; /* 160px to em */
+    height: 4em; /* 53px to em */
+    margin-bottom: 1em;
+    cursor: pointer;
+}
+

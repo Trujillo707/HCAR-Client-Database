@@ -17,6 +17,8 @@ const assignClientResult = document.getElementById('assignClientResult');
 // Submit button declarations for admin functions
 const addEmployeeSubmitButton = document.getElementById('addEmployeeSubmit');
 const removeEmployeeSubmitButton = document.getElementById('removeEmployeeSubmit');
+const addClientSubmitButton = document.getElementById('addClientSubmit');
+const removeClientSubmitButton = document.getElementById('removeClientSubmit');
 
 addEmployeeSubmitButton.addEventListener('click', () => {
     let decision = confirm("Are you sure you want to add an employee using this information?");
@@ -107,8 +109,8 @@ removeEmplSearchButton.addEventListener('click', () => {
             }
 
             // status message for the user:
-            if (data.message === "undefined") {
-                alert("No employees found with that name");
+            if (data.Error) {
+                alert(data.Error);
             }
             else {
                 alert(data.message);
@@ -152,28 +154,36 @@ removeEmployeeSubmitButton.addEventListener('click', () => {
     }
 });
 
-removeClientSearchButton.addEventListener('click', () => {
-    let decision = confirm("Are you sure you want to delete this client? This action cannot be undone.");
-    // Fetch the deleteAccount API to delete the employee if true, else do nothing
-    if (decision) {
-        // console.log(document.getElementById('removeEmplSearchSelect').value);
-        fetch("/api/deleteClient", {
+addClientSubmitButton.addEventListener('click', () => {
+    let decision = confirm("Are you sure you want to add a client using this information?");
+    if(decision){
+        fetch("/api/createClient", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            // Pass in the staff ID from the employee search select
             body: JSON.stringify({
-                firstName: document.getElementById('removeClientFName').value,
-                middleName: "%",
-                lastName: document.getElementById('removeClientLName').value,
-                phoneNumber: "%",
-                dob: "%",
+                fName: document.getElementById('addClientFName').value,
+                mName: document.getElementById('addClientMName').value,
+                lName: document.getElementById('addClientLName').value,
+                address: document.getElementById('addClientAddress').value,
+                addressType: "%",
+                city: document.getElementById('addClientCity').value,
+                state: "%",
+                zip: document.getElementById('addClientZip').value,
+                dateOfBirth: document.getElementById('addClientDoB').value,
+                phoneNumber: document.getElementById('addClientPhone').value,
+                phoneType: "%",
+                sex: "%",
                 gender: "%",
-                program: "%",
-                email: "%",
                 pronouns: "%",
-                pos: "%"
+                greeting: "%",
+                nickname: "%",
+                maritalStatus: "%",
+                religPref: "%",
+                payee: "%",
+                preferredHospital: "%",
+                conservator: "%"
             })
         })
             .then(response => {
@@ -184,11 +194,93 @@ removeClientSearchButton.addEventListener('click', () => {
             })
             .then(data => {
                 // Consider outputting message to screen
+                if(data.Error) {
+                    alert("Error: " + data.Error);
+                }
+                else {
+                    alert(data.message);
+                }
                 console.log(data.message);
                 console.log("error: " + data.Error);
-                alert("Successfully deleted employee");
-                // document.getElementById("removeEmplSearchSelect").option.remove();
-                console.log(document.getElementById("removeEmplSearchSelect").value);
+            })
+            .catch(error => console.log("Error: ", error))
+    }
+})
+
+removeClientSearchButton.addEventListener('click', () => {
+    let removeClientSelect = document.getElementById('removeClientSelect');
+
+    // Fetch the deleteAccount API to delete the employee if true, else do nothing
+    fetch("/admin/searchClients", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            firstName: document.getElementById('removeClientFName').value,
+            lastName: document.getElementById('removeClientLName').value
+        })
+    })
+        .then(response => {
+            // Check for errors, if ok then parse JSON
+            if (!response.ok)
+                throw new Error(`Error: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log(document.getElementById('removeClientFName').value);
+            while (removeClientSelect.options.length > 1) {
+                removeClientSelect.remove(1);
+            }
+
+            // populating the results:
+            data.forEach((client) => {
+                const option = document.createElement("option");
+                option.value = client.clientID;
+                option.textContent = client.clientID + ": " + client.fName +  " " client.mName + " " + client.lName;
+                removeClientSelect.appendChild(option);
+            });
+
+            // status message for the user:
+            if (data.Error) {
+                alert(data.Error);
+            }
+            else {
+                alert("Search Successful");
+            }
+        })
+        .catch(error => console.log("Error: ", error))
+})
+
+removeClientSubmitButton.addEventListener('click', () => {
+    let decision = confirm("Are you sure you want to delete this client? This action cannot be undone.");
+    let removeClientSelect = document.getElementById('removeClientSelect');
+    // Fetch the deleteAccount API to delete the employee if true, else do nothing
+    if (decision) {
+        // console.log(document.getElementById('removeEmplSearchSelect').value);
+        fetch("/api/deleteClient", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                clientID: document.getElementById('removeClientSelect').value
+            })
+        })
+            .then(response => {
+                // Check for errors, if ok then parse JSON
+                if (!response.ok)
+                    throw new Error(`Error: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                // status message for the user:
+                if (data.Error) {
+                    alert(data.Error);
+                }
+                else {
+                    alert(data.message);
+                }
             })
             .catch(error => console.log("Error: ", error))
     }

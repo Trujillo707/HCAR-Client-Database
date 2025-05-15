@@ -232,19 +232,39 @@ app.get("/admin", async (req, res) => {
     const account = await qp.isAuthenticated(req, true);
 
     if (!account.admin) {
-        res.redirect("/home");
+        res.redirect("/");
     }
     else {
-        res.render("admin", {employeeList: []});
+        res.render("admin", {employeeList: [], id: req.session.accountID});
     }
 });
 
-app.post("/admin/:emplList", sanitize, async (req, res) => {
-    let qp = await new QueryParserBuilder().build();
-    const employeeList = req.params.emplList;
+// app.post("/admin/:emplList", sanitize, async (req, res) => {
+//     let qp = await new QueryParserBuilder().build();
+//     const employeeList = req.params.emplList;
+//
+//     res.render("admin", {remEmployeeList: emplList});
+// });
 
-    res.render("admin", {remEmployeeList: emplList});
-})
+app.post('/admin/searchClients', sanitize, async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    let account = qp.isAuthenticated(req, true);
+
+    if (!account.admin) {
+        res.redirect("/");
+    }
+    else {
+        const results = await qp.getAllFilteredClients(req.session.accountID, req.body);
+        console.log(req);
+        if (results[0] !== undefined) {
+            // console.log("this is being run: " + results[0]);
+            return res.json(results[0]);
+        }
+        else {
+            return res.json({Error: "No clients found"});
+        }
+    }
+});
 
 // Complete this to accomodate for new, and edit/view/delete
 app.post("/caseNote", async (req, res) => {

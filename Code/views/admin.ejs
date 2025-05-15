@@ -17,6 +17,7 @@
 <%-include("header")-%>
 <div class="bodyContent">
     <div class="adminContainer">
+        <div class="adminActions"
         <div class="employee_actions">
             <p>Employee Actions: </p>
             <button id="assignClientButton">Assign/Remove a Client</button>
@@ -152,11 +153,14 @@
             <!-- employee username, name, search with table and selector, submit -->
             <fieldset class="removeEmployeeFieldset">
                 <legend>Remove an Employee</legend>
-
-                <label for="removeEmplFName"> First Name: </label>
-                <input type="text" id="removeEmplFName" name="removeEmplFName" />
-                <label for="removeEmplLName"> Last Name: </label>
-                <input type="text" id="removeEmplLName" name="removeEmplLName" />
+                <div>
+                    <label for="removeEmplFName"> First Name: </label>
+                    <input type="text" id="removeEmplFName" name="removeEmplFName" />
+                </div>
+                <div>
+                    <label for="removeEmplLName"> Last Name: </label>
+                    <input type="text" id="removeEmplLName" name="removeEmplLName" />
+                </div>
 
                 <button id="removeEmplSearchButton">Search</button>
 
@@ -166,25 +170,51 @@
                     </select>
                 </div>
 
-                <button type="submit" id="removeEmployeeSubmit">Submit</button>
+                <button id="removeEmployeeSubmit">Submit</button>
             </fieldset>
         </div>
         <div class="addNewClient" id="addNewClient">
             <!-- sends you to empty client page to put in info -->
-            <form method="post" action="/admin/addclient">
-                <fieldset class="addNewClientFieldset">
-                    <legend>Add a New Client</legend>
-
-                    <label for="addNewClient_fName">First Name: </label>
-                    <input type="text" id="addNewClient_fName" required="required"/>
-                    <label for="addNewClient_mName">Middle Name: </label>
-                    <input type="text" id="addNewClient_mName" />
-                    <label for="addNewClient_lName">Last Name: </label>
-                    <input type="text" id="addNewClient_lName" required="required"/>
-
-                    <button id="addNewClient_buildButton">Build</button>
-                </fieldset>
-            </form>
+            <fieldset class="addNewClientFieldset">
+                <legend>Add a New Client</legend>
+                <div>
+                    <label for="addClientFName">First Name: </label>
+                    <input type="text" id="addClientFName" required="required"/>
+                </div>
+                <div>
+                    <label for="addClientMName">Middle Name: </label>
+                    <input type="text" id="addClientMName" />
+                </div>
+                <div>
+                    <label for="addClientLName">Last Name: </label>
+                    <input type="text" id="addClientLName" required="required"/>
+                </div>
+                <div>
+                    <label for="addClientEmail">Email: </label>
+                    <input type="text" id="addClientEmail" />
+                </div>
+                <div>
+                    <label for="addClientAddress">Address: </label>
+                    <input type="text" id="addClientAddress" />
+                </div>
+                <div>
+                    <label for="addClientCity">City: </label>
+                    <input type="text" id="addClientCity" />
+                </div>
+                <div>
+                    <label for="addClientZip">Zip: </label>
+                    <input type="text" id="addClientZip" />
+                </div>
+                <div>
+                    <label for="addClientDoB">Date of Birth: </label>
+                    <input type="date" id="addClientDoB" />
+                </div>
+                <div>
+                    <label for="addClientPhone">Phone: </label>
+                    <input type="text" id="addClientPhone" maxlength="12"/>
+                </div>
+                <button id="addClientSubmit">Add</button>
+            </fieldset>
         </div>
         <div class="removeClient" id="removeClient">
             <!-- search by name, program, id?, phone, email, display info in mini table -->
@@ -202,13 +232,10 @@
                     <label for="removeClientSelect">Clients: </label>
                     <select id="removeClientSelect">
                         <option value="null">Select a Client:</option>
-                        <%
-                        // foreach for array of filtered clients as options
-                        %>
                     </select>
                 </div>
 
-                <button id="removeClientSubmitButton">Submit</button>
+                <button id="removeClientSubmit">Submit</button>
             </fieldset>
         </div>
     </div>
