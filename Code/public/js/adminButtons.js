@@ -20,7 +20,7 @@ const addEmployeeContent = document.getElementById('addEmployee');
 const removeEmployeeContent = document.getElementById('removeEmployee');
 const addNewClientContent = document.getElementById('addNewClient');
 const removeClientContent = document.getElementById('removeClient');
-const resetPasswordContent = document.getElementById('resetPassword');
+// const resetPasswordContent = document.getElementById('resetPassword');
 
 
 // Sub-divs and buttons for admin functions
@@ -35,6 +35,8 @@ const adminContent = [
     removeEmployeeContent,
     addNewClientContent,
     removeClientContent,
+    // resetPasswordContent
+
     // assignClientResult,
     // removeClientResult
 ];
@@ -88,65 +90,48 @@ removeClientButton.addEventListener('click', () => {
 })
 
 resetPasswordButton.addEventListener('click', () => {
-  assignClientContent.style.display    = 'none';
-  addEmployeeContent.style.display     = 'none';
-  removeEmployeeContent.style.display  = 'none';
-  addNewClientContent.style.display    = 'none';
-  removeClientContent.style.display    = 'none';
-  resetPasswordContent.style.display   = 'block';
+  hideAdminContent();
+    resetPasswordContent.style.display = 'block';
 });
 
-/* event listeners for sub-divs in each admin function (only reachable from an admin action) */
-
-assignClientSearchButton.addEventListener('click', () => {
-    assignClientResult.style.display = 'block';
-    window.location.href = '/admin/assign';
-})
-
-
-// addEmployeeButton = document.addEventListener('click', () => {
-//     window.location.href = '/admin/addempl';
-// })
-
-
-resetPasswordForm.addEventListener('submit', async e => {
-  e.preventDefault();
-  resetPasswordResult.textContent = '';  // clear previous
-
-  const username = document.getElementById('resetUsername').value.trim();
-  if (!username) {
-    resetPasswordResult.textContent = 'Please enter a username.';
-    return;
-  }
-
-  try {
-    const res = await fetch(resetPasswordForm.action, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username })
-    });
-    const json = await res.json();
-
-    // 1) always check for Error field first
-    if (json.Error) {
-      resetPasswordResult.textContent = json.Error;
-      return;
-    }
-
-    // 2) then check HTTP status
-    if (!res.ok) {
-      resetPasswordResult.textContent = json.message || 'An unexpected error occurred.';
-      return;
-    }
-
-    // 3) success!
-    resetPasswordResult.innerHTML = `
-      <p>Password reset successfully!</p>
-      <p><strong>New password:</strong> <code>${json.password}</code></p>
-    `;
-  }
-  catch (err) {
-    console.error(err);
-    resetPasswordResult.textContent = 'Network error. Please try again.';
-  }
-});
+// resetPasswordForm.addEventListener('submit', async e => {
+//   e.preventDefault();
+//   resetPasswordResult.textContent = '';  // clear previous
+//
+//   const username = document.getElementById('resetUsername').value.trim();
+//   if (!username) {
+//     resetPasswordResult.textContent = 'Please enter a username.';
+//     return;
+//   }
+//
+//   try {
+//     const res = await fetch(resetPasswordForm.action, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ username })
+//     });
+//     const json = await res.json();
+//
+//     // 1) always check for Error field first
+//     if (json.Error) {
+//       resetPasswordResult.textContent = json.Error;
+//       return;
+//     }
+//
+//     // 2) then check HTTP status
+//     if (!res.ok) {
+//       resetPasswordResult.textContent = json.message || 'An unexpected error occurred.';
+//       return;
+//     }
+//
+//     // 3) success!
+//     resetPasswordResult.innerHTML = `
+//       <p>Password reset successfully!</p>
+//       <p><strong>New password:</strong> <code>${json.password}</code></p>
+//     `;
+//   }
+//   catch (err) {
+//     console.error(err);
+//     resetPasswordResult.textContent = 'Network error. Please try again.';
+//   }
+// });

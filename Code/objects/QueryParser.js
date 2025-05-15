@@ -782,7 +782,7 @@ export default class QueryParser {
         const fName = typeof req.body.fName === 'string' ? `%${req.body.fName}%` : '%%';
         const lName = typeof req.body.lName === 'string' ? `%${req.body.lName}%` : '%%';
         await connection.beginTransaction();
-        let [staffResults] = await connection.execute("SELECT staffID, fName, mName, lName FROM Staff WHERE fName LIKE ? AND lName LIKE ?", [fName, lName]);
+        let [staffResults] = await connection.execute("SELECT s.staffID, a.accountID, s.fName, s.mName, s.lName FROM Staff s JOIN Account a on a.staffID = s.staffID WHERE fName LIKE ? AND lName LIKE ?", [fName, lName]);
         await connection.commit();
         return staffResults;
       }

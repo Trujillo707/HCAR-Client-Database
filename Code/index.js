@@ -245,7 +245,7 @@ app.get("/admin", async (req, res) => {
         res.redirect("/");
     }
     else {
-        res.render("admin", {employeeList: [], id: req.session.accountID});
+        res.render("admin", {theMessage: req.query, id: req.session.accountID});
     }
 });
 
@@ -265,7 +265,6 @@ app.post('/admin/searchClients', sanitize, async (req, res) => {
     }
     else {
         const results = await qp.getAllFilteredClients(req.session.accountID, req.body);
-        console.log(req);
         if (results[0] !== undefined) {
             // console.log("this is being run: " + results[0]);
             return res.json(results[0]);

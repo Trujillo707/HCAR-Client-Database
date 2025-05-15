@@ -8,9 +8,10 @@
 ===*/
 
 // Search button declarations inside admin actions
-const assignClientSearchButton = document.getElementById('assignClientSearchButton');
 const removeEmplSearchButton = document.getElementById('removeEmplSearchButton');
 const removeClientSearchButton = document.getElementById('removeClientSearchButton');
+const assignClientSearchClientButton = document.getElementById('assignClientSearchClientButton');
+const assignClientSearchEmployeeButton = document.getElementById('assignClientSearchEmployeeButton');
 
 const assignClientResult = document.getElementById('assignClientResult');
 
@@ -19,6 +20,91 @@ const addEmployeeSubmitButton = document.getElementById('addEmployeeSubmit');
 const removeEmployeeSubmitButton = document.getElementById('removeEmployeeSubmit');
 const addClientSubmitButton = document.getElementById('addClientSubmit');
 const removeClientSubmitButton = document.getElementById('removeClientSubmit');
+const assignClientSubmitButton = document.getElementById('assignClientSubmit');
+
+assignClientSearchClientButton.addEventListener('click', () => {
+    let assignClientClient = document.getElementById('assignClientClient');
+    // Fetch the searchClient API to delete the employee if true, else do nothing
+    fetch("/admin/searchClients", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            firstName: document.getElementById('assignClientFirstName').value,
+            lastName: document.getElementById('assignClientLastName').value
+        })
+    })
+        .then(response => {
+            // Check for errors, if ok then parse JSON
+            if (!response.ok)
+                throw new Error(`Error: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            while (assignClientClient.options.length > 1) {
+                assignClientClient.remove(1);
+            }
+
+            // populating the results:
+            data.forEach((client) => {
+                const option = document.createElement("option");
+                option.value = client.clientID;
+                option.textContent = client.clientID + ": " + client.fName +  " " + client.lName;
+                assignClientClient.appendChild(option);
+            });
+
+            // status message for the user:
+            if (data.Error) {
+                alert(data.Error);
+            }
+            else {
+                alert("Search Successful");
+            }
+        })
+        .catch(error => console.log("Error: ", error))
+});
+assignClientSearchEmployeeButton.addEventListener('click', () => {
+    let assignClientEmplSelect = document.getElementById('assignClientEmpl');
+    fetch("/api/searchStaff", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            fName: document.getElementById('assignEmployeeFirstName').value,
+            lName: document.getElementById('assignEmployeeLastName').value,
+        })
+    })
+        .then(response => {
+            // Check for errors, if ok then parse JSON
+            if (!response.ok)
+                throw new Error(`Error: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            while (assignClientEmplSelect.options.length > 1) {
+                assignClientEmplSelect.remove(1);
+            }
+
+            // populating the results:
+            data.forEach((employee) => {
+                const option = document.createElement("option");
+                option.value = employee.accountID;
+                option.textContent = employee.fName + " " + employee.mName + " " + employee.lName;
+                assignClientEmplSelect.appendChild(option);
+            });
+
+            // status message for the user:
+            if (data.Error) {
+                alert(data.Error);
+            }
+            else {
+                alert("Search Successful");
+            }
+        })
+        .catch(error => console.log("Error: ", error))
+});
 
 addEmployeeSubmitButton.addEventListener('click', () => {
     let decision = confirm("Are you sure you want to add an employee using this information?");
@@ -49,10 +135,6 @@ addEmployeeSubmitButton.addEventListener('click', () => {
                 return response.json();
             })
             .then(data => {
-                alert(data.message);
-
-
-
                 // Clearing all inputs:
                 const inputs = document.querySelectorAll('#addEmployee input');
                 inputs.forEach((input) => {
@@ -63,10 +145,17 @@ addEmployeeSubmitButton.addEventListener('click', () => {
                         input.value = '';
                     }
                 })
+                if(data.Error) {
+                    alert("Error: " + data.Error);
+                }
+                else {
+                    window.location.href = "/admin?alertMessage=Added+Employee+Successfully";
+                }
             })
             .catch(error => console.log("Error: ", error))
     }
 });
+
 
 removeEmplSearchButton.addEventListener('click', () => {
     let removeEmplSearchSelect = document.getElementById('removeEmplSearchSelect');
@@ -95,31 +184,21 @@ removeEmplSearchButton.addEventListener('click', () => {
             // populating the results:
             data.forEach((employee) => {
                 const option = document.createElement("option");
-                option.value = employee.staffID;
+                option.value = employee.accountID;
                 option.textContent = employee.fName + " " + employee.mName + " " + employee.lName;
                 removeEmplSearchSelect.appendChild(option);
             });
-
-            // Check if the search returned no results, invis if so
-            if (removeEmplSearchSelect.options.length === 1) {
-                removeEmplSearchSelect.style.display = "none";
-            }
-            else {
-                removeEmplSearchSelect.style.display = "block";
-            }
 
             // status message for the user:
             if (data.Error) {
                 alert(data.Error);
             }
             else {
-                alert(data.message);
+                alert("Search Successful");
             }
         })
         .catch(error => console.log("Error: ", error))
 });
-
-
 removeEmployeeSubmitButton.addEventListener('click', () => {
     let decision = confirm("Are you sure you want to delete this employee? This action cannot be undone.");
     // Fetch the deleteAccount API to delete the employee if true, else do nothing
@@ -142,17 +221,17 @@ removeEmployeeSubmitButton.addEventListener('click', () => {
                 return response.json();
             })
             .then(data => {
-                // Consider outputting message to screen
-                console.log(data.message);
-                console.log("error: " + data.Error);
-                alert("Successfully deleted employee");
-                // document.getElementById("removeEmplSearchSelect").option.remove();
-                console.log(document.getElementById("removeEmplSearchSelect").value);
+                if(data.Error) {
+                    console.log("error: " + data.Error);
+                }
+                else {
+                    window.location.href = "/admin?alertMessage=Removed+Employee+Successfully";
+                }
             })
             .catch(error => console.log("Error: ", error))
-        // window.location.reload();
     }
 });
+
 
 addClientSubmitButton.addEventListener('click', () => {
     let decision = confirm("Are you sure you want to add a client using this information?");
@@ -198,14 +277,13 @@ addClientSubmitButton.addEventListener('click', () => {
                     alert("Error: " + data.Error);
                 }
                 else {
-                    alert(data.message);
+                    window.location.href = "/admin?alertMessage=Added+Client+Successfully";
                 }
-                console.log(data.message);
-                console.log("error: " + data.Error);
             })
             .catch(error => console.log("Error: ", error))
     }
 })
+
 
 removeClientSearchButton.addEventListener('click', () => {
     let removeClientSelect = document.getElementById('removeClientSelect');
@@ -237,7 +315,7 @@ removeClientSearchButton.addEventListener('click', () => {
             data.forEach((client) => {
                 const option = document.createElement("option");
                 option.value = client.clientID;
-                option.textContent = client.clientID + ": " + client.fName +  " " client.mName + " " + client.lName;
+                option.textContent = client.clientID + ": " + client.fName +  " " + client.lName;
                 removeClientSelect.appendChild(option);
             });
 
@@ -251,7 +329,6 @@ removeClientSearchButton.addEventListener('click', () => {
         })
         .catch(error => console.log("Error: ", error))
 })
-
 removeClientSubmitButton.addEventListener('click', () => {
     let decision = confirm("Are you sure you want to delete this client? This action cannot be undone.");
     let removeClientSelect = document.getElementById('removeClientSelect');
@@ -279,7 +356,7 @@ removeClientSubmitButton.addEventListener('click', () => {
                     alert(data.Error);
                 }
                 else {
-                    alert(data.message);
+                    window.location.href = "/admin?alertMessage=Removed+Client+Successfully";
                 }
             })
             .catch(error => console.log("Error: ", error))

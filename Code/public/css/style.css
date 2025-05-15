@@ -949,9 +949,18 @@ div#supportTeam.tabcontent {
     padding: 0.5em;
 
     display: grid;
-    grid-template-areas: "adminEmployeeButtons adminClientButtons adminContent";
-    grid-template-columns: 11em 11em;
+    grid-template-areas: "adminActions adminContent";
+    /*grid-template-columns: 11em 11em;*/
     gap: 1em;
+}
+
+.adminActions {
+    display: grid;
+    grid-area: adminActions;
+    grid-template-areas: "adminEmployeeButtons adminClientButtons";
+    grid-template-columns: 50% 50%;
+    gap: 1em;
+    width: 20em;
 }
 
 .employee_actions {
@@ -969,12 +978,12 @@ div#supportTeam.tabcontent {
 
 .assignClientFieldset, .addEmployeeFieldset, .removeEmployeeFieldset,
 .addNewClientFieldset, .removeClientFieldset {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-area: adminContent;
+    grid-template-columns: 50% 50%;
     justify-content: left;
     align-items: left;
-    grid-area: adminContent;
-    gap: 0.5em;
+    gap: 0.75em;
 }
 
 /* generatedReportData.ejs CSS start */
@@ -1030,3 +1039,12 @@ div#supportTeam.tabcontent {
     cursor: pointer;
 }
 
+.addEmployeeFieldset div, .removeEmployeeFieldset div,
+.addNewClientFieldset div, .removeClientFieldset div {
+    margin-bottom: 0.25em;
+    width: 50%;
+}
+
+.assignClientFieldset div {
+    margin-bottom: 0.25em;
+}
