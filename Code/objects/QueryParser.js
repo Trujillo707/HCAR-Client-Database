@@ -389,8 +389,8 @@ export default class QueryParser {
     #validateInput(username, password) {
         if (!username || !password) {
             return {"status": false, "message": {"Error": "Empty username or password"}};
-        } else if (username.length > 32 || password.length > 32) {
-            return {"status": false, "message": {"Error": "Input length exceeded"}};
+        } else if (username.length > 32 || password.length > 32 || password.length < 8) {
+            return {"status": false, "message": {"Error": "Invalid length username or password"}};
         } else if (!/^[a-zA-Z0-9_.]+$/.test(username)) {
             return {"status": false, "message": {"Error": "Username contains invalid characters"}};
         } else {
