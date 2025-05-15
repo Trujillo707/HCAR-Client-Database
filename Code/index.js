@@ -100,10 +100,10 @@ app.get('/home', getPath, async (req, res) => {
     }
 });
 
-app.get('/logout', async (req, res) => {
+app.get("/logout", async (req, res) => {
     req.session.destroy();
     res.redirect("/");
-})
+});
 
 app.get("/search", getPath, async (req, res) => {
     let qp = await new QueryParserBuilder().build()
@@ -116,7 +116,7 @@ app.get("/search", getPath, async (req, res) => {
         // After verification of credentials
         res.render("search");
     }
-})
+});
 
 // Sanitize data sent to results
 app.get('/results', sanitize, async (req, res) => {
@@ -131,7 +131,8 @@ app.get('/results', sanitize, async (req, res) => {
         // Get client list from fetched results (Uncomment later)
         const offset = parseInt(req.query.page) ? (parseInt(req.query.page) -1) : 0;
         const searchData = req.query;
-        let results = await qp.getAllFilteredClients(req.session.accountID, searchData, offset);    // Later replace with accID
+        //console.log(searchData)
+        let results = await qp.getAllFilteredClients(req.session.accountID, searchData, offset);
         // Build Clients for each returned row
         let clients = [];
         if (results[0] !== undefined)
@@ -223,7 +224,44 @@ app.post("/reports/generate", authCheck, sanitize, getPath,  async (req, res) =>
 });
 
 app.get("/admin", async (req, res) => {
-    res.render("admin");
+    let qp = await new QueryParserBuilder().build()
+    const account = await qp.isAuthenticated(req, true);
+
+    if (!account.admin) {
+        res.redirect("/home");
+    }
+    else {
+        res.render("admin", {employeeList: []});
+    }
+});
+
+app.post("/admin/addempl", sanitize, async (req, res) => {
+    if (req.body.addEmployeePass !== req.body.addEmployeePassConf) {
+        // alert("Passwords do not match");
+        res.redirect("/admin");
+    }
+    else {
+        let qp = await new QueryParserBuilder().build()
+        let employeeFields = {
+            fName: req.body.addEmployeeFName,
+            mName: req.body.addEmployeeMName,
+            lName: req.body.addEmployeeLName,
+            username: req.body.addEmployeeUser,
+            password: req.body.addEmployeePass,
+        }
+        console.log(employeeFields);
+
+        const results = await qp.createAccount(employeeFields);
+        console.log(results);
+        res.send(results);
+    }
+});
+
+app.post("/admin/removeempl", sanitize, async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    let emplList = qp.searchStaff(req);
+
+    res.render("admin", {employeeList: emplList});
 })
 
 // Complete this to accomodate for new, and edit/view/delete
@@ -248,7 +286,7 @@ app.post("/caseNote", async (req, res) => {
         // res.render("caseNote", {theClient: client, note: noteID, method: type});
         res.json({redirect: `/caseNote/${type}`});
     }
-})
+});
 
 // Creating a new case note
 app.get("/caseNote/new", async (req, res) => {
@@ -267,7 +305,7 @@ app.get("/caseNote/new", async (req, res) => {
         let client = rebuildClient(clientDem, progs);
         res.render("caseNote", {theClient: client, method: "new"});
     }
-})
+});
 
 // Viewing/editing existing case note USE GETCASENOTE
 app.get("/caseNote/viewedit", async (req, res) => {
@@ -290,7 +328,7 @@ app.get("/caseNote/viewedit", async (req, res) => {
         let client = rebuildClient(clientDem, progs);
         res.render("caseNote", {theClient: client, note: note, method: "viewedit"});
     }
-})
+});
 
 // Download a case note
 app.post("/caseNote/download",authCheck, async (req, res) => {
@@ -304,6 +342,7 @@ app.post("/caseNote/download",authCheck, async (req, res) => {
     if (!permCheck){
         return res.status(403).json({error: "You do not have permission to view this client"});
     }
+
 
     await caseNotePDFData(noteID, req, res);
 })
@@ -621,7 +660,7 @@ app.get("/api/reports/:reportType", authCheck, async (req, res) => {
 /* Port Number should be an environment variable fyi */
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
-})
+});
 
 process.on('SIGTERM',async () => {
     try{
@@ -649,7 +688,7 @@ function sanitize(req, res, next)
         for (const key in req.body)
         {
             // If non-null field
-            if (req.body[key] !== "" && typeof req.body[key] == "string") 
+            if (req.body[key] !== "" && typeof req.body[key] == "string")
             {
                 // Sanitize data
                 if (key === "email")
@@ -667,6 +706,9 @@ function sanitize(req, res, next)
                 // Sanitize data
                 if (key === "email")
                     req.query[key] = req.query[key].replace(/[^\w@\.]/g, "");
+                else if (key === "pronouns"){
+                    req.query[key] = req.query[key].replace(/[^\w\- /]/g, "");
+                }
                 else
                     req.query[key] = req.query[key].replace(/[^\w- ]/g, "");
             }

@@ -117,7 +117,7 @@ export default class QueryParser {
 
     // TODO: there is space for one more filter!
     /**
-     * @desc Queries the database for a reduced subset of attributes for at most 10 clients at a time, with applied
+     * @desc Queries the database for a reduced subset of attributes for at most 15 clients at a time, with applied
      *       filters. It is the caller's responsibility to parse the results.
      * @param {number} acctID Account ID for the current loggedin staff
      * @param {Object} filters Object containing the named parameters for filter options
@@ -128,20 +128,21 @@ export default class QueryParser {
      * @param {string} filters.gender Gender
      * @param {string} filters.program Program
      * @param {string} filters.email Email
-     * @param {string} filters.payee Payee
-     * @param {string} filters.conservator Conservator
-     * @param offset {number} Page offset for results, in multiples of 10 (e.g. offset = 1 --> Clients 11-20)
+     * @param {string} filters.pronouns Pronouns
+     * @param {string} filters.pos Purchase of Services Status => "good" or "bad"
+     * @param offset {number} Page offset for results, in multiples of 15 (e.g. offset = 1 --> Clients 16-25)
      * @returns {Promise<Object[]>} Array of Objects containing raw SQL column results for each client returned
      */
     async getAllFilteredClients(acctID,
                                 filters = {
-                                    firstName: "%", lastName: "%", phoneNumber: "%", dob: "%", gender: "%",
-                                    program: "%", email: "%", payee: "%", conservator: "%"
+                                    firstName: "%", middleName: "%", lastName: "%", phoneNumber: "%", dob: "%", gender: "%",
+                                    program: "%", email: "%", pronouns: "%", pos: "%"
                                 },
                                 offset = 0) {
 
-        const allowedFilters = ["firstName", "lastName", "phoneNumber", "dob", "gender",
-            "program", "email", "payee", "conservator"];
+        const allowedFilters = ["firstName", "mName", "lastName", "phoneNumber", "dob", "gender",
+            "program", "email", "pronouns", "pos"];
+        //console.log(filters)
 
         if (acctID == null) {
             return {"Error": "Invalid Authentication"};
@@ -201,7 +202,15 @@ export default class QueryParser {
                 } else if (key === 'program') {
                     values.push(Number(filters[key]));
                     basicDetailsStmt += ` AND pc.programID = ?`;
-                } else {
+                } else if (key === "pos"){
+                    if (filters[key] === "bad") {
+                        basicDetailsStmt += " AND (((to_days(c.pos) - to_days(curdate())) <= 31) or (c.pos IS NULL))";
+                    } else if (filters[key] === "good") {
+                        basicDetailsStmt += " AND ((to_days(c.pos) - to_days(curdate())) > 31) AND c.pos IS NOT NULL";
+                    }
+                    // if none hit, then just ignore
+                }
+                else {
                     values.push(`%${filters[key]}%`);
                     if (key === "firstName")
                         basicDetailsStmt += ` AND fName LIKE ?`;
@@ -217,8 +226,8 @@ export default class QueryParser {
         basicDetailsStmt += " LIMIT ?, ?";
         values.push(offset.toString());
         values.push(limit.toString());
-        console.log(values)
-        console.log("Query: ", basicDetailsStmt);
+         //console.log(values)
+         //console.log("Query: ", basicDetailsStmt);
 
         let results = [];
         let clientIDs;

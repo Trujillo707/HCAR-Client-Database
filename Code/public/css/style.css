@@ -345,23 +345,31 @@ td.expired {
 
 .buttons-container
 {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-areas: "quickViewButton searchButton"
+                         "reportsButton ."
+                         "adminButton .";
+    grid-template-columns: 16em 16em;
+    grid-template-rows: 6em 6em 6em;
     justify-content: center;
     align-items: center;
-    gap: 0.5em; /* 8px to em */
-    margin: 3.125% auto; /* 50px to em */
-    width: 25%;
-    height: 50%;
+    gap: 0.5em;
+    margin-top: 2.5em;
 }
+
+#quickViewButton { grid-area: quickViewButton; }
+#searchButton { grid-area: searchButton; }
+#reportsButton { grid-area: reportsButton;}
+#adminButton { grid-area: adminButton; }
 
 .home-button
 {
+    grid-area: homeButton;
     background-color: black;
     color: white;
     padding: 0.75em; /* 12px to em */
     width: 8em;
-    height: 17.58em; /* 33px to em */
+    height: 100%;
     border-radius: 0.5em; /* 8px to em */
     font-size: 2em;
     cursor: pointer;
@@ -398,7 +406,7 @@ td.expired {
     grid-area: 1 / 2 / 1 / 3;
 }
 
-#phoneFilter
+#programFilter
 {
     grid-area: 2 / 1 / 2 / 2;
 }
@@ -482,7 +490,7 @@ td.expired {
     grid-area: 3 / 1 / 3 / 2;
 }
 
-#programFilter
+#pronounsFilter
 {
     grid-area: 3 / 2 / 3 / 3;
 }
@@ -492,17 +500,17 @@ td.expired {
     grid-area: 4 / 1 / 4 / 2;
 }
 
-#payeeFilter
+#phoneFilter
 {
     grid-area: 4 / 2 / 4 / 3;
 }
 
-#conservatorFilter
+#mNameFilter
 {
     grid-area: 5 / 1 / 5 / 2;
 }
 
-#labelFilter
+#posFilter
 {
     grid-area: 5 / 2 / 5 / 3;
 }
@@ -945,12 +953,14 @@ div#supportTeam.tabcontent {
     gap: 0.5em;
 }
 
-.assignClient, .addEmployee, .removeEmployee, .addNewClient, .removeClient {
+.assignClientFieldset, .addEmployeeFieldset, .removeEmployeeFieldset,
+.addNewClientFieldset, .removeClientFieldset {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: left;
+    align-items: left;
     grid-area: adminContent;
+    gap: 0.5em;
 }
 
 /* generatedReportData.ejs CSS start */
