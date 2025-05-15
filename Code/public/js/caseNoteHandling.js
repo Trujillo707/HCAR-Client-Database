@@ -217,6 +217,17 @@ downloadCaseNoteButton.addEventListener("click", () => {
                 columns: [
                     {header: "Narrative", dataKey: "narrative"},
                     {header: "Progress on Goal" , dataKey: "goalProgress"},
+                ],
+                body: [
+                    data
+                ],
+                startY: lastY
+            });
+
+            lastY = doc.lastAutoTable.finalY + 20;
+
+            doc.autoTable({
+                columns: [
                     {header: "Next Steps", dataKey: "nextSteps"}
                 ],
                 body: [
