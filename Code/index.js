@@ -73,17 +73,23 @@ app.get('/', async (req, res) => {
 });
 
 app.post('/home', getPath, async (req, res) => {
-    let qp = await new QueryParserBuilder().build();
-    const results = await qp.auth(req);
-    if (results !== "Successful Login"){
-        // Not verified
-        // TODO: Change index.html to an EJS file so we can render login failures
-        res.redirect("/");
-    }else{
-        // After verification of credentials
-        const account = await qp.isAuthenticated(req);
-        res.render("home", {theAccount: account});
-    }
+  const qp     = await new QueryParserBuilder().build();
+  const result = await qp.auth(req);
+
+  // 1) Bad creds or disabled
+  if (result.Error) {
+    return res.redirect('/');
+  }
+
+  // 2) Password reset required
+  if (result.message === 'Please setup your new password') {
+    return res.redirect('/reset-password');
+  }
+
+  // 3) Successful login
+  //    qp.auth has already put accountID (and temporaryPassword=0) into the session
+  const account = await qp.isAuthenticated(req);
+  return res.render('home', { theAccount: account });
 });
 
 // Clicking home from home will re-render the page
@@ -98,6 +104,14 @@ app.get('/home', getPath, async (req, res) => {
         // After verification of credentials
         res.render("home", {theAccount: account});
     }
+});
+
+app.get("/reset-password", (req, res) => {
+  // ensure they really hit the reset flow
+  if (!req.session.temporaryPassword || !req.session.accountID) {
+    return res.redirect("/");
+  }
+  res.render("resetPassword");  // your EJS form
 });
 
 app.get("/logout", async (req, res) => {
@@ -137,8 +151,6 @@ app.get('/results', sanitize, async (req, res) => {
         let clients = [];
         if (results[0] !== undefined)
         {
-            //console.log("Results: ", results[0]);   // Uncomment for debugging
-            // console.log("Programs: ", results[1]);   // Uncomment for debugging
             for (const client of results[0])
             {
                 clients.push(new ClientBuilder()
@@ -177,8 +189,6 @@ app.get("/results/all", async(req, res) => {
         let clients = [];
         if (results[0] !== undefined)
         {
-            //console.log("Results: ", results[0]);   // Uncomment for debugging
-            //console.log("Programs: ", results[1]);   // Uncomment for debugging
             for (const client of results[0])
             {
                 clients.push(new ClientBuilder()
@@ -276,7 +286,6 @@ app.post("/caseNote", async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         // After verification of credentials
@@ -301,7 +310,6 @@ app.get("/caseNote/new", async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         const clientID = Number(req.session.caseNoteInfo.client);
@@ -321,7 +329,6 @@ app.get("/caseNote/viewedit", async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         const clientID = Number(req.session.caseNoteInfo.client);
@@ -357,19 +364,39 @@ app.post("/caseNote/download",authCheck, async (req, res) => {
 })
 
 app.post('/api/auth', sanitize, async (req, res) => {
-  let qp = await new QueryParserBuilder().build()
-  const results = await qp.auth(req);
-  console.log(req.session.id);
-  return res.send(results);
+  let qp     = await new QueryParserBuilder().build();
+  const result = await qp.auth(req);
+
+  if (result.Error) {
+    return res.json({ Error: result.Error });
+  }
+
+  if (result.message === 'Please setup your new password') {
+    return res.json({
+      resetRequired: true,
+      message: result.message
+    });
+  }
+
+  return res.json({
+    resetRequired: false,
+    message: result.message
+  });
 });
+
 /**
  * Body: {
- *   clientID:    number,
- *   contactType: string,
- *   goal:        string,
- *   goalProgress:string,
- *   narrative:   string,
- *   nextSteps:   string
+ *   clientID:      number,
+ *   contactType:   string,
+ *   goal:          string,
+ *   goalProgress:  string,
+ *   narrative:     string,
+ *   nextSteps:     string,
+ *   noteID:        string,
+ *   subject:       string,
+ *   dateOfSignoff: Date,
+ *   dateOfEvent:   Date,
+ *   program:       string
  * }
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully created"
@@ -388,12 +415,12 @@ app.post('/api/createCaseNote', sanitize, async (req, res) => {
  *   goal:          string,
  *   goalProgress:  string,
  *   narrative:     string,
- *   nextSteps:     string
- *   noteID:        string
- *   subject:       string
- *   dateOfSignoff: Date
- *   dateOfEvent:   Date
- *   program:       string
+ *   nextSteps:     string,
+ *   noteID:        string,
+ *   subject:       string,
+ *   dateOfSignoff: Date,
+ *   dateOfEvent:   Date,
+ *   program:       string,
  * }
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully updated"
@@ -471,13 +498,27 @@ app.post('/api/updateCaseNote', sanitize, async (req, res) => {
     const results = await qp.searchStaff(req);
     return res.json(results);
   })
+  app.post("/api/resetPassword", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.resetPassword(req);
+    return res.json(results);
+  })
+  // in your index.js (or app.js), after you set up sanitize and session:
+
+app.post('/api/updatePassword', sanitize, async (req, res) => {
+  const qp = await new QueryParserBuilder().build();
+
+  const result = await qp.updatePassword(req);
+
+  if (result.Error) {
+    return res.render('resetPassword', { error: result.Error });
+  }
+
+      return res.redirect('/home');
+});
 
 
-// TODO: MAKE THIS POST OBVIOUSLY 
-/*app.get('/client', (req, res) => {
-    let rawData = req.body.clientID;
-    res.render("clientDetails", {theAccount: false, theClient: testClientArray[0]});
-});*/
+
 
 app.post('/client', sanitize, async (req, res) => {
     let cliID = req.body.clientID;
@@ -490,10 +531,8 @@ app.get('/client/:id', async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
-        //console.log(req.params.id);
         // After verification of credentials
         const cliID = Number(req.params.id);
         // DB Queries
@@ -508,12 +547,6 @@ app.get('/client/:id', async (req, res) => {
         let vaccines = [];
         let caseNotes = [];
         let supportStaff = [];
-        //console.log("Demographics: ", cliDem);
-        //console.log("Insurance: ", insurAndMed);
-        //console.log("Medication: ", medicationList);
-        //console.log("Vaccination: ", vaccinationList);
-        //console.log("Case Notes: ", caseNotesList);
-        //console.log("Support Staff: ", supportStaffList)
 
         // Comprehension for med list
         for (const med of medicationList)
@@ -789,7 +822,6 @@ async function authCheck(req, res, next) {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         // After verification of credentials
