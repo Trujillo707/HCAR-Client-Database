@@ -810,7 +810,7 @@ export default class QueryParser {
         const hash = await bcrypt.hash(req.body.password, salt);
         
         const accountQuery = "INSERT INTO Account(username, hash, admin, disabled) VALUES(?, ?, ?, ?)";
-        const [accountResponse] = await connection.execute(accountQuery, [req.body.username, hash, 0, 0]);
+        const [accountResponse] = await connection.execute(accountQuery, [req.body.username, hash, req.body.admin, 0]);
         const accountID = accountResponse.insertId;
         
         const staffQuery = "INSERT INTO Staff (fName, mName, lName, address, city, state, zip, phoneNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";

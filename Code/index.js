@@ -239,33 +239,11 @@ app.get("/admin", async (req, res) => {
     }
 });
 
-app.post("/admin/addempl", sanitize, async (req, res) => {
-    if (req.body.addEmployeePass !== req.body.addEmployeePassConf) {
-        // alert("Passwords do not match");
-        res.redirect("/admin");
-    }
-    else {
-        let qp = await new QueryParserBuilder().build()
-        let employeeFields = {
-            fName: req.body.addEmployeeFName,
-            mName: req.body.addEmployeeMName,
-            lName: req.body.addEmployeeLName,
-            username: req.body.addEmployeeUser,
-            password: req.body.addEmployeePass,
-        }
-        console.log(employeeFields);
+app.post("/admin/:emplList", sanitize, async (req, res) => {
+    let qp = await new QueryParserBuilder().build();
+    const employeeList = req.params.emplList;
 
-        const results = await qp.createAccount(employeeFields);
-        console.log(results);
-        res.send(results);
-    }
-});
-
-app.post("/admin/removeempl", sanitize, async (req, res) => {
-    let qp = await new QueryParserBuilder().build()
-    let emplList = qp.searchStaff(req);
-
-    res.render("admin", {employeeList: emplList});
+    res.render("admin", {remEmployeeList: emplList});
 })
 
 // Complete this to accomodate for new, and edit/view/delete
@@ -439,6 +417,7 @@ app.post('/api/updateCaseNote', sanitize, async (req, res) => {
   app.post('/api/createAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createAccount(req);
+    req.body.admin = parseInt(req.body.admin);
     return res.json(results);
   });
 
