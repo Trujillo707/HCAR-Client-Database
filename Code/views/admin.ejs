@@ -16,6 +16,7 @@
             <button id="assignClientButton">Assign/Remove a Client</button>
             <button id="addEmployeeButton">Add a New Employee</button>
             <button id="removeEmployeeButton">Remove an Employee</button>
+            <button id="resetPasswordButton">Reset Employee Password</button>
         </div>
         <div class="client_actions">
             <p>Client Actions: </p>
@@ -127,6 +128,20 @@
                     <button id="submit">Submit</button>
                 </fieldset>
             </form>
+        </div>
+        <div class="resetPassword" id="resetPassword">
+            <!-- employee username, name, search with table and selector, submit -->
+            <form id="resetPasswordForm" method="post" action="/api/resetPassword">
+                <fieldset class="resetPasswordFieldset">
+                    <legend>Reset Employee Password</legend>
+
+                    <label for="resetUsername"> Username: </label>
+                    <input type="text" id="resetUsername" name="username" />
+
+                    <button type="submit" id="resetPasswordSubmit">Submit</button>
+                </fieldset>
+            </form>
+            <div id="resetPasswordResult"></div>
         </div>
         <div class="addNewClient" id="addNewClient">
             <!-- sends you to empty client page to put in info -->

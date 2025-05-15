@@ -982,6 +982,10 @@ div#supportTeam.tabcontent {
     cursor: pointer;
     font-size: 1.2em;
 }
+.accountLinks {
+  text-align: center;
+}
+
 
 /* generatedReportData.ejs CSS end */
 

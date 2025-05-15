@@ -446,7 +446,7 @@ export default class QueryParser {
                     return {"message": "Please setup your new password"};
                 }
                 req.session.accountID = rows[0].accountID;
-                return "Successful Login";
+                return {"message": "Successful Login"};
             } else {
                 return {"Error": "Incorrect username or password"};
             }
@@ -993,6 +993,11 @@ export default class QueryParser {
           return {"Error":"Invalid input"};
         }
         await connection.beginTransaction();
+        let query = "SELECT * FROM Account WHERE username = ?";
+        const [rows] = await this.#pool.execute(query, [req.body.username]);
+        if (rows.length === 0) {
+            return {"Error": "User does not exist"};
+        } //No user found
         
         const randomPassword = this.#generateRandomString(12);
         const salt = await bcrypt.genSalt(10);
