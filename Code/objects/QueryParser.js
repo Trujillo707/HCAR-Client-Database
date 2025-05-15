@@ -389,8 +389,8 @@ export default class QueryParser {
     #validateInput(username, password) {
         if (!username || !password) {
             return {"status": false, "message": {"Error": "Empty username or password"}};
-        } else if (username.length > 32 || password.length > 32) {
-            return {"status": false, "message": {"Error": "Input length exceeded"}};
+        } else if (username.length > 32 || password.length > 32 || password.length < 8) {
+            return {"status": false, "message": {"Error": "Invalid length username or password"}};
         } else if (!/^[a-zA-Z0-9_.]+$/.test(username)) {
             return {"status": false, "message": {"Error": "Username contains invalid characters"}};
         } else {
@@ -398,19 +398,22 @@ export default class QueryParser {
         }
     }
 
-    async isAuthenticated(req, requiresAdmin = false) {
+    async isAuthenticated(req, requiresAdmin = false, temporaryAuthentication = false) {
         try {
             const accountID = req.session.accountID;
             if (!accountID) {
                 return {"Error": "Invalid authentication"};
             }
-            let query = "SELECT username, staffID, disabled, admin FROM Account WHERE accountID = ?";
+            let query = "SELECT username, staffID, disabled, admin, temporaryPassword FROM Account WHERE accountID = ?";
             const [Account] = await this.#pool.execute(query, [accountID]);
             if (Account[0].disabled === 1) {
                 return {"Error": "Account has been disabled"};
             }
             if (requiresAdmin && Account[0].admin !== 1) {
                 return {"Error": "Invalid permissions"};
+            }
+            if(Account[0].temporaryPassword === 1 && !temporaryAuthentication){
+                return {"Error": "You must reset your password before continuing"};
             }
             return Account[0];
         } catch (err) {
@@ -437,8 +440,13 @@ export default class QueryParser {
                 if (rows[0].disabled === 1) {
                     return {"Error": "Account has been disabled"};
                 }
+                if(rows[0].temporaryPassword === 1){
+                    req.session.temporaryPassword = rows[0].temporaryPassword;
+                    req.session.accountID = rows[0].accountID;
+                    return {"message": "Please setup your new password"};
+                }
                 req.session.accountID = rows[0].accountID;
-                return "Successful Login";
+                return {"message": "Successful Login"};
             } else {
                 return {"Error": "Incorrect username or password"};
             }
@@ -801,13 +809,14 @@ export default class QueryParser {
         // Allow only letters for names and an empty string to be sent
         const nameValidation = /^[A-Za-z]+$/;
         const mNameValidation = /^[A-Za-z]*$/;
-
-        if(this.#validateInput(req.body.username, req.body.password)["status"] === false || !usernameValidation.test(req.body.username) || !nameValidation.test(req.body.fName) || !mNameValidation.test(req.body.mName) || !nameValidation.test(req.body.lName)){
+        const randomPassword = this.#generateRandomString(12);
+        if(this.#validateInput(req.body.username, randomPassword)["status"] === false || !usernameValidation.test(req.body.username) || !nameValidation.test(req.body.fName) || !mNameValidation.test(req.body.mName) || !nameValidation.test(req.body.lName)){
           return {"Error":"Invalid input"};
         }
         await connection.beginTransaction();
         const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(req.body.password, salt);
+        const hash = await bcrypt.hash(randomPassword, salt);
+        //const hash = await bcrypt.hash(req.body.password, salt);
         
         const accountQuery = "INSERT INTO Account(username, hash, admin, disabled) VALUES(?, ?, ?, ?)";
         const [accountResponse] = await connection.execute(accountQuery, [req.body.username, hash, req.body.admin, 0]);
@@ -821,7 +830,10 @@ export default class QueryParser {
         const [updateResponse] = await connection.execute(updateAccountQuery, [staffID, accountID]);
       
         await connection.commit();
-        return {"message": "Account successfully created"};
+        return {
+            "message": "Account successfully created",
+            "password": randomPassword
+        };
       }
       catch(err){
         console.log(err);
@@ -904,6 +916,105 @@ export default class QueryParser {
       catch(err){
         await connection.rollback();
         return {"Error":"Error deleting account"};
+      }
+      finally{
+        await connection.release();
+      }
+    }
+
+    #generateRandomString(length = 10) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    async updatePassword(req){
+      const connection = await this.#pool.getConnection();
+      try{
+        const account = await this.isAuthenticated(req, false, true);
+        if(account["Error"]){
+          return account["Error"];
+        }
+        await connection.beginTransaction();
+
+        let query = "SELECT * FROM Account WHERE username = ?";
+        const [rows] = await this.#pool.execute(query, [account.username]);
+        if (rows.length === 0) {
+            return {"Error": "Incorrect username or password"};
+        } //No user found
+        else if (rows.length > 1) { //Should not happen
+            return {"Error": "Incorrect username or password"};
+        } else if (await bcrypt.compare(req.body.pass, rows[0].hash)) {
+            if (rows[0].disabled === 1) {
+                return {"Error": "Account has been disabled"};
+            }
+            if(req.body.newPass === req.body.retypePass){
+                console.log(account.username);
+                if(this.#validateInput(account.username, req.body.newPass)["status"] === false ){
+                    return {"Error":"Invalid input"};
+                }
+                const salt = await bcrypt.genSalt(10);
+                const newHash = await bcrypt.hash(req.body.newPass, salt);
+                const accountQuery = "UPDATE Account SET temporaryPassword = false, hash = ? WHERE username = ?";
+                const [accountResponse] = await connection.execute(accountQuery, [newHash, account.username]);
+            }
+            else{
+                return {"Error":"New passwords do not match"};
+            }
+            await connection.commit();
+            return {"message": "Password updated successfully"};
+        } else {
+            return {"Error": "Incorrect username or password"};
+        }
+      }
+      catch(err){
+        console.log(err);
+        await connection.rollback();
+        return {"Error":"Error setting password"};
+      }
+      finally{
+        await connection.release();
+      }
+    }
+
+    async resetPassword(req){
+      const connection = await this.#pool.getConnection();
+      try{
+        const account = await this.isAuthenticated(req, true);
+        if(account["Error"]){
+          return account["Error"];
+        }
+
+        const usernameValidation = /^[A-Za-z0-9]+$/;
+        if(!usernameValidation.test(req.body.username)){
+          return {"Error":"Invalid input"};
+        }
+        await connection.beginTransaction();
+        let query = "SELECT * FROM Account WHERE username = ?";
+        const [rows] = await this.#pool.execute(query, [req.body.username]);
+        if (rows.length === 0) {
+            return {"Error": "User does not exist"};
+        } //No user found
+        
+        const randomPassword = this.#generateRandomString(12);
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(randomPassword, salt);
+        const accountQuery = "UPDATE Account SET temporaryPassword = true, hash = ? WHERE username = ?";
+        const [accountResponse] = await connection.execute(accountQuery, [hash, req.body.username]);
+
+        await connection.commit();
+        return {
+            "message": "Password reset successfully",
+            "password": randomPassword
+        };
+      }
+      catch(err){
+        console.log(err);
+        await connection.rollback();
+        return {"Error":"Error resetting password"};
       }
       finally{
         await connection.release();

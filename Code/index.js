@@ -73,17 +73,23 @@ app.get('/', async (req, res) => {
 });
 
 app.post('/home', getPath, async (req, res) => {
-    let qp = await new QueryParserBuilder().build();
-    const results = await qp.auth(req);
-    if (results !== "Successful Login"){
-        // Not verified
-        // TODO: Change index.html to an EJS file so we can render login failures
-        res.redirect("/");
-    }else{
-        // After verification of credentials
-        const account = await qp.isAuthenticated(req);
-        res.render("home", {theAccount: account});
-    }
+  const qp     = await new QueryParserBuilder().build();
+  const result = await qp.auth(req);
+
+  // 1) Bad creds or disabled
+  if (result.Error) {
+    return res.redirect('/');
+  }
+
+  // 2) Password reset required
+  if (result.message === 'Please setup your new password') {
+    return res.redirect('/reset-password');
+  }
+
+  // 3) Successful login
+  //    qp.auth has already put accountID (and temporaryPassword=0) into the session
+  const account = await qp.isAuthenticated(req);
+  return res.render('home', { theAccount: account });
 });
 
 // Clicking home from home will re-render the page
@@ -98,6 +104,14 @@ app.get('/home', getPath, async (req, res) => {
         // After verification of credentials
         res.render("home", {theAccount: account});
     }
+});
+
+app.get("/reset-password", (req, res) => {
+  // ensure they really hit the reset flow
+  if (!req.session.temporaryPassword || !req.session.accountID) {
+    return res.redirect("/");
+  }
+  res.render("resetPassword");  // your EJS form
 });
 
 app.get("/logout", async (req, res) => {
@@ -353,11 +367,26 @@ app.post("/caseNote/download",authCheck, async (req, res) => {
 })
 
 app.post('/api/auth', sanitize, async (req, res) => {
-  let qp = await new QueryParserBuilder().build()
-  const results = await qp.auth(req);
-  console.log(req.session.id);
-  return res.send(results);
+  let qp     = await new QueryParserBuilder().build();
+  const result = await qp.auth(req);
+
+  if (result.Error) {
+    return res.json({ Error: result.Error });
+  }
+
+  if (result.message === 'Please setup your new password') {
+    return res.json({
+      resetRequired: true,
+      message: result.message
+    });
+  }
+
+  return res.json({
+    resetRequired: false,
+    message: result.message
+  });
 });
+
 /**
  * Body: {
  *   clientID:    number,
@@ -468,6 +497,27 @@ app.post('/api/updateCaseNote', sanitize, async (req, res) => {
     const results = await qp.searchStaff(req);
     return res.json(results);
   })
+  app.post("/api/resetPassword", async (req, res) => {
+    let qp = await new QueryParserBuilder().build()
+    const results = await qp.resetPassword(req);
+    return res.json(results);
+  })
+  // in your index.js (or app.js), after you set up sanitize and session:
+
+app.post('/api/updatePassword', sanitize, async (req, res) => {
+  const qp = await new QueryParserBuilder().build();
+
+  const result = await qp.updatePassword(req);
+
+  if (result.Error) {
+    return res.render('resetPassword', { error: result.Error });
+  }
+
+      return res.redirect('/home');
+});
+
+
+
 
 
 // TODO: MAKE THIS POST OBVIOUSLY 
