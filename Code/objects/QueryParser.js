@@ -563,7 +563,6 @@ export default class QueryParser {
                 const staffClientQuery = "SELECT COUNT(*) FROM StaffClient sc JOIN NoteClient nc ON sc.clientID=nc.clientID WHERE sc.staffID = ? AND nc.noteID = ? AND sc.clientID = ?;";
                 var [staffClientNote] = await connection.execute(staffClientQuery, [staffID, noteID, clientID]);
             }
-            console.log(staffClientNote[0]['COUNT(*)']);
             if (account.admin === 1 || staffClientNote[0]['COUNT(*)'] === 1) {
                 var [deleteResults] = await connection.execute("CALL DeleteCaseNote(?, ?)", [
                     clientID,
