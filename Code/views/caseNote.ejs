@@ -74,7 +74,8 @@
                 </div>
                 <div class="cn_empl_signoff">
                     <label for="empl_signoff">Employee Sign-Off: </label>
-                    <input type="text" id="empl_signoff" name="empl_sign_off" value="<%= locals.method === 'new' ? '' : locals.note.getEmployeeSign() %>"/>
+                    <input type="text" id="empl_signoff" name="empl_sign_off" value="<%= locals.method === 'new' ? '' : locals.note.getEmployeeSign() %>" readonly="readonly"/>
+                    <input type="button" id="sign_button" data-staff="<%=locals.noteCreator%>" name="sign_button" value="Sign" />
                 </div>
                 <div class="cn_date_of_signoff">
                     <label for="date_of_signoff">Date of Sign-Off: </label>

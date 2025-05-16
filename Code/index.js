@@ -27,6 +27,7 @@ import {
     mailListReport,
     medInfoReport
 } from "./reports-logic/reports.js";
+import { constants } from "os";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -289,6 +290,7 @@ app.post("/caseNote", async (req, res) => {
         res.redirect("/");
     } else {
         // After verification of credentials
+        const noteCreator = await qp.getEmployeeName(account.staffID);
         const client = req.body.clientID;     // Client Object
         const note = req.body.noteID;     // Case Note 
         const type = req.body.button;       // Button pressed
@@ -296,10 +298,10 @@ app.post("/caseNote", async (req, res) => {
         // Session Data Transfer
         req.session.caseNoteInfo = {
             client: client,
-            note: note
+            note: note,
+            noteCreator: noteCreator[0].creator
         };
 
-        // res.render("caseNote", {theClient: client, note: noteID, method: type});
         res.json({redirect: `/caseNote/${type}`});
     }
 });
@@ -313,13 +315,13 @@ app.get("/caseNote/new", async (req, res) => {
         res.redirect("/");
     } else {
         const clientID = Number(req.session.caseNoteInfo.client);
-        const noteID = req.session.caseNoteInfo.note;
+        const noteCreator = req.session.caseNoteInfo.noteCreator;
         // Rebuild class objects
         let clientDem = await qp.getClientDemographics(clientID);
         let progs = await qp.getClientPrograms(clientID);
         // Build client
         let client = rebuildClient(clientDem, progs);
-        res.render("caseNote", {theClient: client, method: "new"});
+        res.render("caseNote", {theClient: client, method: "new", noteCreator: noteCreator});
     }
 });
 
@@ -333,16 +335,17 @@ app.get("/caseNote/viewedit", async (req, res) => {
     } else {
         const clientID = Number(req.session.caseNoteInfo.client);
         const noteID = req.session.caseNoteInfo.note;
+        const noteCreator = req.session.caseNoteInfo.noteCreator;
         // Rebuild class objects
         let clientDem = await qp.getClientDemographics(clientID);
         let progs = await qp.getClientPrograms(clientID);
         let noteDetails = await qp.getCaseNote(noteID);
+        noteDetails.employeeSign = account.staffID;    
         // Build Case Note
-        console.log("Note Details: ", noteDetails);
         let note = rebuild(CaseNote, noteDetails);
         // Build Client
         let client = rebuildClient(clientDem, progs);
-        res.render("caseNote", {theClient: client, note: note, method: "viewedit"});
+        res.render("caseNote", {theClient: client, note: note, noteCreator: noteCreator, method: "viewedit"});
     }
 });
 
@@ -542,7 +545,6 @@ app.get('/client/:id', async (req, res) => {
         let vaccinationList = await qp.getVaccinationList(cliID);
         let caseNotesList = await qp.getCaseNoteList(cliID);
         let supportStaffList = await qp.getSupportStaffList(cliID);
-
         let meds = [];
         let vaccines = [];
         let caseNotes = [];
@@ -738,6 +740,11 @@ process.on('SIGTERM',async () => {
     }
 });
 
+// If no route is matched, path does not exist
+app.use((req, res) => {
+  res.status(404).send('404 - Page Not Found');
+});
+
 function sanitize(req, res, next)
 {
     if (req.method === "POST"){
@@ -750,7 +757,7 @@ function sanitize(req, res, next)
                 if (key === "email")
                     req.body[key] = req.body[key].replace(/[^\w@\.]/g, "");
                 else
-                    req.body[key] = req.body[key].replace(/[^\w- ]/g, "");
+                    req.body[key] = req.body[key].replace(/[^\w-+ ]/g, "");
             }
         }
     } else{

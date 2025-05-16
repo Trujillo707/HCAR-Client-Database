@@ -308,7 +308,7 @@
                     <tr id="caseNoteRow" class="lightHover clickableRow" data-noteid="<%=caseNote.getNoteID()%>" data-notecreator="<%=caseNote.getEmployeeSign()%>">
                         <td><%=caseNote.getSubject()%></td>
                         <td><%=new Intl.DateTimeFormat("en-US").format(caseNote.getDateCreated())%></td>
-                        <td id=""><%=caseNote.getEmployeeSign()%></td>
+                        <td><%=caseNote.getEmployeeSign()%></td>
                         <td><%=caseNote.getProgram()%></td>
                     </tr>
                     <%

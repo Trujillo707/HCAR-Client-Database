@@ -932,7 +932,21 @@ div#supportTeam.tabcontent {
 .cn_narrative { grid-area: narrative; }
 .cn_progress_on_goal { grid-area: progress_on_goal; }
 .cn_next_steps { grid-area: next_steps; }
-.cn_empl_signoff { grid-area: empl_signoff; }
+.cn_empl_signoff { 
+    grid-area: empl_signoff;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem; 
+    max-width: 100%;
+    flex-wrap: wrap; 
+ }
+ #sign_button
+ {
+    background-color: black;
+    color: white;
+    border-radius: 0.5em;
+    padding: 0.5rem 1rem
+ }
 .cn_date_of_signoff { grid-area: date_of_signoff; }
 
 .cn_narrative > *:not(label), .cn_progress_on_goal > *:not(label), .cn_next_steps > *:not(label) {

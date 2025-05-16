@@ -50,8 +50,6 @@ caseNoteRows.forEach(row => {
 
 newCaseNoteButton.addEventListener("click", () => {
     const clientID = caseNoteTable.dataset.clientid;
-    // let chosenRow = caseNoteTable.querySelector(".selected");
-    // let nID = chosenRow.dataset.noteID;
     if (clientID == null) {
         alert("Error: Failed to find case note. Please contact a system administrator");
         return;
