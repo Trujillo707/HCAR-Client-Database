@@ -291,7 +291,7 @@ td.expired {
     width: 100%;
 }
 
-#submit
+#submit, .submit
 {
     color: white;
     background-color: black;
@@ -361,9 +361,9 @@ td.expired {
 .buttons-container
 {
     display: grid;
-    grid-template-areas: "quickViewButton searchButton"
-                         "reportsButton ."
-                         "adminButton .";
+    grid-template-areas: "adminButton ."
+                         "quickViewButton searchButton"
+                         "reportsButton .";
     grid-template-columns: 16em 16em;
     grid-template-rows: 6em 6em 6em;
     justify-content: center;
@@ -372,10 +372,24 @@ td.expired {
     margin-top: 2.5em;
 }
 
-#quickViewButton { grid-area: quickViewButton; }
-#searchButton { grid-area: searchButton; }
-#reportsButton { grid-area: reportsButton;}
-#adminButton { grid-area: adminButton; }
+#quickViewButton {
+    grid-column: 1;
+    grid-row: 2;
+}
+#searchButton {
+    grid-column: 2;
+    grid-row: 2;
+}
+#reportsButton {
+    grid-column: 1 / span 2; /* Span both columns */
+    grid-row: 3;
+    justify-self: center; /* Center the button horizontally */
+}
+#adminButton {
+    grid-column: 1 / span 2; /* Span both columns */
+    grid-row: 1;
+    justify-self: center;
+}
 
 .home-button
 {
@@ -975,9 +989,18 @@ div#supportTeam.tabcontent {
     padding: 0.5em;
 
     display: grid;
-    grid-template-areas: "adminEmployeeButtons adminClientButtons adminContent";
-    grid-template-columns: 11em 11em;
+    grid-template-areas: "adminActions adminContent";
+    /*grid-template-columns: 11em 11em;*/
     gap: 1em;
+}
+
+.adminActions {
+    display: grid;
+    grid-area: adminActions;
+    grid-template-areas: "adminEmployeeButtons adminClientButtons";
+    grid-template-columns: 50% 50%;
+    gap: 1em;
+    width: 20em;
 }
 
 .employee_actions {
@@ -995,12 +1018,12 @@ div#supportTeam.tabcontent {
 
 .assignClientFieldset, .addEmployeeFieldset, .removeEmployeeFieldset,
 .addNewClientFieldset, .removeClientFieldset {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-area: adminContent;
+    grid-template-columns: 50% 50%;
     justify-content: left;
     align-items: left;
-    grid-area: adminContent;
-    gap: 0.5em;
+    gap: 0.75em;
 }
 
 /* generatedReportData.ejs CSS start */
@@ -1043,3 +1066,25 @@ div#supportTeam.tabcontent {
     justify-self: end;
 }
 */
+
+#assignClientButton, #addEmployeeButton, #removeEmployeeButton,
+#addNewClientButton, #removeClientButton {
+    background-color: black;
+    color: white;
+    padding: 0.75em; /* 12px to em */
+    border-radius: 0.5em; /* 8px to em */
+    width: 10em; /* 160px to em */
+    height: 4em; /* 53px to em */
+    margin-bottom: 1em;
+    cursor: pointer;
+}
+
+.addEmployeeFieldset div, .removeEmployeeFieldset div,
+.addNewClientFieldset div, .removeClientFieldset div {
+    margin-bottom: 0.25em;
+    width: 50%;
+}
+
+.assignClientFieldset div {
+    margin-bottom: 0.25em;
+}

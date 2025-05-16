@@ -5,182 +5,225 @@
     <%- include("fontLinks") -%>
     <link href="../css/style.css" rel="stylesheet" type="text/css" />
     <meta charset="utf-8" />
-    <script src="../js/adminButtons.js" defer="defer"></script>
+    <%
+        // when redirected after an admin action, shows message
+        if(locals.theMessage) {
+            %>
+        <dialog id="dialogBox">
+            <p> <%=locals.theMessage %> </p>
+            <div id="dialogButtons">
+                <button id="dialogBlack">Ok</button>
+            </div>
+        </dialog>
+        <%
+        }
+    %>
 </head>
 <body>
 <%-include("header")-%>
 <div class="bodyContent">
     <div class="adminContainer">
-        <div class="employee_actions">
-            <p>Employee Actions: </p>
-            <button id="assignClientButton">Assign/Remove a Client</button>
-            <button id="addEmployeeButton">Add a New Employee</button>
-            <button id="removeEmployeeButton">Remove an Employee</button>
-            <button id="resetPasswordButton">Reset Employee Password</button>
-        </div>
-        <div class="client_actions">
-            <p>Client Actions: </p>
-            <button id="addNewClientButton">Add a New Client</button>
-            <button id="removeClientButton">Remove a Client</button>
+        <div class="adminActions">
+            <div class="employee_actions">
+                <p>Employee Actions: </p>
+                <button id="assignClientButton">Assign/Remove a Client</button>
+                <button id="addEmployeeButton">Add a New Employee</button>
+                <button id="removeEmployeeButton">Remove an Employee</button>
+            </div>
+            <div class="client_actions">
+                <p>Client Actions: </p>
+                <button id="addNewClientButton">Add a New Client</button>
+                <button id="removeClientButton">Remove a Client</button>
+            </div>
         </div>
         <div class="assignClient" id="assignClient">
             <!-- employee name selected from a select, client select filtered from that -->
-            <form method="post" action="/admin/assign">
-                <fieldset class="assignClientFieldset">
-                    <legend>Assign a Client to an Employee</legend>
-
-                    <label for="assignClientFirstName"> Client First Name: </label>
-                    <input type="text" id="assignClientFirstName" name="assignClientFirstName" />
-                    <label for="assignClientLastName"> Client Last Name: </label>
-                    <input type="text" id="assignClientLastName" name="assignClientLastName" />
-                    <label for="assignEmployeeFirstName"> Employee First Name: </label>
-                    <input type="text" id="assignEmployeeFirstName" name="assignEmployeeFirstName" />
-                    <label for="assignEmployeeLastName"> Employee Last Name: </label>
-                    <input type="text" id="assignEmployeeLastName" name="assignEmployeeLastName" />
-
-                    <button id="assignClientSearchButton">Search</button>
-
-                    <div class="assignClientResult">
-                        <label for="assignClient_empl">Employees: </label>
-                        <select name="assignClient_empl" id="assignClient_empl">
-                            <option value="null">Select an Employee</option>
-                            <%
-                            // foreach for array of employees as options
-                            %>
-                        </select>
-                        <label for="assignClient_client">Clients: </label>
-                        <select name="assignClient_client" id="assignClient_client">
-                            <option value="null">Select a Client:</option>
-                            <%
-                            // foreach for array of filtered clients as options
-                            %>
-                        </select>
-                        <button id="submit">Assign</button>
+            <fieldset class="assignClientFieldset">
+                <legend>Assign a Client to an Employee</legend>
+                <div>
+                    <div>
+                        <label for="assignClientFirstName"> Client First Name: </label><br />
+                        <input type="text" id="assignClientFirstName" name="assignClientFirstName" />
                     </div>
-                </fieldset>
-            </form>
+                    <div>
+                        <label for="assignClientLastName"> Client Last Name: </label><br />
+                        <input type="text" id="assignClientLastName" name="assignClientLastName" />
+                    </div>
+                    <button id="assignClientSearchClientButton">Search Clients</button>
+                </div>
+                <div>
+                    <div>
+                        <label for="assignEmployeeFirstName"> Employee First Name: </label><br />
+                        <input type="text" id="assignEmployeeFirstName" name="assignEmployeeFirstName" />
+                    </div>
+                    <div>
+                        <label for="assignEmployeeLastName"> Employee Last Name: </label><br />
+                        <input type="text" id="assignEmployeeLastName" name="assignEmployeeLastName" />
+                    </div>
+                    <button id="assignClientSearchEmployeeButton">Search Employee</button>
+                </div>
+                <div id="assignClientClientResult">
+                    <label for="assignClientClient">Clients: </label><br />
+                    <select name="assignClientClient" id="assignClientClient">
+                        <option value="null">Select a Client:</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="assignClientEmpl">Employees: </label><br />
+                    <select name="assignClientEmpl" id="assignClientEmpl">
+                        <option value="null">Select an Employee</option>
+                    </select>
+                </div>
+                <button id="assignClientSubmit">Assign</button>
+            </fieldset>
         </div>
         <div class="addEmployee" id="addEmployee">
             <!-- employee username, email, password, program(s), submit -->
-            <form method="post" action="/admin/addempl">
-                <fieldset class="addEmployeeFieldset">
-                    <legend>Add an Employee</legend>
-
-                    <label for="addEmployeeFName">First Name: </label>
+            <fieldset class="addEmployeeFieldset">
+                <legend>Add an Employee</legend>
+                <div>
+                    <label for="addEmployeeFName">First Name: </label><br />
                     <input type="text" id="addEmployeeFName" name="addEmployeeFName" />
-
-                    <label for="addEmployeeMName">Middle Name: </label>
+                </div>
+                <div>
+                    <label for="addEmployeeMName">Middle Name: </label><br />
                     <input type="text" id="addEmployeeMName" name="addEmployeeMName" />
-
-                    <label for="addEmployeeLName">Last Name: </label>
+                </div>
+                <div>
+                    <label for="addEmployeeLName">Last Name: </label><br />
                     <input type="text" id="addEmployeeLName" name="addEmployeeLName" />
-
-                    <label for="addEmployeeUser">Username: </label>
+                </div>
+                <div>
+                    <label for="addEmployeeUser">Username: </label><br />
                     <input type="text" id="addEmployeeUser" name="addEmployeeUser" />
-
-                    <label for="addEmployeePass">Password: </label>
-                    <input type="password" id="addEmployeePass" name="addEmployeePass" />
-
-                    <label for="addEmployeePassConfirm">Confirm Password: </label>
-                    <input type="password" id="addEmployeePassConfirm" name="addEmployeePassConfirm" />
-
-                    <label for="addEmployeeAddress"> Address: </label>
+                </div>
+                <div>
+                    <label for="addEmployeeAddress"> Address: </label><br />
                     <input type="text" id="addEmployeeAddress" name="addEmployeeAddress" />
-
-                    <label for="addEmployeeCity"> City: </label>
+                </div>
+                <div>
+                    <label for="addEmployeeCity"> City: </label><br />
                     <input type="text" id="addEmployeeCity" name="addEmployeeCity" />
-
-                    <label for="addEmployeeState"> State: </label>
+                </div>
+                <div>
+                    <label for="addEmployeeState"> State: </label><br />
                     <input type="text" id="addEmployeeState" name="addEmployeeState" />
-
-                    <label for="addEmployeeZip"> Zip Code: </label>
+                </div>
+                <div>
+                    <label for="addEmployeeZip"> Zip Code: </label><br />
                     <input type="text" id="addEmployeeZip" name="addEmployeeZip" />
-
-                    <label for="addEmployeePhone"> Phone: </label>
+                </div>
+                <div>
+                    <label for="addEmployeePhone"> Phone: </label><br />
                     <input type="text" id="addEmployeePhone" name="addEmployeePhone" />
+                </div>
+<!--                <div>-->
+<!--                    <label for="addEmployeePass">Password: </label><br />-->
+<!--                    <input type="password" id="addEmployeePass" name="addEmployeePass" />-->
+<!--                </div>-->
+<!--                <div>-->
+<!--                    <label for="addEmployeePassConfirm">Confirm Password: </label><br />-->
+<!--                    <input type="password" id="addEmployeePassConfirm" name="addEmployeePassConfirm" />-->
+<!--                </div>-->
+                <div>
+                    <label for="addEmployeeAdminCheckbox">Check if this Account will be Admin: </label> <br />
+                    <input type="checkbox" id="addEmployeeAdminCheckbox" value="1" />
+                </div>
 
-                    <button id="submit">Submit</button>
-                </fieldset>
-            </form>
+                <button id="addEmployeeSubmit">Submit</button>
+            </fieldset>
         </div>
         <div class="removeEmployee" id="removeEmployee">
             <!-- employee username, name, search with table and selector, submit -->
-            <form method="post" action="/admin/removeempl">
-                <fieldset class="removeEmployeeFieldset">
-                    <legend>Remove an Employee</legend>
-
-                    <label for="removeEmplFName"> First Name: </label>
+            <fieldset class="removeEmployeeFieldset">
+                <legend>Remove an Employee</legend>
+                <div>
+                    <label for="removeEmplFName"> First Name: </label><br />
                     <input type="text" id="removeEmplFName" name="removeEmplFName" />
-                    <label for="removeEmplLName"> Last Name: </label>
+                </div>
+                <div>
+                    <label for="removeEmplLName"> Last Name: </label><br />
                     <input type="text" id="removeEmplLName" name="removeEmplLName" />
+                </div>
 
-                    <button id="removeEmplSearch">Search</button>
+                <button id="removeEmplSearchButton">Search</button>
 
-                    <div class="removeEmplSearchResults">
-                        <select name="removeEmplFName" id="removeEmplFName">
-                            <option value="null">Select an Employee</option>
-                            <%
+                <div id="removeEmplSearchResults">
+                    <select name="removeEmplSearchSelect" id="removeEmplSearchSelect">
+                        <option value="null">Select an Employee</option>
+                    </select>
+                </div>
 
-                            %>
-                        </select>
-                    </div>
-
-                    <button id="submit">Submit</button>
-                </fieldset>
-            </form>
-        </div>
-        <div class="resetPassword" id="resetPassword">
-            <!-- employee username, name, search with table and selector, submit -->
-            <form id="resetPasswordForm" method="post" action="/api/resetPassword">
-                <fieldset class="resetPasswordFieldset">
-                    <legend>Reset Employee Password</legend>
-
-                    <label for="resetUsername"> Username: </label>
-                    <input type="text" id="resetUsername" name="username" />
-
-                    <button type="submit" id="resetPasswordSubmit">Submit</button>
-                </fieldset>
-            </form>
-            <div id="resetPasswordResult"></div>
+                <button id="removeEmployeeSubmit">Submit</button>
+            </fieldset>
         </div>
         <div class="addNewClient" id="addNewClient">
             <!-- sends you to empty client page to put in info -->
-            <form method="post" action="/admin/addclient">
-                <fieldset class="addNewClientFieldset">
-                    <legend>Add a New Client</legend>
-
-                    <label for="addNewClient_fName">First Name: </label>
-                    <input type="text" id="addNewClient_fName" required="required"/>
-                    <label for="addNewClient_mName">Middle Name: </label>
-                    <input type="text" id="addNewClient_mName" />
-                    <label for="addNewClient_lName">Last Name: </label>
-                    <input type="text" id="addNewClient_lName" required="required"/>
-
-                    <button id="addNewClient_buildButton">Build</button>
-                </fieldset>
-            </form>
+            <fieldset class="addNewClientFieldset">
+                <legend>Add a New Client</legend>
+                <div>
+                    <label for="addClientFName">First Name: </label><br />
+                    <input type="text" id="addClientFName" required="required"/>
+                </div>
+                <div>
+                    <label for="addClientMName">Middle Name: </label><br />
+                    <input type="text" id="addClientMName" />
+                </div>
+                <div>
+                    <label for="addClientLName">Last Name: </label><br />
+                    <input type="text" id="addClientLName" required="required"/>
+                </div>
+                <div>
+                    <label for="addClientEmail">Email: </label><br />
+                    <input type="text" id="addClientEmail" />
+                </div>
+                <div>
+                    <label for="addClientAddress">Address: </label><br />
+                    <input type="text" id="addClientAddress" />
+                </div>
+                <div>
+                    <label for="addClientCity">City: </label><br />
+                    <input type="text" id="addClientCity" />
+                </div>
+                <div>
+                    <label for="addClientZip">Zip: </label><br />
+                    <input type="text" id="addClientZip" />
+                </div>
+                <div>
+                    <label for="addClientDoB">Date of Birth: </label><br />
+                    <input type="date" id="addClientDoB" />
+                </div>
+                <div>
+                    <label for="addClientPhone">Phone: </label><br />
+                    <input type="text" id="addClientPhone" maxlength="12"/>
+                </div>
+                <button id="addClientSubmit">Add</button>
+            </fieldset>
         </div>
         <div class="removeClient" id="removeClient">
             <!-- search by name, program, id?, phone, email, display info in mini table -->
-            <form method="post" action="/admin/removeclient">
-                <fieldset class="removeClientFieldset">
-                    <legend>Remove a Client</legend>
-
-                    <label for="removeClientName"> Enter Client Name: </label>
-                    <input type="text" id="removeClientName" />
-
+            <fieldset class="removeClientFieldset">
+                <legend>Remove a Client</legend>
+                <div>
+                    <label for="removeClientFName"> First Name: </label><br />
+                    <input type="text" id="removeClientFName" />
+                </div>
+                <div>
+                    <label for="removeClientLName"> Last Name: </label><br />
+                    <input type="text" id="removeClientLName" />
+                </div>
+                <div>
                     <button id="removeClientSearchButton">Search</button>
-                    <div class="removeClientResult">
-                        <label for="removeClientSelect">Clients: </label>
-                        <select id="removeClientSelect">
-                            <option value="null">Select a Client:</option>
-                            <%
-                            // foreach for array of filtered clients as options
-                            %>
-                        </select>
-                    </div>
-                </fieldset>
-            </form>
+                </div>
+                <div class="removeClientSearchResults">
+                    <label for="removeClientSelect">Clients: </label><br />
+                    <select id="removeClientSelect">
+                        <option value="null">Select a Client:</option>
+                    </select>
+                </div>
+
+                <button id="removeClientSubmit">Submit</button>
+            </fieldset>
         </div>
     </div>
 </div>
@@ -188,3 +231,6 @@
     <button id="goBackButton" class="dimHover footerButton">Go Back</button>
 </footer>
 </body>
+
+<script src="../js/adminButtons.js" defer="defer"></script>
+<script src="../js/adminActions.js" defer="defer"></script>
