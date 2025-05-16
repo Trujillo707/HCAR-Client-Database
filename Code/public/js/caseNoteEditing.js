@@ -6,8 +6,16 @@ const backButton = document.getElementById("cancelButton");
 const saveButton = document.getElementById("saveButton");
 const confirmDialog = document.getElementById("dialogBox");
 const okayButton = document.getElementById("dialogBlack");
+const signButton = document.getElementById("sign_button");
+const signText = document.getElementById("empl_signoff");
 
 backButton.addEventListener("click", () => history.back());
+
+signButton.addEventListener("click", () =>
+{
+    let staffName = signButton.dataset.staff;
+    signText.value = staffName;
+})
 
 // Event Listener for "Create / Save"
 saveButton.addEventListener("click", () => {
@@ -25,7 +33,7 @@ saveButton.addEventListener("click", () => {
 
 
     // Validity check
-    if (goalProgress == "" || narrative == "" || nextSteps == "" || dateOfEvent == "" || dateOfSignoff == "" || subject == "" || program == "")
+    if (goalProgress == "" || narrative == "" || nextSteps == "" || dateOfEvent == "" || dateOfSignoff == "" || subject == "" || program == "" || signText.value == "")
     {
         alert("Please ensure all required fields are populated");
         return;

@@ -321,6 +321,34 @@ export default class QueryParser {
     }
 
     /**
+     * Queries the database for the name of the current user
+     * @param {number} staffID The ID of the current user
+     * @returns {Promise<Object>} An object containing the client's demographic details or an error message
+     */
+    async getEmployeeName(staffID) {
+        if (staffID == null) {
+            return {"Error": "Invalid StaffID"};
+        }
+
+        if (typeof staffID != "number")
+            staffID = Number(staffID);
+
+        const demoStmt = "SELECT CONCAT(fname, ' ', lname) as creator FROM Staff WHERE staffID = ?";
+
+        try {
+            const [rows] = await this.#pool.execute(demoStmt, [staffID]);
+            if (rows.length > 0) {
+                return rows; 
+            } else {
+                return {"Error": "Staff ID not found / Does Not Exist"};
+            }
+        } catch (e) {
+            console.log("Error: Failure getting Staff Name: " + e);
+            return {"Error": "Failure getting Staff Name"};
+        }
+    }
+
+    /**
      * Queries the database for the client's insurance and medical preferences.
      * @param {number} clientID
      * @returns {Promise<{primaryInsurance: Object, secondaryInsurance: Object, pcp: Object, primaryPhysician: Object}|{Error: string}>}
@@ -535,7 +563,8 @@ export default class QueryParser {
                     return {"Error": "Failure getting program ID given program name"};
                 }
 
-                await connection.execute("UPDATE Note SET contactType = ?, goal = ?, goalProgress = ?, narrative = ?, nextSteps = ?, subject = ?, dateModified = ?, dateOfEvent = ?, programID = ? WHERE noteID = ?", [
+                await connection.execute("UPDATE Note SET staffID = ?, contactType = ?, goal = ?, goalProgress = ?, narrative = ?, nextSteps = ?, subject = ?, dateModified = ?, dateOfEvent = ?, programID = ? WHERE noteID = ?", [
+                    staffID,
                     req.body.contactType,
                     req.body.goal,
                     req.body.goalProgress,
