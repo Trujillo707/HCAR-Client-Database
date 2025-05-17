@@ -135,7 +135,7 @@ export default class QueryParser {
      */
     async getAllFilteredClients(acctID,
                                 filters = {
-                                    firstName: "%", middleName: "%", lastName: "%", phoneNumber: "%", dob: "%", gender: "%",
+                                    firstName: "%", mName: "%", lastName: "%", phoneNumber: "%", dob: "%", gender: "%",
                                     program: "%", email: "%", pronouns: "%", pos: "%"
                                 },
                                 offset = 0) {
@@ -272,7 +272,7 @@ export default class QueryParser {
 
         const demoStmt = "SELECT Client.clientID, fName, mName, lName, email, address, addressType, city, state, zip, dateOfBirth, phoneNumber, " +
             "       phoneType, sex, gender, pronouns, pos, greeting, nickname, maritalStatus, religPref, payee, preferredHospital, likes, " +
-            "       dislikes, goals, hobbies, achievements, conservator, F.filename as profilePicture " +
+            "       dislikes, goals, hobbies, achievements, miscNotes, conservator, F.filename as profilePicture " +
             "FROM Client " +
             "LEFT JOIN HCAR.File F on Client.profilePicture = F.fileID " +
             "WHERE Client.clientID = ?"
@@ -317,6 +317,34 @@ export default class QueryParser {
         } catch (e) {
             console.log("Error: Failure getting Client's programs" + e);
             return {"Error": "Failure getting Client's programs"};
+        }
+    }
+
+    /**
+     * Queries the database for the name of the current user
+     * @param {number} staffID The ID of the current user
+     * @returns {Promise<Object>} An object containing the client's demographic details or an error message
+     */
+    async getEmployeeName(staffID) {
+        if (staffID == null) {
+            return {"Error": "Invalid StaffID"};
+        }
+
+        if (typeof staffID != "number")
+            staffID = Number(staffID);
+
+        const demoStmt = "SELECT CONCAT(fname, ' ', lname) as creator FROM Staff WHERE staffID = ?";
+
+        try {
+            const [rows] = await this.#pool.execute(demoStmt, [staffID]);
+            if (rows.length > 0) {
+                return rows; 
+            } else {
+                return {"Error": "Staff ID not found / Does Not Exist"};
+            }
+        } catch (e) {
+            console.log("Error: Failure getting Staff Name: " + e);
+            return {"Error": "Failure getting Staff Name"};
         }
     }
 
@@ -535,7 +563,8 @@ export default class QueryParser {
                     return {"Error": "Failure getting program ID given program name"};
                 }
 
-                await connection.execute("UPDATE Note SET contactType = ?, goal = ?, goalProgress = ?, narrative = ?, nextSteps = ?, subject = ?, dateModified = ?, dateOfEvent = ?, programID = ? WHERE noteID = ?", [
+                await connection.execute("UPDATE Note SET staffID = ?, contactType = ?, goal = ?, goalProgress = ?, narrative = ?, nextSteps = ?, subject = ?, dateModified = ?, dateOfEvent = ?, programID = ? WHERE noteID = ?", [
+                    staffID,
                     req.body.contactType,
                     req.body.goal,
                     req.body.goalProgress,
@@ -580,7 +609,6 @@ export default class QueryParser {
                 const staffClientQuery = "SELECT COUNT(*) FROM StaffClient sc JOIN NoteClient nc ON sc.clientID=nc.clientID WHERE sc.staffID = ? AND nc.noteID = ? AND sc.clientID = ?;";
                 var [staffClientNote] = await connection.execute(staffClientQuery, [staffID, noteID, clientID]);
             }
-            console.log(staffClientNote[0]['COUNT(*)']);
             if (account.admin === 1 || staffClientNote[0]['COUNT(*)'] === 1) {
                 var [deleteResults] = await connection.execute("CALL DeleteCaseNote(?, ?)", [
                     clientID,
@@ -678,28 +706,24 @@ export default class QueryParser {
          lName             = :lName,
          email             = :email,
          address           = :address,
-         addressType       = :addressType,
          city              = :city,
          state             = :state,
          zip               = :zip,
          dateOfBirth       = :dateOfBirth,
          phoneNumber       = :phoneNumber,
-         phoneType         = :phoneType,
+         pos               = :pos,
          sex               = :sex,
          gender            = :gender,
          pronouns          = :pronouns,
          greeting          = :greeting,
          nickname          = :nickname,
          maritalStatus     = :maritalStatus,
-         religPref         = :religPref,
-         payee             = :payee,
          preferredHospital = :preferredHospital,
          likes             = :likes,
          dislikes          = :dislikes,
          goals             = :goals,
          hobbies           = :hobbies,
          achievements      = :achievements,
-         conservator       = :conservator
         WHERE clientID         = :clientID
         `;
         let [updateClientResult] = await connection.execute(updateClientQuery, 
@@ -710,13 +734,12 @@ export default class QueryParser {
             lName:            req.body.lName,
             email:            req.body.email,
             address:          req.body.address,
-            addressType:      req.body.addressType,
             city:             req.body.city,
             state:            req.body.state,
             zip:              req.body.zip,
             dateOfBirth:      req.body.dateOfBirth,
             phoneNumber:      req.body.phoneNumber,
-            phoneType:        req.body.phoneType,
+              pos:            req.body.pos,
             sex:              req.body.sex,
             gender:           req.body.gender,
             pronouns:         req.body.pronouns,
@@ -724,14 +747,12 @@ export default class QueryParser {
             nickname:         req.body.nickname,
             maritalStatus:    req.body.maritalStatus,
             religPref:        req.body.religPref,
-            payee:            req.body.payee,
             preferredHospital:req.body.preferredHospital,
             likes:            req.body.likes,
             dislikes:         req.body.dislikes,
             goals:            req.body.goals,
             hobbies:          req.body.hobbies,
             achievements:     req.body.achievements,
-            conservator:      req.body.conservator
         });
         await connection.commit();
         return {"message": "Client successfully updated"};

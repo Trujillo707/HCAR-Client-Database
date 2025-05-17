@@ -8,14 +8,17 @@
  * @version 2025-03-26
  */
 export default class Insurance{
+    #id = "";
     #name = "";
     #policyNumber = "";
 
     /**
+     * @param {number} id
      * @param {string} name
      * @param {string} policyNumber
      */
-    constructor({name, policyNumber}) {
+    constructor({id, name, policyNumber}) {
+        this.#id = id;
         this.#name = name;
         this.#policyNumber = policyNumber;
     }
@@ -26,5 +29,9 @@ export default class Insurance{
 
     getPolicyNumber(){
         return this.#policyNumber;
+    }
+
+    getID(){
+        return this.#id;
     }
 }

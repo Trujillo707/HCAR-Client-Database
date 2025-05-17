@@ -27,6 +27,7 @@ import {
     mailListReport,
     medInfoReport
 } from "./reports-logic/reports.js";
+import { constants } from "os";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -151,8 +152,6 @@ app.get('/results', sanitize, async (req, res) => {
         let clients = [];
         if (results[0] !== undefined)
         {
-            // console.log("Results: ", results[0]);   // Uncomment for debugging
-            // console.log("Programs: ", results[1]);   // Uncomment for debugging
             for (const client of results[0])
             {
                 clients.push(new ClientBuilder()
@@ -167,6 +166,7 @@ app.get('/results', sanitize, async (req, res) => {
                     .setSex(client.gender !== null ? client.gender : "Empty")
                     .setPrograms(new Programs({names: results[1].filter(program => program.clientID === client.clientID).map(program => program.name)}))
                     .setPOS(client.pos !== null ? new Date(client.pos) : "")
+                    .setPictureURL(client.profilePictureFilename !== null ? client.profilePictureFilename : "")
                     .build());
             }
         }
@@ -190,8 +190,6 @@ app.get("/results/all", async(req, res) => {
         let clients = [];
         if (results[0] !== undefined)
         {
-            //console.log("Results: ", results[0]);   // Uncomment for debugging
-            //console.log("Programs: ", results[1]);   // Uncomment for debugging
             for (const client of results[0])
             {
                 clients.push(new ClientBuilder()
@@ -206,6 +204,7 @@ app.get("/results/all", async(req, res) => {
                     .setSex(client.gender !== null ? client.gender : "Empty")
                     .setPrograms(new Programs({names: results[1].filter(program => program.clientID === client.clientID).map(program => program.name)}))
                     .setPOS(client.pos !== null ? new Date(client.pos) : "")
+                    .setPictureURL(client.profilePictureFilename !== null ? client.profilePictureFilename : "")
                     .build());
             }
         }
@@ -288,10 +287,10 @@ app.post("/caseNote", async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         // After verification of credentials
+        const noteCreator = await qp.getEmployeeName(account.staffID);
         const client = req.body.clientID;     // Client Object
         const note = req.body.noteID;     // Case Note 
         const type = req.body.button;       // Button pressed
@@ -299,10 +298,10 @@ app.post("/caseNote", async (req, res) => {
         // Session Data Transfer
         req.session.caseNoteInfo = {
             client: client,
-            note: note
+            note: note,
+            noteCreator: noteCreator[0].creator
         };
 
-        // res.render("caseNote", {theClient: client, note: noteID, method: type});
         res.json({redirect: `/caseNote/${type}`});
     }
 });
@@ -313,17 +312,16 @@ app.get("/caseNote/new", async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         const clientID = Number(req.session.caseNoteInfo.client);
-        const noteID = req.session.caseNoteInfo.note;
+        const noteCreator = req.session.caseNoteInfo.noteCreator;
         // Rebuild class objects
         let clientDem = await qp.getClientDemographics(clientID);
         let progs = await qp.getClientPrograms(clientID);
         // Build client
         let client = rebuildClient(clientDem, progs);
-        res.render("caseNote", {theClient: client, method: "new"});
+        res.render("caseNote", {theClient: client, method: "new", noteCreator: noteCreator});
     }
 });
 
@@ -333,21 +331,21 @@ app.get("/caseNote/viewedit", async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         const clientID = Number(req.session.caseNoteInfo.client);
         const noteID = req.session.caseNoteInfo.note;
+        const noteCreator = req.session.caseNoteInfo.noteCreator;
         // Rebuild class objects
         let clientDem = await qp.getClientDemographics(clientID);
         let progs = await qp.getClientPrograms(clientID);
         let noteDetails = await qp.getCaseNote(noteID);
+        noteDetails.employeeSign = account.staffID;    
         // Build Case Note
-        console.log("Note Details: ", noteDetails);
         let note = rebuild(CaseNote, noteDetails);
         // Build Client
         let client = rebuildClient(clientDem, progs);
-        res.render("caseNote", {theClient: client, note: note, method: "viewedit"});
+        res.render("caseNote", {theClient: client, note: note, noteCreator: noteCreator, method: "viewedit"});
     }
 });
 
@@ -391,12 +389,17 @@ app.post('/api/auth', sanitize, async (req, res) => {
 
 /**
  * Body: {
- *   clientID:    number,
- *   contactType: string,
- *   goal:        string,
- *   goalProgress:string,
- *   narrative:   string,
- *   nextSteps:   string
+ *   clientID:      number,
+ *   contactType:   string,
+ *   goal:          string,
+ *   goalProgress:  string,
+ *   narrative:     string,
+ *   nextSteps:     string,
+ *   noteID:        string,
+ *   subject:       string,
+ *   dateOfSignoff: Date,
+ *   dateOfEvent:   Date,
+ *   program:       string
  * }
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully created"
@@ -415,12 +418,12 @@ app.post('/api/createCaseNote', sanitize, async (req, res) => {
  *   goal:          string,
  *   goalProgress:  string,
  *   narrative:     string,
- *   nextSteps:     string
- *   noteID:        string
- *   subject:       string
- *   dateOfSignoff: Date
- *   dateOfEvent:   Date
- *   program:       string
+ *   nextSteps:     string,
+ *   noteID:        string,
+ *   subject:       string,
+ *   dateOfSignoff: Date,
+ *   dateOfEvent:   Date,
+ *   program:       string,
  * }
  * Response on error: { "Error": "…message…" }
  * Response on success: "Case note successfully updated"
@@ -520,13 +523,6 @@ app.post('/api/updatePassword', sanitize, async (req, res) => {
 
 
 
-
-// TODO: MAKE THIS POST OBVIOUSLY 
-/*app.get('/client', (req, res) => {
-    let rawData = req.body.clientID;
-    res.render("clientDetails", {theAccount: false, theClient: testClientArray[0]});
-});*/
-
 app.post('/client', sanitize, async (req, res) => {
     let cliID = req.body.clientID;
     res.json({redirect: `/client/${cliID}`});
@@ -538,10 +534,8 @@ app.get('/client/:id', async (req, res) => {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
-        //console.log(req.params.id);
         // After verification of credentials
         const cliID = Number(req.params.id);
         // DB Queries
@@ -551,19 +545,10 @@ app.get('/client/:id', async (req, res) => {
         let vaccinationList = await qp.getVaccinationList(cliID);
         let caseNotesList = await qp.getCaseNoteList(cliID);
         let supportStaffList = await qp.getSupportStaffList(cliID);
-
         let meds = [];
         let vaccines = [];
         let caseNotes = [];
         let supportStaff = [];
-        /*
-        console.log("Demographics: ", cliDem);
-        console.log("Insurance: ", insurAndMed);
-        console.log("Medication: ", medicationList);
-        console.log("Vaccination: ", vaccinationList);
-        console.log("Case Notes: ", caseNotesList);
-        console.log("Support Staff: ", supportStaffList)
-         */
 
         // Comprehension for med list
         for (const med of medicationList)
@@ -619,47 +604,51 @@ app.get('/client/:id', async (req, res) => {
 
         // Build client
         const client = new ClientBuilder()
-        .setClientID(cliDem.clientID !== null ? cliDem.clientID : "Empty")
-        .setFirstName(cliDem.fName !== null ? cliDem.fName : "Empty")
+        .setClientID(cliDem.clientID !== null ? cliDem.clientID : "")
+        .setFirstName(cliDem.fName !== null ? cliDem.fName : "")
             .setMiddleName(cliDem.mName !== null ? cliDem.mName : "")
-            .setLastName(cliDem.lName !== null ? cliDem.lName : "Empty")
-        .setEmail(cliDem.email !== null ? cliDem.email : "Empty")
+            .setLastName(cliDem.lName !== null ? cliDem.lName : "")
+        .setEmail(cliDem.email !== null ? cliDem.email : "")
         .setAddress(new Address({
-            streetAddress: cliDem.address !== null ? cliDem.address : "Empty",
-            city: cliDem.city !== null ? cliDem.city : "Empty",
-            state: cliDem.state !== null ? cliDem.state : "Empty",
-            zip: cliDem.zip !== null ? cliDem.zip : "Empty" 
+            streetAddress: cliDem.address !== null ? cliDem.address : "",
+            city: cliDem.city !== null ? cliDem.city : "",
+            state: cliDem.state !== null ? cliDem.state : "",
+            zip: cliDem.zip !== null ? cliDem.zip : ""
         }))
-        .setDOB(cliDem.dateOfBirth !== null ? new Date(cliDem.dateOfBirth) : "Empty")
-        .setPhoneNumber(cliDem.phoneNumber !== null ? cliDem.phoneNumber : "Empty")
-        .setSex(cliDem.gender !== null ? cliDem.gender : "Empty")
-        .setPronouns(cliDem.pronouns !== null ? cliDem.pronouns : "Empty")
+        .setDOB(cliDem.dateOfBirth !== null ? new Date(cliDem.dateOfBirth) : "")
+        .setPhoneNumber(cliDem.phoneNumber !== null ? cliDem.phoneNumber : "")
+        .setSex(cliDem.gender !== null ? cliDem.gender : "")
+        .setPronouns(cliDem.pronouns !== null ? cliDem.pronouns : "")
         .setMaritalStatus(cliDem.maritalStatus === 0 ? "Single" : "Divorced")   // Change later?
-        .setPreferredHospital(cliDem.preferredHospital !== null ? cliDem.preferredHospital : "Empty")
-        .setLikes(cliDem.likes !== null ? cliDem.likes : "Empty")
-        .setDislikes(cliDem.dislikes !== null ? cliDem.dislikes : "Empty")
-        .setGoals(cliDem.goals !== null ? cliDem.goals : "Empty")
-        .setHobbies(cliDem.hobbies !== null ? cliDem.hobbies : "Empty")
-        .setAchievements(cliDem.achievements !== null ? cliDem.achievements : "Empty")
+        .setPreferredHospital(cliDem.preferredHospital !== null ? cliDem.preferredHospital : "")
+        .setLikes(cliDem.likes !== null ? cliDem.likes : "")
+        .setDislikes(cliDem.dislikes !== null ? cliDem.dislikes : "")
+        .setGoals(cliDem.goals !== null ? cliDem.goals : "")
+        .setHobbies(cliDem.hobbies !== null ? cliDem.hobbies : "")
+        .setAchievements(cliDem.achievements !== null ? cliDem.achievements : "")
         .setPictureURL(cliDem.profilePicture !== null ? cliDem.profilePicture : "")
         // Setting insurance
         .setPrimaryInsurance(new Insurance({
-            name: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.name !== null) ? insurAndMed.primaryInsurance.name : "Empty",
-            policyNumber: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.policyNumber !== null) ? insurAndMed.primaryInsurance.policyNumber : "Empty"
+            id: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.insuranceID !== null) ? insurAndMed.primaryInsurance.insuranceID : "",
+            name: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.name !== null) ? insurAndMed.primaryInsurance.name : "",
+            policyNumber: (insurAndMed.primaryInsurance && insurAndMed.primaryInsurance.policyNumber !== null) ? insurAndMed.primaryInsurance.policyNumber : ""
         }))
         .setSecondaryInsurance(new Insurance({
-            name: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.name !== null) ? insurAndMed.secondaryInsurance.name : "Empty",
-            policyNumber: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.policyNumber !== null) ? insurAndMed.secondaryInsurance.policyNumber : "Empty"
+            id: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.insuranceID !== null) ? insurAndMed.secondaryInsurance.insuranceID : "",
+            name: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.name !== null) ? insurAndMed.secondaryInsurance.name : "",
+            policyNumber: (insurAndMed.secondaryInsurance && insurAndMed.secondaryInsurance.policyNumber !== null) ? insurAndMed.secondaryInsurance.policyNumber : ""
         }))
         .setPcp(new ContactInfo({
-            name: (insurAndMed.pcp && insurAndMed.pcp.name !== null) ? insurAndMed.pcp.name : "Empty",
-            phoneNumber: (insurAndMed.pcp && insurAndMed.pcp.phoneNumber !== null) ? insurAndMed.pcp.phoneNumber : "Empty",
-            address: (insurAndMed.pcp && insurAndMed.pcp.address !== null) ? insurAndMed.pcp.address : "Empty"
+            id: (insurAndMed.pcp && insurAndMed.pcp.contactID !== null) ? insurAndMed.pcp.contactID : "",
+            name: (insurAndMed.pcp && insurAndMed.pcp.name !== null) ? insurAndMed.pcp.name : "",
+            phoneNumber: (insurAndMed.pcp && insurAndMed.pcp.phoneNumber !== null) ? insurAndMed.pcp.phoneNumber : "",
+            address: (insurAndMed.pcp && insurAndMed.pcp.address !== null) ? insurAndMed.pcp.address : ""
         }))
         .setPrimaryPhysician(new ContactInfo({
-            name: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.name !== null) ? insurAndMed.primaryPhysician.name : "Empty",
-            phoneNumber: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.phoneNumber !== null) ? insurAndMed.primaryPhysician.phoneNumber : "Empty",
-            address: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.address !== null) ? insurAndMed.primaryPhysician.address : "Empty"
+            id: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.contactID !== null) ? insurAndMed.primaryPhysician.contactID : "",
+            name: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.name !== null) ? insurAndMed.primaryPhysician.name : "",
+            phoneNumber: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.phoneNumber !== null) ? insurAndMed.primaryPhysician.phoneNumber : "",
+            address: (insurAndMed.primaryPhysician && insurAndMed.primaryPhysician.address !== null) ? insurAndMed.primaryPhysician.address : ""
         }))
         // Setting medication
         .setMedicationList(meds)
@@ -671,7 +660,7 @@ app.get('/client/:id', async (req, res) => {
         .setCaseNoteList(caseNotes)
             .setPOS(cliDem.pos !== null ? new Date(cliDem.pos) : "")
             .build();
-
+        //console.log(client.getPcp().getID());
         res.render("clientDetails", {theAccount: account, theClient: client});
     }
 });
@@ -751,6 +740,11 @@ process.on('SIGTERM',async () => {
     }
 });
 
+// If no route is matched, path does not exist
+app.use((req, res) => {
+  res.status(404).send('404 - Page Not Found');
+});
+
 function sanitize(req, res, next)
 {
     if (req.method === "POST"){
@@ -763,7 +757,7 @@ function sanitize(req, res, next)
                 if (key === "email")
                     req.body[key] = req.body[key].replace(/[^\w@\.]/g, "");
                 else
-                    req.body[key] = req.body[key].replace(/[^\w- ]/g, "");
+                    req.body[key] = req.body[key].replace(/[^\w-+ ]/g, "");
             }
         }
     } else{
@@ -835,7 +829,6 @@ async function authCheck(req, res, next) {
     const account = await qp.isAuthenticated(req);
     if (!account.username) {
         // Not verified
-        // TODO: Change index.html to an EJS file so we can render login and auth failures
         res.redirect("/");
     } else {
         // After verification of credentials

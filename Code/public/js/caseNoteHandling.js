@@ -50,8 +50,6 @@ caseNoteRows.forEach(row => {
 
 newCaseNoteButton.addEventListener("click", () => {
     const clientID = caseNoteTable.dataset.clientid;
-    // let chosenRow = caseNoteTable.querySelector(".selected");
-    // let nID = chosenRow.dataset.noteID;
     if (clientID == null) {
         alert("Error: Failed to find case note. Please contact a system administrator");
         return;
@@ -217,6 +215,17 @@ downloadCaseNoteButton.addEventListener("click", () => {
                 columns: [
                     {header: "Narrative", dataKey: "narrative"},
                     {header: "Progress on Goal" , dataKey: "goalProgress"},
+                ],
+                body: [
+                    data
+                ],
+                startY: lastY
+            });
+
+            lastY = doc.lastAutoTable.finalY + 20;
+
+            doc.autoTable({
+                columns: [
                     {header: "Next Steps", dataKey: "nextSteps"}
                 ],
                 body: [

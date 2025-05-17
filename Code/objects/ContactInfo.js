@@ -3,6 +3,7 @@
  * @version 2025-03-26
  */
 export default class ContactInfo {
+    #id = "";
     #name = "";
     #phoneNumber = "";
     #address = "";
@@ -13,7 +14,8 @@ export default class ContactInfo {
      * @param {string} phoneNumber
      * @param {string} address
      */
-    constructor({name, phoneNumber, address}) {
+    constructor({id, name, phoneNumber, address}) {
+        this.#id = id;
         this.#name = name;
         this.#phoneNumber = phoneNumber;
         this.#address = address;
@@ -29,5 +31,9 @@ export default class ContactInfo {
 
     getAddress(){
         return this.#address;
+    }
+
+    getID(){
+        return this.#id;
     }
 }
