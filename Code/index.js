@@ -245,41 +245,38 @@ app.get("/admin", async (req, res) => {
     const account = await qp.isAuthenticated(req, true);
 
     if (!account.admin) {
-        res.redirect("/home");
+        res.redirect("/");
     }
     else {
-        res.render("admin", {employeeList: []});
+        res.render("admin", {theMessage: req.query, id: req.session.accountID});
     }
 });
 
-app.post("/admin/addempl", sanitize, async (req, res) => {
-    if (req.body.addEmployeePass !== req.body.addEmployeePassConf) {
-        // alert("Passwords do not match");
-        res.redirect("/admin");
-    }
-    else {
-        let qp = await new QueryParserBuilder().build()
-        let employeeFields = {
-            fName: req.body.addEmployeeFName,
-            mName: req.body.addEmployeeMName,
-            lName: req.body.addEmployeeLName,
-            username: req.body.addEmployeeUser,
-            password: req.body.addEmployeePass,
-        }
-        console.log(employeeFields);
+// app.post("/admin/:emplList", sanitize, async (req, res) => {
+//     let qp = await new QueryParserBuilder().build();
+//     const employeeList = req.params.emplList;
+//
+//     res.render("admin", {remEmployeeList: emplList});
+// });
 
-        const results = await qp.createAccount(employeeFields);
-        console.log(results);
-        res.send(results);
-    }
-});
-
-app.post("/admin/removeempl", sanitize, async (req, res) => {
+app.post('/admin/searchClients', sanitize, async (req, res) => {
     let qp = await new QueryParserBuilder().build()
-    let emplList = qp.searchStaff(req);
+    let account = qp.isAuthenticated(req, true);
 
-    res.render("admin", {employeeList: emplList});
-})
+    if (!account.admin) {
+        res.redirect("/");
+    }
+    else {
+        const results = await qp.getAllFilteredClients(req.session.accountID, req.body);
+        if (results[0] !== undefined) {
+            // console.log("this is being run: " + results[0]);
+            return res.json(results[0]);
+        }
+        else {
+            return res.json({Error: "No clients found"});
+        }
+    }
+});
 
 // Complete this to accomodate for new, and edit/view/delete
 app.post("/caseNote", async (req, res) => {
@@ -471,6 +468,7 @@ app.post('/api/updateCaseNote', sanitize, async (req, res) => {
   app.post('/api/createAccount', async (req, res) => {
     let qp = await new QueryParserBuilder().build()
     const results = await qp.createAccount(req);
+    req.body.admin = parseInt(req.body.admin);
     return res.json(results);
   });
 
