@@ -1,6 +1,6 @@
 const isAdmin = parseInt(document.getElementById("tabContainer").dataset.admin);
 const saveButon = document.getElementById("saveButton");
-/*
+
 function saveClient(){
     if (isAdmin === 1){
         const maritalStatusOption = document.getElementById("maritalStatus").value;
@@ -38,7 +38,7 @@ function saveClient(){
             achievements: document.getElementById("cli_ach").value,
             miscNotes: document.getElementById("cli_add_notes").value
         }
-    } else {
+    } else if (isAdmin === 0) {
 
     }
 }
@@ -46,5 +46,3 @@ function saveClient(){
 document.getElementById("saveButton").addEventListener("click", event => {
     saveClient();
 });
-
-*/
