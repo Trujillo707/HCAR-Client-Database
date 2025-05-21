@@ -722,6 +722,14 @@ td.expired {
 }
 */
 
+#medPrnCol {
+    width: 3em;
+}
+
+#medDosageCol {
+    width: 6em;
+}
+
 .medTableInputs {
     width: 100%;
 }
