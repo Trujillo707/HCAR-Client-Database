@@ -67,10 +67,12 @@ export class ClientBuilder {
     caseNoteList = [];
     /** @type {string} */
     pictureURL = "";
-    /** @type {Program[]} */
+    /** @type {string[]} */
     programs = [];
     /** @type {Date} */
     POS = null;
+    /** @type {string} */
+    gender = "";
 
     // Builder methods
 
@@ -332,6 +334,15 @@ export class ClientBuilder {
      */
     setPOS(pos){
         this.POS = pos;
+        return this;
+    }
+
+    /**
+     * @param gender
+     * @returns {ClientBuilder} Returns this current ClientBuilder to allow method chaining.
+     */
+    setGender(gender){
+        this.gender = gender;
         return this;
     }
 

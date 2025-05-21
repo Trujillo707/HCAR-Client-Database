@@ -20,7 +20,6 @@ export class Client {
     #email = "";
     /** @type {Date}*/
     #DOB = null;
-    // TODO: Consider adding gender as field
     #sex = "";
     #maritalStatus = "";
     #preferredHospital = "";
@@ -50,6 +49,7 @@ export class Client {
     #programs = [];
     /** @type {Date} */
     #POS = null;
+    #gender = "";
 
     /**
      * Client instances are to be created via a ClientBuilder object only.
@@ -86,6 +86,7 @@ export class Client {
         this.#pictureURL = builder.pictureURL;
         this.#programs = builder.programs;
         this.#POS = builder.POS;
+        this.#gender = builder.gender;
     }
 
     /** @returns {number} */
@@ -231,5 +232,10 @@ export class Client {
     /** @returns {Date} */
     getPOS() {
         return this.#POS;
+    }
+
+    /** @returns {string} */
+    getGender(){
+        return this.#gender;
     }
 }

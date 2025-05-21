@@ -617,7 +617,8 @@ app.get('/client/:id', async (req, res) => {
         }))
         .setDOB(cliDem.dateOfBirth !== null ? new Date(cliDem.dateOfBirth) : "")
         .setPhoneNumber(cliDem.phoneNumber !== null ? cliDem.phoneNumber : "")
-        .setSex(cliDem.gender !== null ? cliDem.gender : "")
+            .setSex(cliDem.sex != null ? cliDem.sex : "")
+        .setGender(cliDem.gender !== null ? cliDem.gender : "")
         .setPronouns(cliDem.pronouns !== null ? cliDem.pronouns : "")
         .setMaritalStatus(cliDem.maritalStatus === 0 ? "Single" : "Divorced")   // Change later?
         .setPreferredHospital(cliDem.preferredHospital !== null ? cliDem.preferredHospital : "")
