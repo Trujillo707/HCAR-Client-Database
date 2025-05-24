@@ -1,15 +1,16 @@
 const isAdmin = parseInt(document.getElementById("tabContainer").dataset.admin);
 const saveButon = document.getElementById("saveButton");
-/*
+
 function saveClient(){
     if (isAdmin === 1){
         const maritalStatusOption = document.getElementById("maritalStatus").value;
+        /** @type {number} */
         let maritalStatus;
-        if (maritalStatus === "Single"){
+        if (maritalStatusOption === "Single"){
             maritalStatus = 0;
-        } else if (maritalStatus === "Married"){
+        } else if (maritalStatusOption === "Married"){
             maritalStatus = 1;
-        } else if (maritalStatus === "Divorced"){
+        } else if (maritalStatusOption === "Divorced"){
             maritalStatus = 2;
         } else{
             maritalStatus = 3;
@@ -31,14 +32,21 @@ function saveClient(){
             pronouns: document.getElementById("pronouns").value,
             maritalStatus: maritalStatus,
             preferredHospital: document.getElementById("pref_hospital").value,
+            sex: document.getElementById("sex").value,
             likes: document.getElementById("cli_likes").value,
             dislikes: document.getElementById("cli_dislikes").value,
             goals: document.getElementById("cli_goals").value,
             hobbies: document.getElementById("cli_hobs").value,
             achievements: document.getElementById("cli_ach").value,
             miscNotes: document.getElementById("cli_add_notes").value
+        };
+
+        const primaryInsurance = {
+
         }
-    } else {
+
+
+    } else if (isAdmin === 0) {
 
     }
 }
@@ -46,5 +54,3 @@ function saveClient(){
 document.getElementById("saveButton").addEventListener("click", event => {
     saveClient();
 });
-
-*/

@@ -16,6 +16,7 @@
         let vaccinationList = locals.theClient.getVaccinationList();
         let maritalStatusTypes = ["Single", "Married", "Divorced", "Other"];
         let genderTypes = ["Male", "Female", "Non-Binary", "Agender"];
+        let sexTypes = ["M", "F", "X"];
         let supportTeam = locals.theClient.getSupportTeam();
         let caseNotes = locals.theClient.getCaseNoteList();
 
@@ -132,6 +133,11 @@
                     <input type="text" placeholder="email@example.com" <% if (!isAdmin){%>readonly="readonly"<%}%>
                            value="<%=locals.theClient.getEmail()%>" id="email" />
                 </div>
+                <div id="cli_pronouns">
+                    <label for="pronouns">Pronouns: </label>
+                    <input type="text" placeholder="xx/xxx" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%=locals.theClient.getPronouns()%>" id="pronouns" />
+                </div>
                 <div class="cli_photo">
                     <label for="cli_photo">Photo: </label>
                     <img src="<%= locals.theClient.getPictureURL() %>" alt="client_photo" id="cli_photo" height="100%"  />
@@ -145,9 +151,9 @@
                     <table class="medicationList">
                         <caption> Medication List </caption>
                         <tr>
-                            <th scope="col"> Medication </th>
-                            <th scope="col">PRN</th>
-                            <th scope="col">Dosage</th>
+                            <th scope="col" id="medNameCol"> Medication </th>
+                            <th scope="col" id="medPrnCol">PRN</th>
+                            <th scope="col" id="medDosageCol">Dosage</th>
                             <th scope="col">Time(s) of Day</th>
                             <th scope="col">Purpose</th>
                             <th scope="col">Possible Side Effects</th>
@@ -155,18 +161,18 @@
                         </tr>
                         <% medicationList.forEach((medication) => { %>
                         <tr>
-                            <td><input type="text" class="medTableInputs" id="medName" value="<%=medication.getName()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
-                            <td><input type="text" class="medTableInputs" id="medPrn" value="<%=medication.getPrn()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
-                            <td><input type="text" class="medTableInputs" id="medDosage" value="<%=medication.getDosage()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
-                            <td><input type="text" class="medTableInputs" id="medTimesOfDay" value="<%=medication.getTimesOfDay()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
-                            <td><input type="text" class="medTableInputs" id="medPurpose" value="<%=medication.getPurpose()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
-                            <td><input type="text" class="medTableInputs" id="medSideEffects" value="<%=medication.getSideEffects()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
-                            <td><input type="text" class="medTableInputs" id="medPrescriber" value="<%=medication.getPrescriber()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
+                            <td><input type="text" class="medTableInputs medName" value="<%=medication.getName()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
+                            <td><input type="text" class="medTableInputs medPrn" value="<%=medication.getPrn()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
+                            <td><input type="text" class="medTableInputs medDosage" value="<%=medication.getDosage()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
+                            <td><input type="text" class="medTableInputs medTimesOfDay" value="<%=medication.getTimesOfDay()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
+                            <td><input type="text" class="medTableInputs medPurpose" value="<%=medication.getPurpose()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
+                            <td><input type="text" class="medTableInputs medSideEffects" value="<%=medication.getSideEffects()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
+                            <td><input type="text" class="medTableInputs medPrescriber" value="<%=medication.getPrescriber()%>" <% if (!isAdmin){%>readonly="readonly"<%}%> /></td>
                         </tr>
                         <%
                         })
                         %>
-                        <tr>
+                        <!--tr>
                             <td><input type="text" value="" <% if (!isAdmin){%>readonly="readonly"<%}%>/></td>
                             <td><input type="text" value="" <% if (!isAdmin){%>readonly="readonly"<%}%>/></td>
                             <td><input type="text" value="" <% if (!isAdmin){%>readonly="readonly"<%}%>/></td>
@@ -174,7 +180,7 @@
                             <td><input type="text" value="" <% if (!isAdmin){%>readonly="readonly"<%}%>/></td>
                             <td><input type="text" value="" <% if (!isAdmin){%>readonly="readonly"<%}%>/></td>
                             <td><input type="text" value="" <% if (!isAdmin){%>readonly="readonly"<%}%>/></td>
-                        </tr>
+                        </tr-->
                     </table>
                 </div>
                 <div class="vaccinationListDiv">
@@ -192,10 +198,10 @@
                         <%
                         })
                         %>
-                        <tr>
+                        <!--tr>
                             <td><input type="text" value="" <% if (!isAdmin){%>readonly="readonly"<%}%>/></td>
                             <td><input type="date" value="" <% if (!isAdmin){%>readonly="readonly"<%}%>/></td>
-                        </tr>
+                        </tr-->
                     </table>
                 </div>
                 <div class="p_insurance">
@@ -226,17 +232,44 @@
                     <input type="text" placeholder="Primary Care Provider" <% if (!isAdmin){%>readonly="readonly"<%}%>
                            value="<%=locals.theClient.getPcp().getName()%>" id="p_care_provider"
                            data-id="<%=locals.theClient.getPcp().getID()%>"/>
+
+                    <label for="p_care_provider_phone">PCP Phone Number: </label>
+                    <input type="tel" maxlength="12" placeholder="###-###-####" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                        value="<%= locals.theClient.getPcp().getPhoneNumber()%>" id="p_care_provider_phone"/>
+
+                    <label for="p_care_provider_address">PCP Address: </label>
+                    <input type="text" placeholder="Address" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%= locals.theClient.getPcp().getAddress()%>" id="p_care_provider_address"/>
                 </div>
                 <div class="p_physician">
                     <label for="p_physician">Primary Physician: </label>
                     <input type="text" placeholder="Primary Physician" <% if (!isAdmin){%>readonly="readonly"<%}%>
                            value="<%=locals.theClient.getPrimaryPhysician().getName()%>" id="p_physician"
                            data-id="<%=locals.theClient.getPrimaryPhysician().getID()%>"/>
+
+                    <label for="p_physician_phone">Phys. Phone Number: </label>
+                    <input type="tel" maxlength="12" placeholder="###-###-####" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%= locals.theClient.getPrimaryPhysician().getPhoneNumber()%>" id="p_physician_phone"/>
+
+                    <label for="p_physician_address">Phys. Address: </label>
+                    <input type="text" placeholder="Physician's Address" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%= locals.theClient.getPrimaryPhysician().getAddress()%>" id="p_physician_address"/>
                 </div>
                 <div class="pref_hospital">
                     <label for="pref_hospital">Preferred Hospital: </label>
                     <input type="text" placeholder="Preferred Hospital" <% if (!isAdmin){%>readonly="readonly"<%}%>
                            value="<%=locals.theClient.getPreferredHospital()%>" id="pref_hospital" />
+                </div>
+                <div id="cli_sex">
+                    <% /** using sexTypes[] to remove current value, and use values as other sex options */
+                    sexTypes = sexTypes.filter(e => e !== locals.theClient.getSex())
+                    %>
+                    <label for="sex">Sex: </label>
+                    <select name="sex" id="sex" <% if (!isAdmin){%>disabled="disabled"<%}%>>
+                        <option value="<%=locals.theClient.getSex()%>" id="current"> <%=locals.theClient.getSex()%> </option>
+                        <option value="<%=sexTypes[0]%>" id="option2"> <%=sexTypes[0]%> </option>
+                        <option value="<%=sexTypes[1]%>" id="option3"> <%=sexTypes[1]%> </option>
+                    </select>
                 </div>
             </div>
         </div>

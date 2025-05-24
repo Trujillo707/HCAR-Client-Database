@@ -590,7 +590,7 @@ td.expired {
     grid-template-areas: "fName midName lName DoB"
                          "address city state zip"
                          "phone email pos photo"
-                         "sex maritalStatus . photo";
+                         "gender pronouns maritalStatus photo";
     justify-content: center;
     grid-template-columns: 21% 21% 26% 30%;
     grid-template-rows: 25% 25% 25% 25%;
@@ -607,7 +607,11 @@ td.expired {
 #cli_state { grid-area: state}
 #cli_zip { grid-area: zip}
 .cli_email { grid-area: email; }
-.cli_sex { grid-area: sex; }
+#cli_gender { grid-area: gender; }
+#cli_pronouns {
+    grid-area: pronouns;
+}
+
 .cli_maritalStatus { grid-area: maritalStatus; }
 .cli_regionalCenterID { grid-area: regionalCenterID; }
 /* div for photo */
@@ -648,27 +652,43 @@ td.expired {
     display: grid;
     justify-content: center;
     grid-template-areas: "p_insurance p_insurance_num p_care_provider"
-                         "s_insurance s_insurance_num p_physician"
-                         "pref_hospital . ."
-                         "vaccinationList . medReportButtonContainer"
-                         "medicationList . .";
+                         "s_insurance s_insurance_num p_care_provider"
+                         "pref_hospital sex p_care_provider"
+                         "vaccinationList . p_physician"
+                         "medicationList medicationList medicationList";
     grid-template-columns: 33% 33% 33%;
     row-gap: 1em;
     min-width: 90%;
 }
 
 .medicationListDiv { grid-area: medicationList; }
-.vaccinationListDiv { grid-area: vaccinationList; }
+.vaccinationListDiv { grid-area: vaccinationList;}
 .p_insurance { grid-area: p_insurance; }
 .p_insurance_num { grid-area: p_insurance_num; }
 .s_insurance { grid-area: s_insurance; }
 .s_insurance_num { grid-area: s_insurance_num; }
-.p_care_provider { grid-area: p_care_provider; }
-.p_physician { grid-area: p_physician; }
+.p_care_provider {
+    grid-area: p_care_provider;
+}
+.p_physician {
+    grid-area: p_physician;
+}
+#cli_sex{
+    grid-area: sex;
+}
 .pref_hospital { grid-area: pref_hospital; }
+
+.vaccinationList {
+    border-collapse: collapse;
+}
+
+.vaccinationList td {
+    padding-left: 0.1em;
+}
 #medReportButtonContainer{
     grid-area: medReportButtonContainer;
 }
+
 
 .medContent > div > *:not(label, table, th, td) {
     display: block;
@@ -681,28 +701,45 @@ td.expired {
 
 .medicationList {
     border-collapse: collapse;
-    margin: 0.75em;
+    /*margin: 0.75em;*/
+    width: 100%;
+    table-layout: fixed;
 }
 
 .medicationList th, .medicationList td {
+    padding: 0.1em;
     border: 1px solid #ddd;
-    padding: 8px;
 }
 
 .medicationList th {
-    background-color: #f4f4f4;
+    /*background-color: #f4f4f4;*/
     font-weight: bold;
     width: 100%;
+    border-right: 1px solid #f4f4f4;
 }
 
+.medicationList th:last-of-type {
+    border-right: 1px solid #ddd;
+}
+/*
 .medicationList > tbody > tr > th > *, .medicationList > tbody > tr > td > * {
     width: 7em;
     padding: 0.5em;
     text-wrap: wrap;
 }
+*/
 
+#medPrnCol {
+    width: 3em;
+}
 
+#medDosageCol {
+    width: 6em;
+}
 
+.medTableInputs {
+    width: 100%;
+}
 
 .personalInfoContent {
     display: grid;
