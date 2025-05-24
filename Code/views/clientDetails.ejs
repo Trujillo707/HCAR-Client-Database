@@ -232,12 +232,28 @@
                     <input type="text" placeholder="Primary Care Provider" <% if (!isAdmin){%>readonly="readonly"<%}%>
                            value="<%=locals.theClient.getPcp().getName()%>" id="p_care_provider"
                            data-id="<%=locals.theClient.getPcp().getID()%>"/>
+
+                    <label for="p_care_provider_phone">PCP Phone Number: </label>
+                    <input type="tel" maxlength="12" placeholder="###-###-####" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                        value="<%= locals.theClient.getPcp().getPhoneNumber()%>" id="p_care_provider_phone"/>
+
+                    <label for="p_care_provider_address">PCP Address: </label>
+                    <input type="text" placeholder="Address" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%= locals.theClient.getPcp().getAddress()%>" id="p_care_provider_address"/>
                 </div>
                 <div class="p_physician">
                     <label for="p_physician">Primary Physician: </label>
                     <input type="text" placeholder="Primary Physician" <% if (!isAdmin){%>readonly="readonly"<%}%>
                            value="<%=locals.theClient.getPrimaryPhysician().getName()%>" id="p_physician"
                            data-id="<%=locals.theClient.getPrimaryPhysician().getID()%>"/>
+
+                    <label for="p_physician_phone">Phys. Phone Number: </label>
+                    <input type="tel" maxlength="12" placeholder="###-###-####" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%= locals.theClient.getPrimaryPhysician().getPhoneNumber()%>" id="p_physician_phone"/>
+
+                    <label for="p_physician_address">Phys. Address: </label>
+                    <input type="text" placeholder="Physician's Address" <% if (!isAdmin){%>readonly="readonly"<%}%>
+                           value="<%= locals.theClient.getPrimaryPhysician().getAddress()%>" id="p_physician_address"/>
                 </div>
                 <div class="pref_hospital">
                     <label for="pref_hospital">Preferred Hospital: </label>
