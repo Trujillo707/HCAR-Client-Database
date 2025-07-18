@@ -25,7 +25,7 @@
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "express-mysql-session": "^3.0.3",
-    "express-session": "^1.18.1",
+    "express-session": "^1.18.2",
     "jspdf": "^3.0.1",
     "mysql2": "^3.14.0",
     "serve-favicon": "^2.5.0"
